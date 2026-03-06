@@ -1,0 +1,6 @@
+// Barrel export — import any ViewModel from '@/viewmodels'
+export { useDashboardViewModel } from './useDashboardViewModel'
+export { usePackagesViewModel } from './usePackagesViewModel'
+export { useWarehousesViewModel } from './useWarehousesViewModel'
+export { useCarriersViewModel } from './useCarriersViewModel'
+export { useUsersViewModel } from './useUsersViewModel'

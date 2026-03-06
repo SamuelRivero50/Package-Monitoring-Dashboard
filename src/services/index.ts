@@ -1,0 +1,8 @@
+// Barrel export — import any service from '@/services'
+export { apiFetch, buildUrl } from './api'
+export type { PaginatedResponse, ApiError } from './api'
+export { packageService } from './packageService'
+export { warehouseService } from './warehouseService'
+export { carrierService } from './carrierService'
+export { userService } from './userService'
+export { dashboardService } from './dashboardService'
