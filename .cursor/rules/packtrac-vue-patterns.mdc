@@ -1,0 +1,37 @@
+---
+description: Vue 3 patterns for PackTrac - Composition API, SFC structure
+globs: "**/*.vue"
+alwaysApply: false
+---
+
+# Vue 3 Patterns
+
+## Composition API
+
+- Use `<script setup>` and Composition API. No Options API.
+- Prefer composables for reusable logic (e.g. `usePackagesStore`, `useAuth`).
+
+## SFC Structure
+
+Order: `<script setup>`, `<template>`, `<style>`. Use `scoped` for component styles when possible.
+
+## Props and Emits
+
+- Define props with `defineProps<Props>()` and types.
+- Define emits with `defineEmits<Emits>()` for type safety.
+
+```vue
+<script setup lang="ts">
+interface Props {
+  items: Package[]
+  loading?: boolean
+}
+defineProps<Props>()
+defineEmits<{ (e: 'select', id: string): void }>()
+</script>
+```
+
+## State
+
+- Use Pinia stores for shared state. Avoid prop drilling.
+- Local state with `ref` or `reactive` only when not shared.
