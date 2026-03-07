@@ -1,9 +1,9 @@
 ---
-description: PackTrac architecture rules - routes, services, views, components
+description: PackTracker architecture rules - routes, services, views, components
 alwaysApply: true
 ---
 
-# PackTrac Architecture Rules
+# PackTracker Architecture Rules
 
 ## Routes
 

@@ -1,9 +1,9 @@
 ---
-description: PackTrac coding standards - types, DRY, ETC, author headers
+description: PackTracker coding standards - types, DRY, ETC, author headers
 alwaysApply: true
 ---
 
-# PackTrac Coding Standards
+# PackTracker Coding Standards
 
 ## Author Header
 

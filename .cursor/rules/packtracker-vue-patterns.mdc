@@ -1,5 +1,5 @@
 ---
-description: Vue 3 patterns for PackTrac - Composition API, SFC structure
+description: Vue 3 patterns for PackTracker - Composition API, SFC structure
 globs: "**/*.vue"
 alwaysApply: false
 ---

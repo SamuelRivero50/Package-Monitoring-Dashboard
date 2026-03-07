@@ -1,9 +1,9 @@
 ---
-description: PackTrac Entregable 1 constraints - LocalStorage, pages, CRUDs, libraries
+description: PackTracker Entregable 1 constraints - LocalStorage, pages, CRUDs, libraries
 alwaysApply: true
 ---
 
-# PackTrac Entregable 1 Constraints
+# PackTracker Entregable 1 Constraints
 
 **Scope: First deliverable only.** Future deliverables may change these requirements.
 
