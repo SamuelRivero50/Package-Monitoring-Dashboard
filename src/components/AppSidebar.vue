@@ -61,7 +61,6 @@ const navItems: { path: string; label: string; icon: string; adminOnly?: boolean
   { path: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { path: '/packages', label: 'Packages', icon: 'inventory_2' },
   { path: '/warehouses', label: 'Warehouses', icon: 'warehouse' },
-  { path: '/carriers', label: 'Companies', icon: 'domain' },
   { path: '/users', label: 'Users', icon: 'group', adminOnly: true },
   { path: '/settings', label: 'Settings', icon: 'settings', adminOnly: true },
 ]

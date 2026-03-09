@@ -1,6 +1,46 @@
 <script setup lang="ts">
+/**
+ * @author Samuel Rivero, Law
+ * @description System overview dashboard with Chart.js donut and Leaflet live map.
+ */
+import { computed } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
+import DonutChart from '@/components/DonutChart.vue'
+import LeafletMap from '@/components/LeafletMap.vue'
+import { useDashboardViewModel } from '@/viewmodels'
+
+const { summary, statCards, trendLabel, trendClass } = useDashboardViewModel()
+
+const chartLabels = computed(() => ['Delivered', 'In Transit', 'Warehouse'])
+const chartValues = computed(() => {
+  const s = summary.value?.statusBreakdown
+  return s ? [s.delivered, s.inTransit, s.atWarehouse] : [65, 25, 10]
+})
+const chartColors = ['#2dd4bf', '#f59e0b', '#8b949e']
+
+const totalLabel = computed(() => {
+  if (!summary.value) return '12.8k'
+  const t = summary.value.totalPackages
+  return t >= 1000 ? `${(t / 1000).toFixed(1)}k` : String(t)
+})
+
+const recentPackages = computed(() => summary.value?.recentPackages ?? [])
+
+const warehouseMarkers = [
+  { id: 'wh-1', label: 'Central Hub', lat: 41.8781, lng: -87.6298, popupHtml: '<b>Central Hub</b><br>Chicago, IL — 85% capacity' },
+  { id: 'wh-2', label: 'West Coast', lat: 34.0522, lng: -118.2437, popupHtml: '<b>West Coast</b><br>Los Angeles, CA — 62% capacity' },
+  { id: 'wh-3', label: 'East Distro', lat: 40.7357, lng: -74.1724, popupHtml: '<b>East Distro</b><br>Newark, NJ — 94% capacity' },
+  { id: 'wh-4', label: 'South Regional', lat: 33.749, lng: -84.388, popupHtml: '<b>South Regional</b><br>Atlanta, GA — 42% capacity' },
+]
+
+// Simulated logistics routes between hubs
+const warehouseRoutes = [
+  { fromId: 'wh-2', toId: 'wh-1' }, // LA → Chicago
+  { fromId: 'wh-1', toId: 'wh-3' }, // Chicago → Newark
+  { fromId: 'wh-1', toId: 'wh-4' }, // Chicago → Atlanta
+  { fromId: 'wh-4', toId: 'wh-3' }, // Atlanta → Newark
+]
 </script>
 
 <template>
@@ -14,54 +54,21 @@ import DashboardHeader from '@/components/DashboardHeader.vue'
       <div class="dashboard-content">
         <!-- Stat Cards -->
         <div class="stat-cards">
-          <div class="stat-card">
+          <div v-for="card in statCards" :key="card.label" class="stat-card">
             <div class="stat-card-top">
-              <div class="stat-icon stat-icon--packages">
-                <span class="material-symbols-outlined">package</span>
+              <div :class="['stat-icon', card.iconColorClass]">
+                <span class="material-symbols-outlined">{{ card.icon }}</span>
               </div>
-              <span class="stat-trend stat-trend--up">
-                <span class="material-symbols-outlined">trending_up</span> +12%
+              <span :class="['stat-trend', trendClass(card.trend)]">
+                <span
+                  v-if="card.trend !== 0"
+                  class="material-symbols-outlined"
+                >{{ card.trend > 0 ? 'trending_up' : 'trending_down' }}</span>
+                {{ trendLabel(card.trend) }}
               </span>
             </div>
-            <p class="stat-label">Total Packages</p>
-            <h3 class="stat-value">12,840</h3>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-card-top">
-              <div class="stat-icon stat-icon--warehouses">
-                <span class="material-symbols-outlined">warehouse</span>
-              </div>
-              <span class="stat-trend stat-trend--neutral">0%</span>
-            </div>
-            <p class="stat-label">Active Warehouses</p>
-            <h3 class="stat-value">24</h3>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-card-top">
-              <div class="stat-icon stat-icon--companies">
-                <span class="material-symbols-outlined">business</span>
-              </div>
-              <span class="stat-trend stat-trend--down">
-                <span class="material-symbols-outlined">trending_down</span> -2%
-              </span>
-            </div>
-            <p class="stat-label">Affiliated Companies</p>
-            <h3 class="stat-value">156</h3>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-card-top">
-              <div class="stat-icon stat-icon--users">
-                <span class="material-symbols-outlined">group</span>
-              </div>
-              <span class="stat-trend stat-trend--up">
-                <span class="material-symbols-outlined">trending_up</span> +5%
-              </span>
-            </div>
-            <p class="stat-label">System Users</p>
-            <h3 class="stat-value">892</h3>
+            <p class="stat-label">{{ card.label }}</p>
+            <h3 class="stat-value">{{ card.value }}</h3>
           </div>
         </div>
 
@@ -84,29 +91,11 @@ import DashboardHeader from '@/components/DashboardHeader.vue'
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td class="tracking-id">#TRK-9902</td>
-                    <td>Industrial Pump Spare Parts</td>
-                    <td><span class="badge badge-transit">In Transit</span></td>
-                    <td class="time-cell">2 mins ago</td>
-                  </tr>
-                  <tr>
-                    <td class="tracking-id">#TRK-8812</td>
-                    <td>Solar Panel Modules (x20)</td>
-                    <td><span class="badge badge-warehouse">At Warehouse</span></td>
-                    <td class="time-cell">1 hour ago</td>
-                  </tr>
-                  <tr>
-                    <td class="tracking-id">#TRK-7721</td>
-                    <td>Server Rack Components</td>
-                    <td><span class="badge badge-delivered">Delivered</span></td>
-                    <td class="time-cell">3 hours ago</td>
-                  </tr>
-                  <tr>
-                    <td class="tracking-id">#TRK-6610</td>
-                    <td>Lithium Battery Pack</td>
-                    <td><span class="badge badge-transit">In Transit</span></td>
-                    <td class="time-cell">5 hours ago</td>
+                  <tr v-for="row in recentPackages" :key="row.trackingId">
+                    <td class="tracking-id">{{ row.trackingId }}</td>
+                    <td>{{ row.description }}</td>
+                    <td><span :class="['badge', row.statusClass]">{{ row.status }}</span></td>
+                    <td class="time-cell">{{ row.updatedAgo }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -117,42 +106,13 @@ import DashboardHeader from '@/components/DashboardHeader.vue'
           <div class="status-panel">
             <h2 class="panel-title">Status Summary</h2>
             <div class="status-chart-area">
-              <div class="donut-container">
-                <svg class="donut" viewBox="0 0 100 100">
-                  <circle
-                    class="donut-bg"
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="transparent"
-                    stroke-width="8"
-                  />
-                  <circle
-                    class="donut-primary"
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="transparent"
-                    stroke-width="8"
-                    stroke-dasharray="251.2"
-                    stroke-dashoffset="60"
-                  />
-                  <circle
-                    class="donut-amber"
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="transparent"
-                    stroke-width="8"
-                    stroke-dasharray="251.2"
-                    stroke-dashoffset="200"
-                  />
-                </svg>
-                <div class="donut-label">
-                  <span class="donut-value">12.8k</span>
-                  <span class="donut-sub">Total</span>
-                </div>
-              </div>
+              <DonutChart
+                :labels="chartLabels"
+                :values="chartValues"
+                :colors="chartColors"
+                :center-value="totalLabel"
+                center-label="Total"
+              />
               <div class="status-legend">
                 <div class="legend-item">
                   <div class="legend-left">
@@ -260,21 +220,7 @@ import DashboardHeader from '@/components/DashboardHeader.vue'
 
         <!-- Live Map -->
         <div class="live-map">
-          <img
-            alt="Logistics Network Map"
-            class="map-image"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDC_9BuPhjQu7bBw9XEjarhMkC_WCoBm1jeI0Fn98XCkXbMVl_e_DoJFdJSw7U3XJ-mQC8UNcSbZwGzo9FGJYKdrgPozo6RtreT6MNMGTmITOzRWNh9eCDglraYnoQEa1iHiBVQYfcbdCLvn1wRlvQuPOpyiv8JlHe5v0f3D3pApY2mbiiDHl--FyuqABn5c-2qy2s-5zABl_6ibSeNDF5_1XTk6xElTSKbkVs5XIGJvBLbSlGxvhf5SQKt1dc24I2EijE18YzdELuF"
-          />
-          <div class="map-overlay">
-            <div class="map-status-dot">
-              <span class="dot-ping-lg"></span>
-              <span class="dot-solid-lg"></span>
-            </div>
-            <h4 class="map-title">Live Operations Map</h4>
-            <p class="map-desc">
-              Currently tracking 42 active shipments across 8 international routes.
-            </p>
-          </div>
+          <LeafletMap :markers="warehouseMarkers" :routes="warehouseRoutes" />
           <div class="map-badge-corner">
             <span>Status: Operational</span>
           </div>
@@ -559,49 +505,7 @@ import DashboardHeader from '@/components/DashboardHeader.vue'
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-
-.donut-container {
-  position: relative;
-  width: 160px;
-  height: 160px;
-}
-
-.donut {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-
-.donut-bg {
-  stroke: var(--border-subtle);
-}
-.donut-primary {
-  stroke: var(--color-primary);
-}
-.donut-amber {
-  stroke: #f59e0b;
-}
-
-.donut-label {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.donut-value {
-  font-size: var(--text-xl);
-  font-weight: 700;
-}
-
-.donut-sub {
-  font-size: 10px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  font-weight: 700;
+  gap: var(--spacing-lg);
 }
 
 .status-legend {
@@ -774,74 +678,10 @@ import DashboardHeader from '@/components/DashboardHeader.vue'
 /* ---- Live Map ---- */
 .live-map {
   position: relative;
-  height: 256px;
+  height: 360px;
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid var(--border-default);
-}
-
-.map-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: grayscale(1);
-  opacity: 0.2;
-}
-
-.map-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(13, 17, 23, 0.85), transparent);
-  padding: var(--spacing-lg);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.map-status-dot {
-  position: relative;
-  width: 12px;
-  height: 12px;
-  display: inline-flex;
-  margin-bottom: var(--spacing-sm);
-}
-
-.dot-ping-lg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 9999px;
-  background: var(--color-primary);
-  opacity: 0.75;
-  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-.dot-solid-lg {
-  position: relative;
-  width: 12px;
-  height: 12px;
-  border-radius: 9999px;
-  background: var(--color-primary);
-}
-
-@keyframes ping {
-  75%,
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-.map-title {
-  font-size: var(--text-lg);
-  font-weight: 700;
-  color: #fff;
-}
-
-.map-desc {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  max-width: 440px;
 }
 
 .map-badge-corner {
@@ -853,6 +693,7 @@ import DashboardHeader from '@/components/DashboardHeader.vue'
   padding: 6px 12px;
   border-radius: var(--radius-md);
   border: 1px solid rgba(45, 212, 191, 0.2);
+  z-index: 1000;
 }
 
 .map-badge-corner span {

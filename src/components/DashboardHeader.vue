@@ -11,10 +11,6 @@
       <button class="notificationBtn">
         <span class="material-symbols-outlined">notifications</span>
       </button>
-      <button class="newActionBtn">
-        <span class="material-symbols-outlined">add</span>
-        New Action
-      </button>
     </div>
   </header>
 </template>
@@ -122,27 +118,6 @@ defineProps<{
   background: rgba(45, 212, 191, 0.1);
 }
 
-.newActionBtn {
-  height: 40px;
-  padding: 0 var(--spacing-md);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--color-primary);
-  color: var(--bg-base);
-  font-size: var(--text-sm);
-  font-weight: 700;
-  border-radius: var(--radius-md);
-  transition: filter 0.2s;
-}
-
-.newActionBtn .material-symbols-outlined {
-  font-size: 16px;
-}
-
-.newActionBtn:hover {
-  filter: brightness(1.1);
-}
 
 @media (max-width: 640px) {
   .dashHeaderSearch {

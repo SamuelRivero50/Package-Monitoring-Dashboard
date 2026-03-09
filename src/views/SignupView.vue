@@ -132,31 +132,10 @@ import AppFooter from '@/components/AppFooter.vue'
             </button>
           </form>
 
-          <div class="social-divider">
-            <p class="divider-text">Or sign up with</p>
-            <div class="social-buttons">
-              <button class="social-btn">
-                <img
-                  alt="Google"
-                  class="social-icon"
-                  src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000"
-                />
-                <span>Google</span>
-              </button>
-              <button class="social-btn">
-                <img
-                  alt="LinkedIn"
-                  class="social-icon"
-                  src="https://img.icons8.com/?size=100&id=13930&format=png&color=000000"
-                />
-                <span>LinkedIn</span>
-              </button>
-            </div>
             <div class="mobile-signin">
               <span>Already have an account?</span>
               <RouterLink to="/login" class="mobile-signin-link">Sign in</RouterLink>
             </div>
-          </div>
         </div>
       </div>
     </main>
@@ -529,55 +508,6 @@ import AppFooter from '@/components/AppFooter.vue'
 
 .btn-create:hover {
   background: #2d333b;
-}
-
-/* ---- Social section ---- */
-.social-divider {
-  margin-top: var(--spacing-xl);
-  padding-top: var(--spacing-xl);
-  border-top: 1px solid var(--border-default);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.divider-text {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-}
-
-.social-buttons {
-  display: flex;
-  gap: var(--spacing-md);
-  width: 100%;
-}
-
-.social-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  padding: 10px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  transition:
-    background 0.15s,
-    border-color 0.15s;
-}
-
-.social-btn:hover {
-  background: var(--bg-surface);
-  border-color: var(--color-primary);
-}
-
-.social-icon {
-  width: 20px;
-  height: 20px;
 }
 
 .mobile-signin {

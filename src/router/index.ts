@@ -1,4 +1,9 @@
+/**
+ * @description Vue Router configuration with authentication and admin-only guards.
+ */
+
 import { createRouter, createWebHistory } from 'vue-router'
+import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -58,10 +63,17 @@ const router = createRouter({
       component: () => import('../views/SettingsView.vue'),
       meta: { requiresAuth: true, adminOnly: true },
     },
+    {
+      path: '/access-denied',
+      name: 'access-denied',
+      component: () => import('../views/AccessDeniedView.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach(
+  (to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext): void => {
   const auth = useAuthStore()
   const isPublic = to.meta.public === true
   const requiresAuth = to.meta.requiresAuth === true
@@ -72,7 +84,7 @@ router.beforeEach((to, _from, next) => {
     return
   }
   if (adminOnly && !auth.isAdmin) {
-    next({ name: 'dashboard' })
+    next({ name: 'access-denied' })
     return
   }
   if (isPublic && auth.isAuthenticated && (to.name === 'login' || to.name === 'signup')) {
@@ -80,6 +92,7 @@ router.beforeEach((to, _from, next) => {
     return
   }
   next()
-})
+},
+)
 
 export default router

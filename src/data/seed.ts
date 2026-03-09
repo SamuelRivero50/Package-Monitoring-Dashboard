@@ -118,7 +118,7 @@ const SEED_USERS: UserInterface[] = [
   {
     id: 'user-1',
     name: 'Alex Johnson',
-    email: 'alex@quantum-tech.io',
+    email: 'alex@packtrack.dev',
     password: 'admin123',
     role: 'Admin',
     avatarUrl:

@@ -37,13 +37,6 @@ export function useDashboardViewModel() {
         iconColorClass: 'stat-icon--warehouses',
       },
       {
-        label: 'Affiliated Companies',
-        value: String(s.affiliatedCompanies),
-        icon: 'business',
-        trend: -2,
-        iconColorClass: 'stat-icon--companies',
-      },
-      {
         label: 'System Users',
         value: String(s.systemUsers),
         icon: 'group',

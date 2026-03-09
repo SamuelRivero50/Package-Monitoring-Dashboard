@@ -8,7 +8,6 @@ export interface UpdatePackageLogDTO {
   packageId: string
   fromWarehouseId?: string
   toWarehouseId?: string
-  previousStatus?: string
   newStatus?: string
   description?: string
 }

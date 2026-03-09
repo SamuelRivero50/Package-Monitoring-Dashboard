@@ -1,12 +1,13 @@
 <script setup lang="ts">
 /**
- * @author Samuel Rivero
- * @description Warehouse management view - capacity cards and packages per warehouse.
+ * @author Samuel Rivero, Law
+ * @description Warehouse management view - capacity cards, Leaflet map, and packages per warehouse.
  */
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
 import AppModal from '@/components/AppModal.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
+import LeafletMap from '@/components/LeafletMap.vue'
 import { usePackagesStore } from '@/stores/packages'
 import type { WarehouseInterface } from '@/interfaces'
 
@@ -23,6 +24,44 @@ const form = ref({
   capacity: 0,
   managerName: '',
   imageUrl: '',
+})
+
+/** Known city → lat/lng lookup for warehouse locations on the map. */
+const CITY_COORDS: Record<string, [number, number]> = {
+  'chicago, il': [41.8781, -87.6298],
+  'los angeles, ca': [34.0522, -118.2437],
+  'newark, nj': [40.7357, -74.1724],
+  'atlanta, ga': [33.749, -84.388],
+  'new york, ny': [40.7128, -74.006],
+  'houston, tx': [29.7604, -95.3698],
+  'phoenix, az': [33.4484, -112.074],
+  'dallas, tx': [32.7767, -96.797],
+  'miami, fl': [25.7617, -80.1918],
+  'seattle, wa': [47.6062, -122.3321],
+  'denver, co': [39.7392, -104.9903],
+  'boston, ma': [42.3601, -71.0589],
+}
+
+const warehouseMarkers = computed(() =>
+  store.warehouses
+    .map((wh) => {
+      const coords = CITY_COORDS[wh.location.toLowerCase()]
+      if (!coords) return null
+      return {
+        id: wh.id,
+        label: wh.name,
+        lat: coords[0],
+        lng: coords[1],
+        popupHtml: `<b>${wh.name}</b><br>${wh.location} — ${wh.capacity}% capacity`,
+      }
+    })
+    .filter((m): m is NonNullable<typeof m> => m !== null),
+)
+
+// Connect mapped warehouses in a sequential loop to simulate cargo routes
+const warehouseRoutes = computed(() => {
+  const ids = warehouseMarkers.value.map((m) => m.id)
+  return ids.map((id, i) => ({ fromId: id, toId: ids[(i + 1) % ids.length] }))
 })
 
 function statusClass(status: string): string {
@@ -213,6 +252,20 @@ async function confirmDelete(id: string, e: Event) {
             </div>
           </div>
         </div>
+
+        <!-- Warehouse Location Map -->
+        <div class="mapSection">
+          <div class="mapHeader">
+            <h2 class="mapTitle">
+              <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle">map</span>
+              Hub Locations
+            </h2>
+            <span class="mapCount">{{ warehouseMarkers.length }} mapped</span>
+          </div>
+          <div class="mapContainer">
+            <LeafletMap :markers="warehouseMarkers" :routes="warehouseRoutes" />
+          </div>
+        </div>
       </div>
     </main>
 
@@ -343,6 +396,40 @@ async function confirmDelete(id: string, e: Event) {
 
 .btnPrimary:hover {
   filter: brightness(1.1);
+}
+
+/* ---- Map Section ---- */
+.mapSection {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.mapHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.mapTitle {
+  font-size: var(--text-base);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.mapCount {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.mapContainer {
+  height: 300px;
 }
 
 /* ---- Warehouse Grid ---- */

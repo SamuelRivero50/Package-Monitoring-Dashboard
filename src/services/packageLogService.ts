@@ -37,12 +37,13 @@ export class PackageLogService {
       packageId: dto.packageId,
       fromWarehouseId: dto.fromWarehouseId,
       toWarehouseId: dto.toWarehouseId,
-      previousStatus: dto.previousStatus,
+      previousStatus: pkg.status,
       newStatus: dto.newStatus,
       description: dto.description,
       timestamp: now,
     }
     pkg.logHistory.push(newLog)
+    pkg.status = dto.newStatus
     pkg.updatedAt = now
     setToStorage(STORAGE_KEYS.PACKAGES, packages)
     return newLog
@@ -59,7 +60,6 @@ export class PackageLogService {
 
     if (dto.fromWarehouseId !== undefined) log.fromWarehouseId = dto.fromWarehouseId
     if (dto.toWarehouseId !== undefined) log.toWarehouseId = dto.toWarehouseId
-    if (dto.previousStatus !== undefined) log.previousStatus = dto.previousStatus
     if (dto.newStatus !== undefined) log.newStatus = dto.newStatus
     if (dto.description !== undefined) log.description = dto.description
 

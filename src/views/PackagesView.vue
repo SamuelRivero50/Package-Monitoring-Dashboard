@@ -26,7 +26,6 @@ const logPackageId = ref<string>('')
 const logForm = ref({
   fromWarehouseId: '',
   toWarehouseId: '',
-  previousStatus: '',
   newStatus: '',
   description: '',
 })
@@ -110,7 +109,6 @@ function openAddLog(packageId: string) {
   logForm.value = {
     fromWarehouseId: '',
     toWarehouseId: '',
-    previousStatus: '',
     newStatus: '',
     description: '',
   }
@@ -122,7 +120,6 @@ function openEditLog(log: PackageLogInterface, packageId: string) {
   logForm.value = {
     fromWarehouseId: log.fromWarehouseId,
     toWarehouseId: log.toWarehouseId,
-    previousStatus: log.previousStatus,
     newStatus: log.newStatus,
     description: log.description,
   }
@@ -138,7 +135,6 @@ async function submitLogCreate() {
     packageId: logPackageId.value,
     fromWarehouseId: logForm.value.fromWarehouseId,
     toWarehouseId: logForm.value.toWarehouseId,
-    previousStatus: logForm.value.previousStatus,
     newStatus: logForm.value.newStatus,
     description: logForm.value.description.trim(),
   })
@@ -152,7 +148,6 @@ async function submitLogEdit() {
     packageId: editingLog.value.packageId,
     fromWarehouseId: logForm.value.fromWarehouseId,
     toWarehouseId: logForm.value.toWarehouseId,
-    previousStatus: logForm.value.previousStatus,
     newStatus: logForm.value.newStatus,
     description: logForm.value.description.trim(),
   })
@@ -369,10 +364,6 @@ async function confirmDeleteLog(logId: string, packageId: string) {
           </select>
         </div>
         <div class="formGroup">
-          <label for="log-prev">Previous Status</label>
-          <input id="log-prev" v-model="logForm.previousStatus" type="text" placeholder="e.g. Pending" />
-        </div>
-        <div class="formGroup">
           <label for="log-new">New Status</label>
           <select id="log-new" v-model="logForm.newStatus">
             <option value="Pending">Pending</option>
@@ -408,10 +399,6 @@ async function confirmDeleteLog(logId: string, packageId: string) {
             <option value="">— None —</option>
             <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
           </select>
-        </div>
-        <div class="formGroup">
-          <label for="log-edit-prev">Previous Status</label>
-          <input id="log-edit-prev" v-model="logForm.previousStatus" type="text" />
         </div>
         <div class="formGroup">
           <label for="log-edit-new">New Status</label>

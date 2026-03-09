@@ -96,7 +96,7 @@ async function submitLogin() {
                   id="login-email"
                   v-model="email"
                   type="email"
-                  placeholder="alex@quantum-tech.io"
+                  placeholder="alex@packtrack.dev"
                   class="field-input"
                   autocomplete="email"
                 />
