@@ -1,5 +1,5 @@
 /**
- * @author Samuel Rivero, Dav, Juan Andrés Young Hoyos
+ * @author Samuel Rivero
  * @description DTO for creating a Warehouse.
  */
 

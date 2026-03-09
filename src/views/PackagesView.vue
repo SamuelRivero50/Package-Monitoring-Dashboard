@@ -1,21 +1,70 @@
 <script setup lang="ts">
 /**
- * @author Samuel Rivero, Dav, Juan Andrés Young Hoyos
+ * @author Samuel Rivero
  * @description Package Tracking view - table with warehouse assignment and log history.
  */
 import { ref, computed } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
+import AppModal from '@/components/AppModal.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
 import { usePackagesStore } from '@/stores/packages'
+import { useUsersStore } from '@/stores/users'
+import type { PackageLogInterface } from '@/interfaces'
 
 const store = usePackagesStore()
+const usersStore = useUsersStore()
 const filterButtons = ['All', 'In Transit', 'Delivered', 'Pending', 'Exception']
+const activeFilter = ref(0)
 
 const expandedRow = ref<string | null>(null)
+const showCreateModal = ref(false)
+const showLogCreateModal = ref(false)
+const editingLog = ref<{ log: PackageLogInterface; packageId: string } | null>(null)
+const deletingId = ref<string | null>(null)
+const logPackageId = ref<string>('')
+
+const logForm = ref({
+  fromWarehouseId: '',
+  toWarehouseId: '',
+  previousStatus: '',
+  newStatus: '',
+  description: '',
+})
 
 const warehouseOptions = computed(() =>
   store.warehouses.map((w) => ({ id: w.id, name: w.name })),
 )
+
+function warehouseName(id: string): string {
+  if (!id) return '—'
+  return store.warehouses.find((w) => w.id === id)?.name ?? id
+}
+
+function formatLogTimestamp(ts: string): string {
+  try {
+    const d = new Date(ts)
+    return d.toLocaleString(undefined, {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    })
+  } catch {
+    return ts
+  }
+}
+
+const filteredPackages = computed(() => {
+  const status = filterButtons[activeFilter.value]
+  if (status === 'All') return store.packages
+  return store.packages.filter((p) => p.status === status)
+})
+
+const form = ref({
+  userId: '',
+  warehouseId: '' as string | null,
+  status: 'Pending',
+  description: '',
+  price: 0,
+})
 
 function statusClass(status: string): string {
   const map: Record<string, string> = {
@@ -29,6 +78,90 @@ function statusClass(status: string): string {
 
 function toggleLog(id: string) {
   expandedRow.value = expandedRow.value === id ? null : id
+}
+
+function setFilter(i: number) {
+  activeFilter.value = i
+}
+
+async function submitCreate() {
+  if (!form.value.description.trim()) return
+  await store.createPackage({
+    userId: form.value.userId,
+    warehouseId: form.value.warehouseId || null,
+    status: form.value.status,
+    description: form.value.description.trim(),
+    price: Number(form.value.price) || 0,
+  })
+  form.value = { userId: '', warehouseId: '', status: 'Pending', description: '', price: 0 }
+  showCreateModal.value = false
+}
+
+async function confirmDelete(id: string) {
+  if (!confirm('Delete this package?')) return
+  deletingId.value = id
+  await store.removePackage(id)
+  deletingId.value = null
+  if (expandedRow.value === id) expandedRow.value = null
+}
+
+function openAddLog(packageId: string) {
+  logPackageId.value = packageId
+  logForm.value = {
+    fromWarehouseId: '',
+    toWarehouseId: '',
+    previousStatus: '',
+    newStatus: '',
+    description: '',
+  }
+  showLogCreateModal.value = true
+}
+
+function openEditLog(log: PackageLogInterface, packageId: string) {
+  editingLog.value = { log, packageId }
+  logForm.value = {
+    fromWarehouseId: log.fromWarehouseId,
+    toWarehouseId: log.toWarehouseId,
+    previousStatus: log.previousStatus,
+    newStatus: log.newStatus,
+    description: log.description,
+  }
+}
+
+function closeEditLog() {
+  editingLog.value = null
+}
+
+async function submitLogCreate() {
+  if (!logForm.value.description.trim()) return
+  await store.addPackageLog({
+    packageId: logPackageId.value,
+    fromWarehouseId: logForm.value.fromWarehouseId,
+    toWarehouseId: logForm.value.toWarehouseId,
+    previousStatus: logForm.value.previousStatus,
+    newStatus: logForm.value.newStatus,
+    description: logForm.value.description.trim(),
+  })
+  showLogCreateModal.value = false
+}
+
+async function submitLogEdit() {
+  if (!editingLog.value) return
+  await store.updatePackageLog({
+    id: editingLog.value.log.id,
+    packageId: editingLog.value.packageId,
+    fromWarehouseId: logForm.value.fromWarehouseId,
+    toWarehouseId: logForm.value.toWarehouseId,
+    previousStatus: logForm.value.previousStatus,
+    newStatus: logForm.value.newStatus,
+    description: logForm.value.description.trim(),
+  })
+  closeEditLog()
+}
+
+async function confirmDeleteLog(logId: string, packageId: string) {
+  if (!confirm('Delete this log entry?')) return
+  await store.removePackageLog(logId, packageId)
 }
 </script>
 
@@ -50,11 +183,13 @@ function toggleLog(id: string) {
             <button
               v-for="(btn, i) in filterButtons"
               :key="btn"
-              :class="['filterBtn', { filterBtnActive: i === 0 }]"
+              :class="['filterBtn', { filterBtnActive: activeFilter === i }]"
+              @click="setFilter(i)"
             >
               {{ btn }}
             </button>
           </div>
+          <button class="btnPrimary" @click="showCreateModal = true">New Package</button>
         </div>
 
         <!-- Table -->
@@ -72,7 +207,7 @@ function toggleLog(id: string) {
               </tr>
             </thead>
             <tbody>
-              <template v-for="pkg in store.packages" :key="pkg.id">
+              <template v-for="pkg in filteredPackages" :key="pkg.id">
                 <tr class="tableRow">
                   <td class="trackingId">{{ pkg.id }}</td>
                   <td class="cellBold">{{ pkg.description }}</td>
@@ -99,17 +234,33 @@ function toggleLog(id: string) {
                   </td>
                   <td class="cellMuted">1 hour ago</td>
                   <td>
-                    <button class="btnDetails" @click="toggleLog(pkg.id)">
-                      <span class="material-symbols-outlined btnDetailsIcon">{{
-                        expandedRow === pkg.id ? 'expand_less' : 'expand_more'
-                      }}</span>
-                      <span>{{ expandedRow === pkg.id ? 'Hide' : 'Details' }}</span>
-                    </button>
+                    <div class="cellActions">
+                      <button class="btnDetails" @click="toggleLog(pkg.id)">
+                        <span class="material-symbols-outlined btnDetailsIcon">{{
+                          expandedRow === pkg.id ? 'expand_less' : 'expand_more'
+                        }}</span>
+                        <span>{{ expandedRow === pkg.id ? 'Hide' : 'Details' }}</span>
+                      </button>
+                      <button
+                        class="btnDelete"
+                        :disabled="deletingId === pkg.id"
+                        title="Delete"
+                        @click="confirmDelete(pkg.id)"
+                      >
+                        <span class="material-symbols-outlined">delete</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
                 <!-- Tracking log expandable row -->
                 <tr v-if="expandedRow === pkg.id" class="logRow">
                   <td colspan="7" class="logCell">
+                    <div class="logHeader">
+                      <span class="logHeaderTitle">Tracking Log</span>
+                      <button class="btnLogAdd" @click="openAddLog(pkg.id)">
+                        <span class="material-symbols-outlined">add</span> Add Log
+                      </button>
+                    </div>
                     <div class="logTimeline">
                       <div v-for="(entry, i) in pkg.logHistory" :key="entry.id" class="logEntry">
                         <div class="logDotCol">
@@ -118,10 +269,31 @@ function toggleLog(id: string) {
                         </div>
                         <div class="logContent">
                           <p class="logEvent">{{ entry.description }}</p>
-                          <p class="logMeta">
-                            <span class="logDate">{{ entry.timestamp }}</span>
-                            <span v-if="entry.newStatus"> → {{ entry.newStatus }}</span>
-                          </p>
+                          <div class="logDetails">
+                            <p class="logMeta">
+                              <span class="logDate">{{ formatLogTimestamp(entry.timestamp) }}</span>
+                              <span v-if="entry.previousStatus || entry.newStatus" class="logStatusChange">
+                                {{ entry.previousStatus || '—' }} → {{ entry.newStatus || '—' }}
+                              </span>
+                            </p>
+                            <p v-if="entry.fromWarehouseId || entry.toWarehouseId" class="logWarehouses">
+                              <span v-if="entry.fromWarehouseId">
+                                <span class="logLabel">Desde:</span> {{ warehouseName(entry.fromWarehouseId) }}
+                              </span>
+                              <span v-if="entry.fromWarehouseId && entry.toWarehouseId" class="logSeparator">·</span>
+                              <span v-if="entry.toWarehouseId">
+                                <span class="logLabel">Hacia:</span> {{ warehouseName(entry.toWarehouseId) }}
+                              </span>
+                            </p>
+                          </div>
+                          <div class="logActions">
+                            <button class="logActionBtn" title="Edit" @click="openEditLog(entry, pkg.id)">
+                              <span class="material-symbols-outlined">edit</span>
+                            </button>
+                            <button class="logActionBtn logActionBtnDanger" title="Delete" @click="confirmDeleteLog(entry.id, pkg.id)">
+                              <span class="material-symbols-outlined">delete</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -133,6 +305,133 @@ function toggleLog(id: string) {
         </div>
       </div>
     </main>
+
+    <!-- Create Package Modal -->
+    <AppModal :show="showCreateModal" title="New Package" @close="showCreateModal = false">
+      <form class="formModal" @submit.prevent="submitCreate">
+        <div class="formGroup">
+          <label for="pkg-userId">User</label>
+          <select id="pkg-userId" v-model="form.userId" required>
+            <option value="">— Select —</option>
+            <option v-for="u in usersStore.users" :key="u.id" :value="u.id">
+              {{ u.name }} ({{ u.email }})
+            </option>
+          </select>
+        </div>
+        <div class="formGroup">
+          <label for="pkg-warehouse">Warehouse</label>
+          <select id="pkg-warehouse" v-model="form.warehouseId">
+            <option value="">— None —</option>
+            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">
+              {{ wh.name }}
+            </option>
+          </select>
+        </div>
+        <div class="formGroup">
+          <label for="pkg-status">Status</label>
+          <select id="pkg-status" v-model="form.status">
+            <option value="Pending">Pending</option>
+            <option value="In Transit">In Transit</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Exception">Exception</option>
+          </select>
+        </div>
+        <div class="formGroup">
+          <label for="pkg-desc">Description</label>
+          <input id="pkg-desc" v-model="form.description" required type="text" placeholder="e.g. Electronics Kit" />
+        </div>
+        <div class="formGroup">
+          <label for="pkg-price">Price</label>
+          <input id="pkg-price" v-model.number="form.price" required type="number" step="0.01" min="0" />
+        </div>
+        <div class="formActions">
+          <button type="button" class="btnSecondary" @click="showCreateModal = false">Cancel</button>
+          <button type="submit" class="btnPrimary">Create</button>
+        </div>
+      </form>
+    </AppModal>
+
+    <!-- Create Log Modal -->
+    <AppModal :show="showLogCreateModal" title="Add Log Entry" @close="showLogCreateModal = false">
+      <form class="formModal" @submit.prevent="submitLogCreate">
+        <div class="formGroup">
+          <label for="log-from">From Warehouse</label>
+          <select id="log-from" v-model="logForm.fromWarehouseId">
+            <option value="">— None —</option>
+            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
+          </select>
+        </div>
+        <div class="formGroup">
+          <label for="log-to">To Warehouse</label>
+          <select id="log-to" v-model="logForm.toWarehouseId">
+            <option value="">— None —</option>
+            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
+          </select>
+        </div>
+        <div class="formGroup">
+          <label for="log-prev">Previous Status</label>
+          <input id="log-prev" v-model="logForm.previousStatus" type="text" placeholder="e.g. Pending" />
+        </div>
+        <div class="formGroup">
+          <label for="log-new">New Status</label>
+          <select id="log-new" v-model="logForm.newStatus">
+            <option value="Pending">Pending</option>
+            <option value="In Transit">In Transit</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Exception">Exception</option>
+          </select>
+        </div>
+        <div class="formGroup">
+          <label for="log-desc">Description</label>
+          <input id="log-desc" v-model="logForm.description" required type="text" placeholder="e.g. Picked up from warehouse" />
+        </div>
+        <div class="formActions">
+          <button type="button" class="btnSecondary" @click="showLogCreateModal = false">Cancel</button>
+          <button type="submit" class="btnPrimary">Add</button>
+        </div>
+      </form>
+    </AppModal>
+
+    <!-- Edit Log Modal -->
+    <AppModal :show="!!editingLog" title="Edit Log Entry" @close="closeEditLog">
+      <form v-if="editingLog" class="formModal" @submit.prevent="submitLogEdit">
+        <div class="formGroup">
+          <label for="log-edit-from">From Warehouse</label>
+          <select id="log-edit-from" v-model="logForm.fromWarehouseId">
+            <option value="">— None —</option>
+            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
+          </select>
+        </div>
+        <div class="formGroup">
+          <label for="log-edit-to">To Warehouse</label>
+          <select id="log-edit-to" v-model="logForm.toWarehouseId">
+            <option value="">— None —</option>
+            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
+          </select>
+        </div>
+        <div class="formGroup">
+          <label for="log-edit-prev">Previous Status</label>
+          <input id="log-edit-prev" v-model="logForm.previousStatus" type="text" />
+        </div>
+        <div class="formGroup">
+          <label for="log-edit-new">New Status</label>
+          <select id="log-edit-new" v-model="logForm.newStatus">
+            <option value="Pending">Pending</option>
+            <option value="In Transit">In Transit</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Exception">Exception</option>
+          </select>
+        </div>
+        <div class="formGroup">
+          <label for="log-edit-desc">Description</label>
+          <input id="log-edit-desc" v-model="logForm.description" required type="text" />
+        </div>
+        <div class="formActions">
+          <button type="button" class="btnSecondary" @click="closeEditLog">Cancel</button>
+          <button type="submit" class="btnPrimary">Save</button>
+        </div>
+      </form>
+    </AppModal>
   </div>
 </template>
 
@@ -241,6 +540,106 @@ function toggleLog(id: string) {
   color: var(--bg-base);
   border-color: var(--color-primary);
   font-weight: 700;
+}
+
+.btnPrimary {
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary);
+  color: var(--bg-base);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  border: none;
+  white-space: nowrap;
+  transition: filter 0.2s;
+}
+
+.btnPrimary:hover {
+  filter: brightness(1.1);
+}
+
+/* ---- Cell actions ---- */
+.cellActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnDelete {
+  padding: 6px;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: color 0.2s, background 0.2s;
+}
+
+.btnDelete:hover:not(:disabled) {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.btnDelete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- Form modal ---- */
+.formModal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.formGroup label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.formGroup input,
+.formGroup select {
+  padding: 10px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.btnSecondary {
+  padding: 10px 18px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  border: 1px solid var(--border-default);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btnSecondary:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 /* ---- Table ---- */
@@ -396,6 +795,38 @@ function toggleLog(id: string) {
   padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg) var(--spacing-lg) !important;
 }
 
+.logHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.logHeaderTitle {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.btnLogAdd {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: rgba(45, 212, 191, 0.1);
+  border: 1px solid rgba(45, 212, 191, 0.25);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btnLogAdd:hover {
+  background: rgba(45, 212, 191, 0.2);
+}
+
 .logTimeline {
   display: flex;
   flex-direction: column;
@@ -440,6 +871,34 @@ function toggleLog(id: string) {
 
 .logContent {
   padding-bottom: var(--spacing-md);
+  flex: 1;
+  position: relative;
+}
+
+.logActions {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.logActionBtn {
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+.logActionBtn:hover {
+  color: var(--color-primary);
+  background: rgba(45, 212, 191, 0.1);
+}
+
+.logActionBtnDanger:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .logEvent {
@@ -448,13 +907,38 @@ function toggleLog(id: string) {
   color: var(--text-primary);
 }
 
+.logDetails {
+  margin-top: 4px;
+}
+
 .logMeta {
   display: flex;
   align-items: center;
-  gap: 4px;
+  flex-wrap: wrap;
+  gap: 8px;
   font-size: 12px;
   color: var(--text-secondary);
-  margin-top: 2px;
+}
+
+.logStatusChange {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.logWarehouses {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.logLabel {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.logSeparator {
+  margin: 0 6px;
+  color: var(--border-default);
 }
 
 .logMetaIcon {

@@ -1,30 +1,90 @@
 <script setup lang="ts">
+/**
+ * @author Samuel Rivero
+ * @description User management view - CRUD for users.
+ */
+import { ref, computed } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
+import AppModal from '@/components/AppModal.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
+import { useUsersStore } from '@/stores/users'
+import type { UserInterface } from '@/interfaces'
 
-const statCards = [
-  { label: 'Total Users', value: '1,284', icon: 'groups' },
-  { label: 'Admins', value: '42', icon: 'shield_person' },
-]
+const store = useUsersStore()
 
-const users = [
+const showCreateModal = ref(false)
+const editingUser = ref<UserInterface | null>(null)
+const deletingId = ref<string | null>(null)
+
+const form = ref({
+  name: '',
+  email: '',
+  password: '',
+  role: 'User',
+  avatarUrl: '',
+})
+
+const statCards = computed(() => [
+  { label: 'Total Users', value: String(store.users.length), icon: 'groups' },
   {
-    name: 'Alex Johnson',
-    email: 'alex@quantum-tech.io',
-    role: 'Admin',
-    efficiency: 85,
-    avatar:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBQ0jbd7M1shlf4BjKGrH0gsgCwxpLKJBtqnQWbNld6eXFykstsRJHUpRFggUV1ACpSY3ahOvEfoRswG1v99TF5FnRVsIRh621s0nhbrDZtR7B_RlQtd4Cw3X_Tofx17lzApi1wmC5FUr_roBO4-1a6Zw2EYtdTA3le8Ux8HLXTvijVGRGdcclNjbRL8Y4Sd2KS85wy9GRlXIcCQkr_Dhxw92zN21ORRAawzEUNwRUaEx7s630udmyDnVNFsPXObaNSO7gdU7hlfh1S',
+    label: 'Admins',
+    value: String(store.users.filter((u) => u.role === 'Admin').length),
+    icon: 'shield_person',
   },
-  {
-    name: 'Maria Garcia',
-    email: 'maria.g@global.net',
-    role: 'Manager',
-    efficiency: 12,
-    avatar:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuC3vpmkxarpB0SV14Zfz2Awz17xzM2i1PmP41oBTau5jzTecGJKl8C90bzRlS7SYiRT-yxW6R5QUdl0SJ46G9chewMrSepfTYj61WiSKgL-PGj9sB-7yr5NYAi30sD8l2GunGeYT-X7WPiXTL4qZpO35o7asIyxvEYreIhvJWJnL70MFIcsZeOtoW5jS-SPnpTgetncxKB1lmwkxwLY_Q5KNWYoV5v89Bpn8X_-ALusTBUrnQmjDpZGcoAQServcjMJ0uOPqwwduHxU',
-  },
-]
+])
+
+function openCreate() {
+  form.value = { name: '', email: '', password: '', role: 'User', avatarUrl: '' }
+  showCreateModal.value = true
+}
+
+function openEdit(user: UserInterface) {
+  form.value = {
+    name: user.name,
+    email: user.email,
+    password: user.password,
+    role: user.role,
+    avatarUrl: user.avatarUrl ?? '',
+  }
+  editingUser.value = user
+}
+
+function closeEdit() {
+  editingUser.value = null
+}
+
+async function submitCreate() {
+  if (!form.value.name.trim() || !form.value.email.trim() || !form.value.password.trim())
+    return
+  await store.createUser({
+    name: form.value.name.trim(),
+    email: form.value.email.trim(),
+    password: form.value.password,
+    role: form.value.role,
+    avatarUrl: form.value.avatarUrl.trim() || undefined,
+  })
+  showCreateModal.value = false
+}
+
+async function submitEdit() {
+  if (!editingUser.value || !form.value.name.trim() || !form.value.email.trim()) return
+  await store.updateUser({
+    id: editingUser.value.id,
+    name: form.value.name.trim(),
+    email: form.value.email.trim(),
+    password: form.value.password || undefined,
+    role: form.value.role,
+    avatarUrl: form.value.avatarUrl.trim() || undefined,
+  })
+  closeEdit()
+}
+
+async function confirmDelete(id: string) {
+  if (!confirm('Delete this user?')) return
+  deletingId.value = id
+  await store.removeUser(id)
+  deletingId.value = null
+}
 </script>
 
 <template>
@@ -46,6 +106,9 @@ const users = [
               <span class="material-symbols-outlined">{{ stat.icon }}</span>
             </div>
           </div>
+          <div class="userStatCard userStatCardAction">
+            <button class="btnPrimary" @click="openCreate">New User</button>
+          </div>
         </div>
 
         <!-- Users table -->
@@ -54,19 +117,20 @@ const users = [
             <thead>
               <tr>
                 <th>User</th>
-                <th>Status</th>
                 <th>Role</th>
-                <th>Efficiency</th>
                 <th class="thRight">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="user in users" :key="user.email" class="tableRow">
+              <tr v-for="user in store.users" :key="user.id" class="tableRow">
                 <td>
                   <div class="userCell">
                     <div
                       class="userCellAvatar"
-                      :style="{ backgroundImage: `url(${user.avatar})` }"
+                      :style="{
+                        backgroundImage: user.avatarUrl ? `url(${user.avatarUrl})` : 'none',
+                        backgroundColor: user.avatarUrl ? 'transparent' : 'var(--bg-elevated)',
+                      }"
                     ></div>
                     <div>
                       <p class="userCellName">{{ user.name }}</p>
@@ -74,21 +138,18 @@ const users = [
                     </div>
                   </div>
                 </td>
-                <td>
-                  <span class="badgeActive">Active</span>
-                </td>
                 <td class="roleCell">{{ user.role }}</td>
-                <td>
-                  <div class="effBar">
-                    <div class="effFill" :style="{ width: user.efficiency + '%' }"></div>
-                  </div>
-                </td>
                 <td class="actionsCell">
                   <div class="actionBtns">
-                    <button class="actionEdit">
+                    <button class="actionEdit" title="Edit" @click="openEdit(user)">
                       <span class="material-symbols-outlined">edit</span>
                     </button>
-                    <button class="actionDelete">
+                    <button
+                      class="actionDelete"
+                      :disabled="deletingId === user.id"
+                      title="Delete"
+                      @click="confirmDelete(user.id)"
+                    >
                       <span class="material-symbols-outlined">delete</span>
                     </button>
                   </div>
@@ -99,6 +160,74 @@ const users = [
         </div>
       </div>
     </main>
+
+    <!-- Create User Modal -->
+    <AppModal :show="showCreateModal" title="New User" @close="showCreateModal = false">
+      <form class="formModal" @submit.prevent="submitCreate">
+        <div class="formGroup">
+          <label for="user-name">Name</label>
+          <input id="user-name" v-model="form.name" required type="text" placeholder="John Doe" />
+        </div>
+        <div class="formGroup">
+          <label for="user-email">Email</label>
+          <input id="user-email" v-model="form.email" required type="email" placeholder="john@example.com" />
+        </div>
+        <div class="formGroup">
+          <label for="user-password">Password</label>
+          <input id="user-password" v-model="form.password" required type="password" />
+        </div>
+        <div class="formGroup">
+          <label for="user-role">Role</label>
+          <select id="user-role" v-model="form.role">
+            <option value="User">User</option>
+            <option value="Manager">Manager</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+        <div class="formGroup">
+          <label for="user-avatar">Avatar URL</label>
+          <input id="user-avatar" v-model="form.avatarUrl" type="url" placeholder="https://..." />
+        </div>
+        <div class="formActions">
+          <button type="button" class="btnSecondary" @click="showCreateModal = false">Cancel</button>
+          <button type="submit" class="btnPrimary">Create</button>
+        </div>
+      </form>
+    </AppModal>
+
+    <!-- Edit User Modal -->
+    <AppModal :show="!!editingUser" title="Edit User" @close="closeEdit">
+      <form v-if="editingUser" class="formModal" @submit.prevent="submitEdit">
+        <div class="formGroup">
+          <label for="user-edit-name">Name</label>
+          <input id="user-edit-name" v-model="form.name" required type="text" />
+        </div>
+        <div class="formGroup">
+          <label for="user-edit-email">Email</label>
+          <input id="user-edit-email" v-model="form.email" required type="email" />
+        </div>
+        <div class="formGroup">
+          <label for="user-edit-password">Password (leave blank to keep)</label>
+          <input id="user-edit-password" v-model="form.password" type="password" placeholder="••••••••" />
+        </div>
+        <div class="formGroup">
+          <label for="user-edit-role">Role</label>
+          <select id="user-edit-role" v-model="form.role">
+            <option value="User">User</option>
+            <option value="Manager">Manager</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+        <div class="formGroup">
+          <label for="user-edit-avatar">Avatar URL</label>
+          <input id="user-edit-avatar" v-model="form.avatarUrl" type="url" />
+        </div>
+        <div class="formActions">
+          <button type="button" class="btnSecondary" @click="closeEdit">Cancel</button>
+          <button type="submit" class="btnPrimary">Save</button>
+        </div>
+      </form>
+    </AppModal>
   </div>
 </template>
 
@@ -150,6 +279,27 @@ const users = [
 
 .userStatCard:hover {
   border-color: rgba(45, 212, 191, 0.25);
+}
+
+.userStatCardAction {
+  align-items: center;
+  justify-content: center;
+}
+
+.btnPrimary {
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary);
+  color: var(--bg-base);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  border: none;
+  white-space: nowrap;
+  transition: filter 0.2s;
+}
+
+.btnPrimary:hover {
+  filter: brightness(1.1);
 }
 
 .userStatLabel {
@@ -248,40 +398,11 @@ const users = [
   color: var(--text-secondary);
 }
 
-/* ---- Badge ---- */
-.badgeActive {
-  display: inline-flex;
-  padding: 2px 10px;
-  border-radius: 9999px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  background: rgba(34, 197, 94, 0.12);
-  color: #22c55e;
-  border: 1px solid rgba(34, 197, 94, 0.2);
-}
-
 /* ---- Role ---- */
 .roleCell {
   font-size: var(--text-xs);
   font-weight: 700;
   color: var(--color-primary);
-}
-
-/* ---- Efficiency bar ---- */
-.effBar {
-  height: 6px;
-  width: 96px;
-  background: rgba(45, 212, 191, 0.1);
-  border-radius: 9999px;
-  overflow: hidden;
-}
-
-.effFill {
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: 9999px;
-  transition: width 0.6s ease;
 }
 
 /* ---- Actions ---- */
@@ -294,12 +415,6 @@ const users = [
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-.tableRow:hover .actionBtns {
-  opacity: 1;
 }
 
 .actionEdit,
@@ -310,10 +425,10 @@ const users = [
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
-  transition:
-    background 0.15s,
-    color 0.15s;
+  transition: background 0.15s, color 0.15s;
   color: var(--text-secondary);
+  background: transparent;
+  border: none;
 }
 
 .actionEdit .material-symbols-outlined,
@@ -326,8 +441,71 @@ const users = [
   color: var(--color-primary);
 }
 
-.actionDelete:hover {
+.actionDelete:hover:not(:disabled) {
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
+}
+
+.actionDelete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- Form modal ---- */
+.formModal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.formGroup label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.formGroup input,
+.formGroup select {
+  padding: 10px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.btnSecondary {
+  padding: 10px 18px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  border: 1px solid var(--border-default);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btnSecondary:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 </style>

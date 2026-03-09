@@ -1,16 +1,29 @@
 <script setup lang="ts">
 /**
- * @author Samuel Rivero, Dav, Juan Andrés Young Hoyos
+ * @author Samuel Rivero
  * @description Warehouse management view - capacity cards and packages per warehouse.
  */
 import { ref } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
+import AppModal from '@/components/AppModal.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
 import { usePackagesStore } from '@/stores/packages'
+import type { WarehouseInterface } from '@/interfaces'
 
 const store = usePackagesStore()
 
 const expandedWh = ref<string | null>(null)
+const showCreateModal = ref(false)
+const editingWh = ref<WarehouseInterface | null>(null)
+const deletingId = ref<string | null>(null)
+
+const form = ref({
+  name: '',
+  location: '',
+  capacity: 0,
+  managerName: '',
+  imageUrl: '',
+})
 
 function statusClass(status: string): string {
   const map: Record<string, string> = {
@@ -24,6 +37,60 @@ function statusClass(status: string): string {
 
 function toggleWh(id: string) {
   expandedWh.value = expandedWh.value === id ? null : id
+}
+
+function openCreate() {
+  form.value = { name: '', location: '', capacity: 0, managerName: '', imageUrl: '' }
+  showCreateModal.value = true
+}
+
+function openEdit(wh: WarehouseInterface) {
+  form.value = {
+    name: wh.name,
+    location: wh.location,
+    capacity: wh.capacity,
+    managerName: wh.managerName,
+    imageUrl: wh.imageUrl ?? '',
+  }
+  editingWh.value = wh
+}
+
+function closeEdit() {
+  editingWh.value = null
+}
+
+async function submitCreate() {
+  if (!form.value.name.trim()) return
+  await store.createWarehouse({
+    name: form.value.name.trim(),
+    location: form.value.location.trim(),
+    capacity: Number(form.value.capacity) || 0,
+    managerName: form.value.managerName.trim(),
+    imageUrl: form.value.imageUrl.trim() || undefined,
+  })
+  showCreateModal.value = false
+}
+
+async function submitEdit() {
+  if (!editingWh.value || !form.value.name.trim()) return
+  await store.updateWarehouse({
+    id: editingWh.value.id,
+    name: form.value.name.trim(),
+    location: form.value.location.trim(),
+    capacity: Number(form.value.capacity) || 0,
+    managerName: form.value.managerName.trim(),
+    imageUrl: form.value.imageUrl.trim() || undefined,
+  })
+  closeEdit()
+}
+
+async function confirmDelete(id: string, e: Event) {
+  e.stopPropagation()
+  if (!confirm('Delete this warehouse? Packages assigned to it will be unassigned.')) return
+  deletingId.value = id
+  await store.removeWarehouse(id)
+  deletingId.value = null
+  if (expandedWh.value === id) expandedWh.value = null
 }
 </script>
 
@@ -41,7 +108,7 @@ function toggleWh(id: string) {
             <h1 class="pageTitle">Warehouse Hubs</h1>
             <p class="pageSubtitle">Real-time capacity and performance monitoring.</p>
           </div>
-          <button class="btnPrimary">Add New Hub</button>
+          <button class="btnPrimary" @click="openCreate">Add New Hub</button>
         </div>
 
         <!-- Cards grid -->
@@ -52,19 +119,36 @@ function toggleWh(id: string) {
               :class="{ whCardActive: expandedWh === wh.id }"
               @click="toggleWh(wh.id)"
             >
+              <div class="whCardActions">
+                <button
+                  class="whActionBtn"
+                  title="Edit"
+                  @click.stop="openEdit(wh)"
+                >
+                  <span class="material-symbols-outlined">edit</span>
+                </button>
+                <button
+                  class="whActionBtn whActionBtnDanger"
+                  :disabled="deletingId === wh.id"
+                  title="Delete"
+                  @click="confirmDelete(wh.id, $event)"
+                >
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
               <div class="whImageWrap">
                 <img :src="wh.imageUrl" :alt="wh.name" class="whImage" />
                 <div class="whActiveBadge">Active</div>
                 <div class="whPkgCount">
                   <span class="material-symbols-outlined" style="font-size: 14px">package_2</span>
-                  {{ store.packagesForWarehouse(wh.name).length }}
+                  {{ store.packagesForWarehouse(wh.id).length }}
                 </div>
               </div>
               <div class="whBody">
                 <div class="whNameRow">
                   <h3 class="whName">{{ wh.name }}</h3>
                   <span class="material-symbols-outlined whChevron">{{
-                    expandedWh === wh.name ? 'expand_less' : 'expand_more'
+                    expandedWh === wh.id ? 'expand_less' : 'expand_more'
                   }}</span>
                 </div>
                 <p class="whLocation">
@@ -131,6 +215,66 @@ function toggleWh(id: string) {
         </div>
       </div>
     </main>
+
+    <!-- Create Warehouse Modal -->
+    <AppModal :show="showCreateModal" title="Add New Hub" @close="showCreateModal = false">
+      <form class="formModal" @submit.prevent="submitCreate">
+        <div class="formGroup">
+          <label for="wh-name">Name</label>
+          <input id="wh-name" v-model="form.name" required type="text" placeholder="e.g. Central Hub" />
+        </div>
+        <div class="formGroup">
+          <label for="wh-location">Location</label>
+          <input id="wh-location" v-model="form.location" required type="text" placeholder="e.g. Chicago, IL" />
+        </div>
+        <div class="formGroup">
+          <label for="wh-capacity">Capacity (%)</label>
+          <input id="wh-capacity" v-model.number="form.capacity" required type="number" min="0" max="100" />
+        </div>
+        <div class="formGroup">
+          <label for="wh-manager">Manager Name</label>
+          <input id="wh-manager" v-model="form.managerName" type="text" placeholder="e.g. John Smith" />
+        </div>
+        <div class="formGroup">
+          <label for="wh-image">Image URL</label>
+          <input id="wh-image" v-model="form.imageUrl" type="url" placeholder="https://..." />
+        </div>
+        <div class="formActions">
+          <button type="button" class="btnSecondary" @click="showCreateModal = false">Cancel</button>
+          <button type="submit" class="btnPrimary">Create</button>
+        </div>
+      </form>
+    </AppModal>
+
+    <!-- Edit Warehouse Modal -->
+    <AppModal :show="!!editingWh" title="Edit Warehouse" @close="closeEdit">
+      <form v-if="editingWh" class="formModal" @submit.prevent="submitEdit">
+        <div class="formGroup">
+          <label for="wh-edit-name">Name</label>
+          <input id="wh-edit-name" v-model="form.name" required type="text" />
+        </div>
+        <div class="formGroup">
+          <label for="wh-edit-location">Location</label>
+          <input id="wh-edit-location" v-model="form.location" required type="text" />
+        </div>
+        <div class="formGroup">
+          <label for="wh-edit-capacity">Capacity (%)</label>
+          <input id="wh-edit-capacity" v-model.number="form.capacity" required type="number" min="0" max="100" />
+        </div>
+        <div class="formGroup">
+          <label for="wh-edit-manager">Manager Name</label>
+          <input id="wh-edit-manager" v-model="form.managerName" type="text" />
+        </div>
+        <div class="formGroup">
+          <label for="wh-edit-image">Image URL</label>
+          <input id="wh-edit-image" v-model="form.imageUrl" type="url" />
+        </div>
+        <div class="formActions">
+          <button type="button" class="btnSecondary" @click="closeEdit">Cancel</button>
+          <button type="submit" class="btnPrimary">Save</button>
+        </div>
+      </form>
+    </AppModal>
   </div>
 </template>
 
@@ -227,6 +371,7 @@ function toggleWh(id: string) {
 }
 
 .whCard {
+  position: relative;
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
@@ -252,6 +397,95 @@ function toggleWh(id: string) {
   height: 160px;
   position: relative;
   overflow: hidden;
+}
+
+.whCardActions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+
+.whActionBtn {
+  padding: 6px;
+  border-radius: var(--radius-md);
+  background: rgba(13, 17, 23, 0.72);
+  backdrop-filter: blur(8px);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  transition: background 0.2s, color 0.2s;
+}
+
+.whActionBtn:hover {
+  background: var(--bg-elevated);
+  color: var(--color-primary);
+}
+
+.whActionBtnDanger:hover {
+  color: #ef4444;
+}
+
+.whActionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- Form modal ---- */
+.formModal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.formGroup label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.formGroup input {
+  padding: 10px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.btnSecondary {
+  padding: 10px 18px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  border: 1px solid var(--border-default);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btnSecondary:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .whImage {

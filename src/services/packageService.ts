@@ -1,99 +1,44 @@
 /**
- * @author Samuel Rivero, Dav, Juan Andrés Young Hoyos
- * @description CRUD operations for the Package entity.
+ * @author Samuel Rivero
+ * @description CRUD operations for the Package entity. Persisted in LocalStorage.
  */
 
-import { apiFetch } from './api'
+import { getFromStorage, setToStorage, STORAGE_KEYS } from '@/infrastructure/storage'
 import type { PackageInterface } from '@/interfaces'
 import type { CreatePackageDTO, UpdatePackageDTO } from '@/dtos'
 
-const MOCK_PACKAGES: PackageInterface[] = [
-  {
-    id: 'pkg-1',
-    userId: 'user-1',
-    warehouseId: 'wh-1',
-    status: 'In Transit',
-    description: 'Electronics Kit',
-    price: 299.99,
-    createdAt: '2026-03-06T09:00:00Z',
-    updatedAt: '2026-03-06T14:20:00Z',
-    logHistory: [
-      {
-        id: 'log-1',
-        packageId: 'pkg-1',
-        fromWarehouseId: 'wh-1',
-        toWarehouseId: 'wh-2',
-        previousStatus: 'Pending',
-        newStatus: 'In Transit',
-        description: 'Picked up from warehouse',
-        timestamp: '2026-03-06T09:12:00Z',
-      },
-    ],
-  },
-  {
-    id: 'pkg-2',
-    userId: 'user-2',
-    warehouseId: 'wh-2',
-    status: 'Delivered',
-    description: 'Spare Parts',
-    price: 89.5,
-    createdAt: '2026-03-04T08:00:00Z',
-    updatedAt: '2026-03-05T14:42:00Z',
-    logHistory: [
-      {
-        id: 'log-2',
-        packageId: 'pkg-2',
-        fromWarehouseId: 'wh-2',
-        toWarehouseId: 'wh-2',
-        previousStatus: 'In Transit',
-        newStatus: 'Delivered',
-        description: 'Delivered',
-        timestamp: '2026-03-05T14:42:00Z',
-      },
-    ],
-  },
-  {
-    id: 'pkg-3',
-    userId: 'user-3',
-    warehouseId: null,
-    status: 'Pending',
-    description: 'Medical Box',
-    price: 150,
-    createdAt: '2026-03-06T07:00:00Z',
-    updatedAt: '2026-03-06T07:00:00Z',
-    logHistory: [
-      {
-        id: 'log-3',
-        packageId: 'pkg-3',
-        fromWarehouseId: '',
-        toWarehouseId: '',
-        previousStatus: '',
-        newStatus: 'Pending',
-        description: 'Label created',
-        timestamp: '2026-03-06T07:00:00Z',
-      },
-    ],
-  },
-]
+function loadAll(): PackageInterface[] {
+  return getFromStorage<PackageInterface[]>(STORAGE_KEYS.PACKAGES) ?? []
+}
+
+function nextPackageId(existing: PackageInterface[]): string {
+  const TIMESTAMP_THRESHOLD = 1e9
+  let max = 0
+  for (const p of existing) {
+    const m = p.id.match(/^pkg-(\d+)$/)
+    if (m?.[1]) {
+      const n = parseInt(m[1], 10)
+      if (n < TIMESTAMP_THRESHOLD && n > max) max = n
+    }
+  }
+  return `pkg-${max + 1}`
+}
 
 export class PackageService {
   static async getAll(status?: string): Promise<PackageInterface[]> {
-    const filtered =
-      status && status !== 'All' ? MOCK_PACKAGES.filter((p) => p.status === status) : MOCK_PACKAGES
-    return apiFetch('/packages', undefined, filtered)
+    const all = loadAll()
+    if (status && status !== 'All') return all.filter((p) => p.status === status)
+    return all
   }
 
   static async getById(id: string): Promise<PackageInterface | undefined> {
-    return apiFetch(
-      `/packages/${id}`,
-      undefined,
-      MOCK_PACKAGES.find((p) => p.id === id),
-    )
+    return loadAll().find((p) => p.id === id)
   }
 
   static async create(dto: CreatePackageDTO): Promise<PackageInterface> {
+    const all = loadAll()
     const now = new Date().toISOString()
-    const pkgId = `pkg-${Date.now()}`
+    const pkgId = nextPackageId(all)
     const newPkg: PackageInterface = {
       id: pkgId,
       userId: dto.userId,
@@ -116,25 +61,27 @@ export class PackageService {
         },
       ],
     }
-    MOCK_PACKAGES.push(newPkg)
-    return Promise.resolve(newPkg)
+    all.push(newPkg)
+    setToStorage(STORAGE_KEYS.PACKAGES, all)
+    return newPkg
   }
 
   static async update(dto: UpdatePackageDTO): Promise<PackageInterface | undefined> {
-    const pkg = MOCK_PACKAGES.find((p) => p.id === dto.id)
-    if (pkg) {
-      if (dto.warehouseId !== undefined) pkg.warehouseId = dto.warehouseId
-      if (dto.status !== undefined) pkg.status = dto.status
-      if (dto.description !== undefined) pkg.description = dto.description
-      if (dto.price !== undefined) pkg.price = dto.price
-      pkg.updatedAt = new Date().toISOString()
-    }
-    return Promise.resolve(pkg)
+    const all = loadAll()
+    const idx = all.findIndex((p) => p.id === dto.id)
+    const pkg = idx !== -1 ? all[idx] : undefined
+    if (!pkg) return undefined
+    if (dto.warehouseId !== undefined) pkg.warehouseId = dto.warehouseId
+    if (dto.status !== undefined) pkg.status = dto.status
+    if (dto.description !== undefined) pkg.description = dto.description
+    if (dto.price !== undefined) pkg.price = dto.price
+    pkg.updatedAt = new Date().toISOString()
+    setToStorage(STORAGE_KEYS.PACKAGES, all)
+    return pkg
   }
 
   static async remove(id: string): Promise<void> {
-    const idx = MOCK_PACKAGES.findIndex((p) => p.id === id)
-    if (idx !== -1) MOCK_PACKAGES.splice(idx, 1)
-    return Promise.resolve()
+    const all = loadAll().filter((p) => p.id !== id)
+    setToStorage(STORAGE_KEYS.PACKAGES, all)
   }
 }
