@@ -9,6 +9,7 @@ import AppModal from '@/components/AppModal.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
 import { usePackagesStore } from '@/stores/packages'
 import { useUsersStore } from '@/stores/users'
+import BarChart from '@/components/BarChart.vue'
 import type { PackageLogInterface } from '@/interfaces'
 
 const store = usePackagesStore()
@@ -51,6 +52,15 @@ function formatLogTimestamp(ts: string): string {
     return ts
   }
 }
+
+const statusBreakdown = computed(() => {
+  const statuses = ['Pending', 'In Transit', 'Delivered', 'Exception']
+  return {
+    labels: statuses,
+    values: statuses.map((s) => store.packages.filter((p) => p.status === s).length),
+    colors: ['#8b949e', '#f59e0b', '#2dd4bf', '#ef4444'],
+  }
+})
 
 const filteredPackages = computed(() => {
   return store.packages
@@ -190,6 +200,18 @@ async function confirmDeleteLog(logId: string, packageId: string) {
             <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
           </select>
           <button class="btnPrimary" @click="showCreateModal = true">New Package</button>
+        </div>
+
+        <!-- Status Bar Chart -->
+        <div class="chartCard">
+          <p class="chartTitle">Packages by Status</p>
+          <div class="chartBody">
+            <BarChart
+              :labels="statusBreakdown.labels"
+              :values="statusBreakdown.values"
+              :colors="statusBreakdown.colors"
+            />
+          </div>
         </div>
 
         <!-- Table -->
@@ -449,6 +471,27 @@ async function confirmDeleteLog(logId: string, packageId: string) {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+}
+
+/* ---- Chart card ---- */
+.chartCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+}
+
+.chartTitle {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.chartBody {
+  height: 200px;
 }
 
 /* ---- Filters ---- */

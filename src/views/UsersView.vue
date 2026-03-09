@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * @author Samuel Rivero
+ * @author Samuel Rivero, Juan Andrés Young Hoyos(dropdown)
  * @description User management view - CRUD for users.
  */
 import { ref, computed } from 'vue'
@@ -8,6 +8,7 @@ import AppSidebar from '@/components/AppSidebar.vue'
 import AppModal from '@/components/AppModal.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
 import { useUsersStore } from '@/stores/users'
+import BarChart from '@/components/BarChart.vue'
 import type { UserInterface } from '@/interfaces'
 
 const store = useUsersStore()
@@ -29,6 +30,15 @@ const form = ref({
   password: '',
   role: 'User',
   avatarUrl: '',
+})
+
+const roleBreakdown = computed(() => {
+  const roles = ['User', 'Manager', 'Admin']
+  return {
+    labels: roles,
+    values: roles.map((r) => store.users.filter((u) => u.role === r).length),
+    colors: ['#8b949e', '#f59e0b', '#2dd4bf'],
+  }
 })
 
 const statCards = computed(() => [
@@ -126,6 +136,18 @@ async function confirmDelete(id: string) {
             <option value="Manager">Manager</option>
             <option value="Admin">Admin</option>
           </select>
+        </div>
+
+        <!-- Role Bar Chart -->
+        <div class="chartCard">
+          <p class="chartTitle">Users by Role</p>
+          <div class="chartBody">
+            <BarChart
+              :labels="roleBreakdown.labels"
+              :values="roleBreakdown.values"
+              :colors="roleBreakdown.colors"
+            />
+          </div>
         </div>
 
         <!-- Users table -->
@@ -365,6 +387,27 @@ async function confirmDelete(id: string) {
 .filterSelect:focus,
 .filterSelect:hover {
   border-color: var(--color-primary);
+}
+
+/* ---- Chart card ---- */
+.chartCard {
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.chartTitle {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.chartBody {
+  height: 200px;
 }
 
 /* ---- Table ---- */
