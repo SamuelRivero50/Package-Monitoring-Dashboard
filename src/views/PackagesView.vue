@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /**
- * @author Samuel Rivero
+ * @author Samuel Rivero , Juan Andrés Young Hoyos
  * @description Package Tracking view - table with warehouse assignment and log history.
- */
+*/
 import { ref, computed } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
 import AppModal from '@/components/AppModal.vue'
@@ -13,8 +13,9 @@ import type { PackageLogInterface } from '@/interfaces'
 
 const store = usePackagesStore()
 const usersStore = useUsersStore()
-const filterButtons = ['All', 'In Transit', 'Delivered', 'Pending', 'Exception']
-const activeFilter = ref(0)
+const searchQuery = ref('')
+const statusFilter = ref('All')
+const warehouseFilter = ref('')
 
 const expandedRow = ref<string | null>(null)
 const showCreateModal = ref(false)
@@ -52,9 +53,15 @@ function formatLogTimestamp(ts: string): string {
 }
 
 const filteredPackages = computed(() => {
-  const status = filterButtons[activeFilter.value]
-  if (status === 'All') return store.packages
-  return store.packages.filter((p) => p.status === status)
+  return store.packages
+    .filter((p) => statusFilter.value === 'All' || p.status === statusFilter.value)
+    .filter((p) => warehouseFilter.value === '' || p.warehouseId === warehouseFilter.value)
+    .filter(
+      (p) =>
+        !searchQuery.value ||
+        p.id.includes(searchQuery.value) ||
+        p.description.toLowerCase().includes(searchQuery.value.toLowerCase()),
+    )
 })
 
 const form = ref({
@@ -79,9 +86,6 @@ function toggleLog(id: string) {
   expandedRow.value = expandedRow.value === id ? null : id
 }
 
-function setFilter(i: number) {
-  activeFilter.value = i
-}
 
 async function submitCreate() {
   if (!form.value.description.trim()) return
@@ -172,18 +176,19 @@ async function confirmDeleteLog(logId: string, packageId: string) {
         <div class="filtersBar">
           <div class="searchWrapper">
             <span class="material-symbols-outlined searchIcon">search</span>
-            <input class="filterSearch" placeholder="Search by tracking #..." type="text" />
+            <input v-model="searchQuery" class="filterSearch" placeholder="Search by tracking #..." type="text" />
           </div>
-          <div class="filterBtns">
-            <button
-              v-for="(btn, i) in filterButtons"
-              :key="btn"
-              :class="['filterBtn', { filterBtnActive: activeFilter === i }]"
-              @click="setFilter(i)"
-            >
-              {{ btn }}
-            </button>
-          </div>
+          <select v-model="statusFilter" class="filterSelect">
+            <option value="All">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="In Transit">In Transit</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Exception">Exception</option>
+          </select>
+          <select v-model="warehouseFilter" class="filterSelect">
+            <option value="">All Warehouses</option>
+            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
+          </select>
           <button class="btnPrimary" @click="showCreateModal = true">New Package</button>
         </div>
 
@@ -496,37 +501,21 @@ async function confirmDeleteLog(logId: string, packageId: string) {
   box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.12);
 }
 
-.filterBtns {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-}
-
-.filterBtn {
-  padding: 10px 18px;
-  border-radius: var(--radius-lg);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  white-space: nowrap;
+.filterSelect {
+  padding: 10px 12px;
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
-  color: var(--text-secondary);
-  transition:
-    background 0.2s,
-    color 0.2s,
-    border-color 0.2s;
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
 }
 
-.filterBtn:hover {
+.filterSelect:focus,
+.filterSelect:hover {
   border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.filterBtnActive {
-  background: var(--color-primary);
-  color: var(--bg-base);
-  border-color: var(--color-primary);
-  font-weight: 700;
 }
 
 .btnPrimary {

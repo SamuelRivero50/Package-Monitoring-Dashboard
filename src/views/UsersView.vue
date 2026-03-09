@@ -12,6 +12,13 @@ import type { UserInterface } from '@/interfaces'
 
 const store = useUsersStore()
 
+const roleFilter = ref('All')
+
+const filteredUsers = computed(() => {
+  if (roleFilter.value === 'All') return store.users
+  return store.users.filter((u) => u.role === roleFilter.value)
+})
+
 const showCreateModal = ref(false)
 const editingUser = ref<UserInterface | null>(null)
 const deletingId = ref<string | null>(null)
@@ -111,6 +118,16 @@ async function confirmDelete(id: string) {
           </div>
         </div>
 
+        <!-- Filter bar -->
+        <div class="filtersBar">
+          <select v-model="roleFilter" class="filterSelect">
+            <option value="All">All Roles</option>
+            <option value="User">User</option>
+            <option value="Manager">Manager</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+
         <!-- Users table -->
         <div class="tableCard">
           <table class="dataTable">
@@ -122,7 +139,7 @@ async function confirmDelete(id: string) {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="user in store.users" :key="user.id" class="tableRow">
+              <tr v-for="user in filteredUsers" :key="user.id" class="tableRow">
                 <td>
                   <div class="userCell">
                     <div
@@ -325,6 +342,29 @@ async function confirmDelete(id: string) {
 
 .userStatIcon .material-symbols-outlined {
   font-size: 22px;
+}
+
+/* ---- Filter bar ---- */
+.filtersBar {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.filterSelect {
+  padding: 10px 12px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.filterSelect:focus,
+.filterSelect:hover {
+  border-color: var(--color-primary);
 }
 
 /* ---- Table ---- */
