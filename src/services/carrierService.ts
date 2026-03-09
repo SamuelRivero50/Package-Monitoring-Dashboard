@@ -1,14 +1,13 @@
-// =============================================================
-// Carrier Service
-// CRUD operations for the Carrier (shipping company) entity.
-// =============================================================
+/**
+ * @author Samuel Rivero, Dav, Juan Andrés Young Hoyos
+ * @description CRUD operations for the Carrier entity.
+ */
 
 import { apiFetch } from './api'
-import type { Carrier, CreateCarrierDTO, UpdateCarrierDTO } from '@/models'
+import type { CarrierInterface } from '@/types'
+import type { CreateCarrierDTO, UpdateCarrierDTO } from '@/dtos'
 
-// --- Mock data (remove when backend is ready) ---
-
-const MOCK_CARRIERS: Carrier[] = [
+const MOCK_CARRIERS: CarrierInterface[] = [
   {
     id: 'cr-1',
     name: 'FedEx',
@@ -39,26 +38,21 @@ const MOCK_CARRIERS: Carrier[] = [
   },
 ]
 
-// --- Service methods ---
-
-export const carrierService = {
-  async getAll(): Promise<Carrier[]> {
-    // TODO: return apiFetch<Carrier[]>('/carriers')
+export class CarrierService {
+  static async getAll(): Promise<CarrierInterface[]> {
     return apiFetch('/carriers', undefined, MOCK_CARRIERS)
-  },
+  }
 
-  async getById(id: string): Promise<Carrier | undefined> {
-    // TODO: return apiFetch<Carrier>(`/carriers/${id}`)
+  static async getById(id: string): Promise<CarrierInterface | undefined> {
     return apiFetch(
       `/carriers/${id}`,
       undefined,
       MOCK_CARRIERS.find((c) => c.id === id),
     )
-  },
+  }
 
-  async create(dto: CreateCarrierDTO): Promise<Carrier> {
-    // TODO: return apiFetch<Carrier>('/carriers', { method: 'POST', body: JSON.stringify(dto) })
-    const newCarrier: Carrier = {
+  static async create(dto: CreateCarrierDTO): Promise<CarrierInterface> {
+    const newCarrier: CarrierInterface = {
       id: `cr-${Date.now()}`,
       name: dto.name,
       gradient: 'linear-gradient(135deg, #2dd4bf, #0d9488)',
@@ -67,19 +61,17 @@ export const carrierService = {
     }
     MOCK_CARRIERS.push(newCarrier)
     return Promise.resolve(newCarrier)
-  },
+  }
 
-  async update(dto: UpdateCarrierDTO): Promise<Carrier | undefined> {
-    // TODO: return apiFetch<Carrier>(`/carriers/${dto.id}`, { method: 'PATCH', body: JSON.stringify(dto) })
+  static async update(dto: UpdateCarrierDTO): Promise<CarrierInterface | undefined> {
     const carrier = MOCK_CARRIERS.find((c) => c.id === dto.id)
     if (carrier && dto.name) carrier.name = dto.name
     return Promise.resolve(carrier)
-  },
+  }
 
-  async remove(id: string): Promise<void> {
-    // TODO: return apiFetch(`/carriers/${id}`, { method: 'DELETE' })
+  static async remove(id: string): Promise<void> {
     const idx = MOCK_CARRIERS.findIndex((c) => c.id === id)
     if (idx !== -1) MOCK_CARRIERS.splice(idx, 1)
     return Promise.resolve()
-  },
+  }
 }

@@ -1,38 +1,28 @@
-// =============================================================
-// Packages Store (Pinia)
-// Global state for packages and warehouses.
-// All data operations go through the service layer so swapping
-// the backend only requires changes in /services, not here.
-// =============================================================
+/**
+ * @author Samuel Rivero, Dav, Juan Andrés Young Hoyos
+ * @description Pinia store for packages and warehouses.
+ */
 
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { packageService, warehouseService } from '@/services'
-import type { Package } from '@/models/Package'
-import type { Warehouse } from '@/models/Warehouse'
+import { PackageService, WarehouseService } from '@/services'
+import type { PackageInterface, WarehouseInterface } from '@/interfaces'
 
 export const usePackagesStore = defineStore('packages', () => {
-  // --- State ---
-
-  const warehouses = ref<Warehouse[]>([])
-  const packages = ref<Package[]>([])
+  const warehouses = ref<WarehouseInterface[]>([])
+  const packages = ref<PackageInterface[]>([])
   const isLoading = ref(false)
-
-  // --- Computed ---
 
   const warehouseNames = computed(() => warehouses.value.map((w) => w.name))
 
-  // --- Actions ---
-
   async function loadWarehouses() {
-    warehouses.value = await warehouseService.getAll()
+    warehouses.value = await WarehouseService.getAll()
   }
 
   async function loadPackages() {
-    packages.value = await packageService.getAll()
+    packages.value = await PackageService.getAll()
   }
 
-  // Loads both resources in parallel.
   async function loadAll() {
     isLoading.value = true
     try {
@@ -42,19 +32,16 @@ export const usePackagesStore = defineStore('packages', () => {
     }
   }
 
-  // Assigns (or clears) a warehouse for the given package.
-  async function assignWarehouse(pkgId: string, warehouseName: string | null) {
-    await packageService.update({ id: pkgId, warehouseId: warehouseName })
+  async function assignWarehouse(pkgId: string, warehouseId: string | null) {
+    await PackageService.update({ id: pkgId, warehouseId })
     const pkg = packages.value.find((p) => p.id === pkgId)
-    if (pkg) pkg.warehouse = warehouseName
+    if (pkg) pkg.warehouseId = warehouseId
   }
 
-  // Returns all packages currently assigned to a warehouse.
-  function packagesForWarehouse(warehouseName: string) {
-    return packages.value.filter((p) => p.warehouse === warehouseName)
+  function packagesForWarehouse(warehouseId: string) {
+    return packages.value.filter((p) => p.warehouseId === warehouseId)
   }
 
-  // Initial load on first use.
   loadAll()
 
   return {

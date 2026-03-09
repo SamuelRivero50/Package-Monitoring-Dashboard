@@ -5,28 +5,28 @@
 // =============================================================
 
 import { ref, onMounted } from 'vue'
-import { warehouseService, packageService } from '@/services'
-import type { Warehouse, Package } from '@/models'
+import { WarehouseService, PackageService } from '@/services'
+import type { WarehouseInterface, PackageInterface } from '@/interfaces'
 
 export function useWarehousesViewModel() {
   // --- State ---
 
   const isLoading = ref(true)
   const error = ref<string | null>(null)
-  const warehouses = ref<Warehouse[]>([])
-  const allPackages = ref<Package[]>([])
+  const warehouses = ref<WarehouseInterface[]>([])
+  const allPackages = ref<PackageInterface[]>([])
   const expandedWh = ref<string | null>(null)
 
   // --- Actions ---
 
   // Toggles the package panel under a warehouse card.
-  function toggleWh(name: string) {
-    expandedWh.value = expandedWh.value === name ? null : name
+  function toggleWh(id: string) {
+    expandedWh.value = expandedWh.value === id ? null : id
   }
 
   // Returns all packages currently assigned to a warehouse.
-  function packagesForWarehouse(warehouseName: string): Package[] {
-    return allPackages.value.filter((p) => p.warehouse === warehouseName)
+  function packagesForWarehouse(warehouseId: string): PackageInterface[] {
+    return allPackages.value.filter((p) => p.warehouseId === warehouseId)
   }
 
   // --- Data loading ---
@@ -36,7 +36,7 @@ export function useWarehousesViewModel() {
     isLoading.value = true
     error.value = null
     try {
-      const [whs, pkgs] = await Promise.all([warehouseService.getAll(), packageService.getAll()])
+      const [whs, pkgs] = await Promise.all([WarehouseService.getAll(), PackageService.getAll()])
       warehouses.value = whs
       allPackages.value = pkgs
     } catch (e: unknown) {

@@ -1,19 +1,15 @@
-// =============================================================
-// Dashboard Model
-// Types used specifically on the system overview / dashboard page.
-// =============================================================
-
-// --- Stat cards ---
+/**
+ * @author Samuel Rivero, Dav, Juan Andrés Young Hoyos
+ * @description Dashboard view types. NOT in class diagram.
+ */
 
 export interface DashboardStatCard {
   label: string
   value: string
   icon: string
-  trend: number // positive = up, negative = down, 0 = flat
-  iconColorClass: string // maps to a CSS class for the icon background
+  trend: number
+  iconColorClass: string
 }
-
-// --- Status breakdown (donut chart data) ---
 
 export interface StatusBreakdown {
   delivered: number
@@ -23,8 +19,6 @@ export interface StatusBreakdown {
   exception: number
 }
 
-// --- Recent packages table row ---
-
 export interface RecentPackageRow {
   trackingId: string
   description: string
@@ -32,8 +26,6 @@ export interface RecentPackageRow {
   statusClass: string
   updatedAgo: string
 }
-
-// --- Summary (returned by /dashboard/summary) ---
 
 export interface DashboardSummary {
   totalPackages: number

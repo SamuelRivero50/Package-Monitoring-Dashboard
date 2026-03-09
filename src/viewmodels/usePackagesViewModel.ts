@@ -5,15 +5,15 @@
 // =============================================================
 
 import { ref, computed, onMounted } from 'vue'
-import { packageService } from '@/services'
-import type { Package } from '@/models'
+import { PackageService } from '@/services'
+import type { PackageInterface } from '@/interfaces'
 
 export function usePackagesViewModel() {
   // --- State ---
 
   const isLoading = ref(true)
   const error = ref<string | null>(null)
-  const packages = ref<Package[]>([])
+  const packages = ref<PackageInterface[]>([])
   const activeFilter = ref('All')
   const searchQuery = ref('')
   const expandedRow = ref<string | null>(null)
@@ -36,7 +36,7 @@ export function usePackagesViewModel() {
         (p) =>
           p.id.toLowerCase().includes(q) ||
           p.description.toLowerCase().includes(q) ||
-          p.user.toLowerCase().includes(q),
+          p.userId.toLowerCase().includes(q),
       )
     }
 
@@ -55,10 +55,10 @@ export function usePackagesViewModel() {
   }
 
   // Assigns (or clears) a warehouse for the given package.
-  async function assignWarehouse(pkgId: string, warehouseName: string | null) {
-    await packageService.update({ id: pkgId, warehouseId: warehouseName })
+  async function assignWarehouse(pkgId: string, warehouseId: string | null) {
+    await PackageService.update({ id: pkgId, warehouseId })
     const pkg = packages.value.find((p) => p.id === pkgId)
-    if (pkg) pkg.warehouse = warehouseName
+    if (pkg) pkg.warehouseId = warehouseId
   }
 
   // --- Data loading ---
@@ -67,7 +67,7 @@ export function usePackagesViewModel() {
     isLoading.value = true
     error.value = null
     try {
-      packages.value = await packageService.getAll()
+      packages.value = await PackageService.getAll()
     } catch (e: unknown) {
       error.value = (e as { message?: string })?.message ?? 'Failed to load packages'
     } finally {

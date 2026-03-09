@@ -1,6 +1,0 @@
-// Barrel export — import any model from '@/models'
-export * from './Package'
-export * from './Warehouse'
-export * from './Carrier'
-export * from './User'
-export * from './Dashboard'

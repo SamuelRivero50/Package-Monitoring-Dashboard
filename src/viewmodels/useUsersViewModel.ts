@@ -5,15 +5,15 @@
 // =============================================================
 
 import { ref, onMounted } from 'vue'
-import { userService } from '@/services'
-import type { User } from '@/models'
+import { UserService } from '@/services'
+import type { UserInterface } from '@/interfaces'
 
 export function useUsersViewModel() {
   // --- State ---
 
   const isLoading = ref(true)
   const error = ref<string | null>(null)
-  const users = ref<User[]>([])
+  const users = ref<UserInterface[]>([])
 
   // Stat cards shown at the top of the Users page.
   const statCards = [
@@ -24,7 +24,7 @@ export function useUsersViewModel() {
   // --- Actions ---
 
   async function deleteUser(id: string) {
-    await userService.remove(id)
+    await UserService.remove(id)
     users.value = users.value.filter((u) => u.id !== id)
   }
 
@@ -34,7 +34,7 @@ export function useUsersViewModel() {
     isLoading.value = true
     error.value = null
     try {
-      users.value = await userService.getAll()
+      users.value = await UserService.getAll()
     } catch (e: unknown) {
       error.value = (e as { message?: string })?.message ?? 'Failed to load users'
     } finally {

@@ -32,7 +32,8 @@ When implementing features for Entregable 1, respect:
 
 ## Classes
 
-- All classes from the class diagram must be implemented in `src/models/`.
+- All 4 classes from the class diagram (User, Warehouse, Package, PackageLog) must be implemented as interfaces in `src/interfaces/`.
+- Carrier and Dashboard are NOT in the diagram; they live in `src/types/`.
 
 ## Documentation
 

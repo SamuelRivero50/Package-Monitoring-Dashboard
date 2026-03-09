@@ -5,8 +5,8 @@
 // =============================================================
 
 import { ref, computed, onMounted } from 'vue'
-import { dashboardService } from '@/services'
-import type { DashboardSummary, DashboardStatCard } from '@/models'
+import { DashboardService } from '@/services'
+import type { DashboardSummary, DashboardStatCard } from '@/types'
 
 export function useDashboardViewModel() {
   // --- State ---
@@ -75,7 +75,7 @@ export function useDashboardViewModel() {
     isLoading.value = true
     error.value = null
     try {
-      summary.value = await dashboardService.getSummary()
+      summary.value = await DashboardService.getSummary()
     } catch (e: unknown) {
       error.value = (e as { message?: string })?.message ?? 'Failed to load dashboard data'
     } finally {

@@ -4,15 +4,15 @@
 // =============================================================
 
 import { ref, onMounted } from 'vue'
-import { carrierService } from '@/services'
-import type { Carrier } from '@/models'
+import { CarrierService } from '@/services'
+import type { CarrierInterface } from '@/types'
 
 export function useCarriersViewModel() {
   // --- State ---
 
   const isLoading = ref(true)
   const error = ref<string | null>(null)
-  const carriers = ref<Carrier[]>([])
+  const carriers = ref<CarrierInterface[]>([])
 
   // --- Data loading ---
 
@@ -20,7 +20,7 @@ export function useCarriersViewModel() {
     isLoading.value = true
     error.value = null
     try {
-      carriers.value = await carrierService.getAll()
+      carriers.value = await CarrierService.getAll()
     } catch (e: unknown) {
       error.value = (e as { message?: string })?.message ?? 'Failed to load carriers'
     } finally {

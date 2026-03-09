@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * @author Samuel Rivero, Dav, Juan Andrés Young Hoyos
+ * @description Warehouse management view - capacity cards and packages per warehouse.
+ */
 import { ref } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
@@ -8,8 +12,18 @@ const store = usePackagesStore()
 
 const expandedWh = ref<string | null>(null)
 
-function toggleWh(name: string) {
-  expandedWh.value = expandedWh.value === name ? null : name
+function statusClass(status: string): string {
+  const map: Record<string, string> = {
+    'In Transit': 'badgeTransit',
+    Delivered: 'badgeDelivered',
+    Pending: 'badgePending',
+    Exception: 'badgeException',
+  }
+  return map[status] ?? 'badgePending'
+}
+
+function toggleWh(id: string) {
+  expandedWh.value = expandedWh.value === id ? null : id
 }
 </script>
 
@@ -32,14 +46,14 @@ function toggleWh(name: string) {
 
         <!-- Cards grid -->
         <div class="whGrid">
-          <div v-for="wh in store.warehouses" :key="wh.name" class="whCardWrapper">
+          <div v-for="wh in store.warehouses" :key="wh.id" class="whCardWrapper">
             <div
               class="whCard"
-              :class="{ whCardActive: expandedWh === wh.name }"
-              @click="toggleWh(wh.name)"
+              :class="{ whCardActive: expandedWh === wh.id }"
+              @click="toggleWh(wh.id)"
             >
               <div class="whImageWrap">
-                <img :src="wh.image" :alt="wh.name" class="whImage" />
+                <img :src="wh.imageUrl" :alt="wh.name" class="whImage" />
                 <div class="whActiveBadge">Active</div>
                 <div class="whPkgCount">
                   <span class="material-symbols-outlined" style="font-size: 14px">package_2</span>
@@ -76,7 +90,7 @@ function toggleWh(name: string) {
             </div>
 
             <!-- Packages panel -->
-            <div v-if="expandedWh === wh.name" class="pkgPanel">
+            <div v-if="expandedWh === wh.id" class="pkgPanel">
               <p class="pkgPanelTitle">
                 <span
                   class="material-symbols-outlined"
@@ -85,7 +99,7 @@ function toggleWh(name: string) {
                 >
                 Packages assigned to {{ wh.name }}
               </p>
-              <div v-if="store.packagesForWarehouse(wh.name).length === 0" class="pkgEmpty">
+              <div v-if="store.packagesForWarehouse(wh.id).length === 0" class="pkgEmpty">
                 No packages assigned yet.
               </div>
               <table v-else class="pkgTable">
@@ -99,16 +113,16 @@ function toggleWh(name: string) {
                 </thead>
                 <tbody>
                   <tr
-                    v-for="pkg in store.packagesForWarehouse(wh.name)"
+                    v-for="pkg in store.packagesForWarehouse(wh.id)"
                     :key="pkg.id"
                     class="pkgRow"
                   >
                     <td class="pkgId">{{ pkg.id }}</td>
                     <td>{{ pkg.description }}</td>
                     <td>
-                      <span :class="['pkgBadge', pkg.statusClass]">{{ pkg.status }}</span>
+                      <span :class="['pkgBadge', statusClass(pkg.status)]">{{ pkg.status }}</span>
                     </td>
-                    <td class="pkgMuted">{{ pkg.user }}</td>
+                    <td class="pkgMuted">{{ pkg.userId }}</td>
                   </tr>
                 </tbody>
               </table>

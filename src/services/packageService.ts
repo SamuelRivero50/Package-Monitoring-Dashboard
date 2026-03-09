@@ -1,147 +1,140 @@
-// =============================================================
-// Package Service
-// CRUD operations for the Package entity.
-// Replace the mock fallbacks with real apiFetch() calls once
-// the backend is running.
-// =============================================================
+/**
+ * @author Samuel Rivero, Dav, Juan Andrés Young Hoyos
+ * @description CRUD operations for the Package entity.
+ */
 
 import { apiFetch } from './api'
-import type { Package, CreatePackageDTO, UpdatePackageDTO } from '@/models'
+import type { PackageInterface } from '@/interfaces'
+import type { CreatePackageDTO, UpdatePackageDTO } from '@/dtos'
 
-// --- Mock data (remove when backend is ready) ---
-
-const MOCK_PACKAGES: Package[] = [
+const MOCK_PACKAGES: PackageInterface[] = [
   {
-    id: '#TRK-9921-X3',
-    description: 'Electronics Kit',
-    user: 'John Doe',
-    company: 'TechFlow Inc.',
+    id: 'pkg-1',
+    userId: 'user-1',
+    warehouseId: 'wh-1',
     status: 'In Transit',
-    statusClass: 'badgeTransit',
-    warehouse: 'Central Hub',
-    log: [
-      { date: '2026-03-06 09:12', event: 'Picked up from warehouse', location: 'Chicago, IL' },
+    description: 'Electronics Kit',
+    price: 299.99,
+    createdAt: '2026-03-06T09:00:00Z',
+    updatedAt: '2026-03-06T14:20:00Z',
+    logHistory: [
       {
-        date: '2026-03-06 11:35',
-        event: 'In transit to sorting facility',
-        location: 'Indianapolis, IN',
-      },
-      {
-        date: '2026-03-06 14:20',
-        event: 'Arrived at sorting facility',
-        location: 'Louisville, KY',
+        id: 'log-1',
+        packageId: 'pkg-1',
+        fromWarehouseId: 'wh-1',
+        toWarehouseId: 'wh-2',
+        previousStatus: 'Pending',
+        newStatus: 'In Transit',
+        description: 'Picked up from warehouse',
+        timestamp: '2026-03-06T09:12:00Z',
       },
     ],
   },
   {
-    id: '#TRK-8442-B9',
-    description: 'Spare Parts',
-    user: 'Sarah Smith',
-    company: 'Global Heavy',
+    id: 'pkg-2',
+    userId: 'user-2',
+    warehouseId: 'wh-2',
     status: 'Delivered',
-    statusClass: 'badgeDelivered',
-    warehouse: 'East Distro',
-    log: [
-      { date: '2026-03-04 08:00', event: 'Picked up', location: 'Newark, NJ' },
-      { date: '2026-03-05 10:15', event: 'Out for delivery', location: 'Boston, MA' },
-      { date: '2026-03-05 14:42', event: 'Delivered', location: 'Boston, MA' },
+    description: 'Spare Parts',
+    price: 89.5,
+    createdAt: '2026-03-04T08:00:00Z',
+    updatedAt: '2026-03-05T14:42:00Z',
+    logHistory: [
+      {
+        id: 'log-2',
+        packageId: 'pkg-2',
+        fromWarehouseId: 'wh-2',
+        toWarehouseId: 'wh-2',
+        previousStatus: 'In Transit',
+        newStatus: 'Delivered',
+        description: 'Delivered',
+        timestamp: '2026-03-05T14:42:00Z',
+      },
     ],
   },
   {
-    id: '#TRK-1022-P1',
-    description: 'Medical Box',
-    user: 'Mike Wilson',
-    company: 'HealthFirst',
+    id: 'pkg-3',
+    userId: 'user-3',
+    warehouseId: null,
     status: 'Pending',
-    statusClass: 'badgePending',
-    warehouse: null,
-    log: [{ date: '2026-03-06 07:00', event: 'Label created', location: 'Los Angeles, CA' }],
-  },
-  {
-    id: '#TRK-7711-E4',
-    description: 'Fiber Panels',
-    user: 'Elena Rodriguez',
-    company: 'ConstructX',
-    status: 'Exception',
-    statusClass: 'badgeException',
-    warehouse: 'West Coast',
-    log: [
-      { date: '2026-03-05 09:30', event: 'Picked up', location: 'Dallas, TX' },
-      { date: '2026-03-05 18:00', event: 'Exception — address issue', location: 'Houston, TX' },
+    description: 'Medical Box',
+    price: 150,
+    createdAt: '2026-03-06T07:00:00Z',
+    updatedAt: '2026-03-06T07:00:00Z',
+    logHistory: [
+      {
+        id: 'log-3',
+        packageId: 'pkg-3',
+        fromWarehouseId: '',
+        toWarehouseId: '',
+        previousStatus: '',
+        newStatus: 'Pending',
+        description: 'Label created',
+        timestamp: '2026-03-06T07:00:00Z',
+      },
     ],
   },
 ]
 
-// Status → CSS class mapping used when updating a package.
-const STATUS_CLASS_MAP: Record<string, Package['statusClass']> = {
-  'In Transit': 'badgeTransit',
-  Delivered: 'badgeDelivered',
-  Pending: 'badgePending',
-  Exception: 'badgeException',
-}
-
-// --- Service methods ---
-
-export const packageService = {
-  // Fetch all packages, optionally filtered by status.
-  async getAll(status?: string): Promise<Package[]> {
-    // TODO: return apiFetch<Package[]>(`/packages?status=${status ?? ''}`)
+export class PackageService {
+  static async getAll(status?: string): Promise<PackageInterface[]> {
     const filtered =
       status && status !== 'All' ? MOCK_PACKAGES.filter((p) => p.status === status) : MOCK_PACKAGES
     return apiFetch('/packages', undefined, filtered)
-  },
+  }
 
-  // Fetch a single package by its tracking ID.
-  async getById(id: string): Promise<Package | undefined> {
-    // TODO: return apiFetch<Package>(`/packages/${id}`)
+  static async getById(id: string): Promise<PackageInterface | undefined> {
     return apiFetch(
       `/packages/${id}`,
       undefined,
       MOCK_PACKAGES.find((p) => p.id === id),
     )
-  },
+  }
 
-  // Create a new package and add it to the local list.
-  async create(dto: CreatePackageDTO): Promise<Package> {
-    // TODO: return apiFetch<Package>('/packages', { method: 'POST', body: JSON.stringify(dto) })
-    const newPkg: Package = {
-      id: `#TRK-${Math.floor(Math.random() * 9000 + 1000)}-XX`,
+  static async create(dto: CreatePackageDTO): Promise<PackageInterface> {
+    const now = new Date().toISOString()
+    const pkgId = `pkg-${Date.now()}`
+    const newPkg: PackageInterface = {
+      id: pkgId,
+      userId: dto.userId,
+      warehouseId: dto.warehouseId ?? null,
+      status: dto.status,
       description: dto.description,
-      user: dto.user,
-      company: dto.company,
-      status: 'Pending',
-      statusClass: 'badgePending',
-      warehouse: dto.warehouseId ?? null,
-      log: [
+      price: dto.price,
+      createdAt: now,
+      updatedAt: now,
+      logHistory: [
         {
-          date: new Date().toISOString().slice(0, 16).replace('T', ' '),
-          event: 'Label created',
-          location: 'System',
+          id: `log-${Date.now()}`,
+          packageId: pkgId,
+          fromWarehouseId: '',
+          toWarehouseId: dto.warehouseId ?? '',
+          previousStatus: '',
+          newStatus: dto.status,
+          description: 'Created',
+          timestamp: now,
         },
       ],
     }
     MOCK_PACKAGES.push(newPkg)
     return Promise.resolve(newPkg)
-  },
+  }
 
-  // Update fields on an existing package.
-  async update(dto: UpdatePackageDTO): Promise<Package | undefined> {
-    // TODO: return apiFetch<Package>(`/packages/${dto.id}`, { method: 'PATCH', body: JSON.stringify(dto) })
+  static async update(dto: UpdatePackageDTO): Promise<PackageInterface | undefined> {
     const pkg = MOCK_PACKAGES.find((p) => p.id === dto.id)
     if (pkg) {
-      if (dto.warehouseId !== undefined) pkg.warehouse = dto.warehouseId
-      if (dto.status) pkg.statusClass = STATUS_CLASS_MAP[dto.status] ?? 'badgePending'
-      if (dto.status) pkg.status = dto.status
-      if (dto.description) pkg.description = dto.description
+      if (dto.warehouseId !== undefined) pkg.warehouseId = dto.warehouseId
+      if (dto.status !== undefined) pkg.status = dto.status
+      if (dto.description !== undefined) pkg.description = dto.description
+      if (dto.price !== undefined) pkg.price = dto.price
+      pkg.updatedAt = new Date().toISOString()
     }
     return Promise.resolve(pkg)
-  },
+  }
 
-  // Delete a package by ID.
-  async remove(id: string): Promise<void> {
-    // TODO: return apiFetch<void>(`/packages/${id}`, { method: 'DELETE' })
+  static async remove(id: string): Promise<void> {
     const idx = MOCK_PACKAGES.findIndex((p) => p.id === id)
     if (idx !== -1) MOCK_PACKAGES.splice(idx, 1)
     return Promise.resolve()
-  },
+  }
 }

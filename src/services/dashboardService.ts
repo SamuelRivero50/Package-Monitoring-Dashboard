@@ -1,13 +1,10 @@
-// =============================================================
-// Dashboard Service
-// Aggregated data for the system overview page.
-// When the backend is available this maps to GET /dashboard/summary.
-// =============================================================
+/**
+ * @author Samuel Rivero, Dav, Juan Andrés Young Hoyos
+ * @description Aggregated data for the system overview page.
+ */
 
 import { apiFetch } from './api'
-import type { DashboardSummary, RecentPackageRow } from '@/models'
-
-// --- Mock data (remove when backend is ready) ---
+import type { DashboardSummary, RecentPackageRow } from '@/types'
 
 const MOCK_RECENT: RecentPackageRow[] = [
   {
@@ -55,11 +52,8 @@ const MOCK_SUMMARY: DashboardSummary = {
   recentPackages: MOCK_RECENT,
 }
 
-// --- Service methods ---
-
-export const dashboardService = {
-  async getSummary(): Promise<DashboardSummary> {
-    // TODO: return apiFetch<DashboardSummary>('/dashboard/summary')
+export class DashboardService {
+  static async getSummary(): Promise<DashboardSummary> {
     return apiFetch('/dashboard/summary', undefined, MOCK_SUMMARY)
-  },
+  }
 }

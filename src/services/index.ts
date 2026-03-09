@@ -1,8 +1,12 @@
-// Barrel export — import any service from '@/services'
+/**
+ * @author Samuel Rivero, Dav, Juan Andrés Young Hoyos
+ * @description Barrel export for services.
+ */
+
 export { apiFetch, buildUrl } from './api'
 export type { PaginatedResponse, ApiError } from './api'
-export { packageService } from './packageService'
-export { warehouseService } from './warehouseService'
-export { carrierService } from './carrierService'
-export { userService } from './userService'
-export { dashboardService } from './dashboardService'
+export { PackageService } from './PackageService'
+export { WarehouseService } from './WarehouseService'
+export { UserService } from './UserService'
+export { CarrierService } from './CarrierService'
+export { DashboardService } from './DashboardService'

@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+/**
+ * @author Samuel Rivero, Dav, Juan Andrés Young Hoyos
+ * @description Package Tracking view - table with warehouse assignment and log history.
+ */
+import { ref, computed } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
 import { usePackagesStore } from '@/stores/packages'
@@ -8,6 +12,20 @@ const store = usePackagesStore()
 const filterButtons = ['All', 'In Transit', 'Delivered', 'Pending', 'Exception']
 
 const expandedRow = ref<string | null>(null)
+
+const warehouseOptions = computed(() =>
+  store.warehouses.map((w) => ({ id: w.id, name: w.name })),
+)
+
+function statusClass(status: string): string {
+  const map: Record<string, string> = {
+    'In Transit': 'badgeTransit',
+    Delivered: 'badgeDelivered',
+    Pending: 'badgePending',
+    Exception: 'badgeException',
+  }
+  return map[status] ?? 'badgePending'
+}
 
 function toggleLog(id: string) {
   expandedRow.value = expandedRow.value === id ? null : id
@@ -47,7 +65,6 @@ function toggleLog(id: string) {
                 <th>Tracking #</th>
                 <th>Description</th>
                 <th>User</th>
-                <th>Company</th>
                 <th>Status</th>
                 <th>Warehouse</th>
                 <th>Updated</th>
@@ -59,15 +76,14 @@ function toggleLog(id: string) {
                 <tr class="tableRow">
                   <td class="trackingId">{{ pkg.id }}</td>
                   <td class="cellBold">{{ pkg.description }}</td>
-                  <td>{{ pkg.user }}</td>
-                  <td>{{ pkg.company }}</td>
+                  <td>{{ pkg.userId }}</td>
                   <td>
-                    <span :class="['badge', pkg.statusClass]">{{ pkg.status }}</span>
+                    <span :class="['badge', statusClass(pkg.status)]">{{ pkg.status }}</span>
                   </td>
                   <td>
                     <select
                       class="whSelect"
-                      :value="pkg.warehouse ?? ''"
+                      :value="pkg.warehouseId ?? ''"
                       @change="
                         store.assignWarehouse(
                           pkg.id,
@@ -76,8 +92,8 @@ function toggleLog(id: string) {
                       "
                     >
                       <option value="">— None —</option>
-                      <option v-for="wh in store.warehouseNames" :key="wh" :value="wh">
-                        {{ wh }}
+                      <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">
+                        {{ wh.name }}
                       </option>
                     </select>
                   </td>
@@ -93,19 +109,18 @@ function toggleLog(id: string) {
                 </tr>
                 <!-- Tracking log expandable row -->
                 <tr v-if="expandedRow === pkg.id" class="logRow">
-                  <td colspan="8" class="logCell">
+                  <td colspan="7" class="logCell">
                     <div class="logTimeline">
-                      <div v-for="(entry, i) in pkg.log" :key="i" class="logEntry">
+                      <div v-for="(entry, i) in pkg.logHistory" :key="entry.id" class="logEntry">
                         <div class="logDotCol">
                           <span class="logDot" :class="{ logDotActive: i === 0 }"></span>
-                          <span v-if="i < pkg.log.length - 1" class="logLine"></span>
+                          <span v-if="i < pkg.logHistory.length - 1" class="logLine"></span>
                         </div>
                         <div class="logContent">
-                          <p class="logEvent">{{ entry.event }}</p>
+                          <p class="logEvent">{{ entry.description }}</p>
                           <p class="logMeta">
-                            <span class="material-symbols-outlined logMetaIcon">location_on</span>
-                            {{ entry.location }}
-                            <span class="logDate">{{ entry.date }}</span>
+                            <span class="logDate">{{ entry.timestamp }}</span>
+                            <span v-if="entry.newStatus"> → {{ entry.newStatus }}</span>
                           </p>
                         </div>
                       </div>
