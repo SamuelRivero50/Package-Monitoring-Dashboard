@@ -10,12 +10,13 @@
 
       <nav class="header-nav">
         <RouterLink class="nav-link" to="/">Home</RouterLink>
-        <RouterLink class="nav-link" to="/dashboard">Dashboard</RouterLink>
-        <RouterLink class="nav-link" to="/signup">Sign In</RouterLink>
+        <RouterLink v-if="auth.isAuthenticated" class="nav-link" to="/dashboard">Dashboard</RouterLink>
+        <RouterLink v-else class="nav-link" to="/login">Sign In</RouterLink>
       </nav>
 
       <div class="header-actions">
-        <RouterLink to="/signup" class="btn-get-started">Get Started</RouterLink>
+        <RouterLink v-if="!auth.isAuthenticated" to="/login" class="btn-get-started">Get Started</RouterLink>
+        <RouterLink v-else to="/dashboard" class="btn-get-started">Dashboard</RouterLink>
         <button class="mobile-menu-btn">
           <span class="material-symbols-outlined">menu</span>
         </button>
@@ -26,6 +27,9 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
 </script>
 
 <style scoped>

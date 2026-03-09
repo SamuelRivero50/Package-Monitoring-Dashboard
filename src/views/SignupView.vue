@@ -15,7 +15,7 @@ import AppFooter from '@/components/AppFooter.vue'
       </RouterLink>
       <div class="signup-header-right">
         <span class="header-hint">Already have an account?</span>
-        <RouterLink to="/dashboard" class="btn-signin">Sign in</RouterLink>
+        <RouterLink to="/login" class="btn-signin">Sign in</RouterLink>
       </div>
     </header>
 
@@ -154,7 +154,7 @@ import AppFooter from '@/components/AppFooter.vue'
             </div>
             <div class="mobile-signin">
               <span>Already have an account?</span>
-              <RouterLink to="/dashboard" class="mobile-signin-link">Sign in</RouterLink>
+              <RouterLink to="/login" class="mobile-signin-link">Sign in</RouterLink>
             </div>
           </div>
         </div>

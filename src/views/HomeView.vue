@@ -34,7 +34,7 @@ import AppFooter from '@/components/AppFooter.vue'
 
               <div class="hero-buttons">
                 <RouterLink to="/signup" class="btn-cta">Get Started Free</RouterLink>
-                <RouterLink to="/dashboard" class="btn-secondary">View Demo</RouterLink>
+                <RouterLink to="/login" class="btn-secondary">Sign in</RouterLink>
               </div>
             </div>
 

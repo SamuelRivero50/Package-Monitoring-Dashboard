@@ -61,6 +61,7 @@ export class UserService {
   }
 
   static async logout(): Promise<void> {
-    localStorage.removeItem('auth_token')
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+    localStorage.removeItem(STORAGE_KEYS.AUTH_USER)
   }
 }

@@ -14,7 +14,7 @@
 
     <nav class="sidebar-nav">
       <RouterLink
-        v-for="item in navItems"
+        v-for="item in navItems.filter((i) => !i.adminOnly || auth.isAdmin)"
         :key="item.path"
         :to="item.path"
         :class="['nav-item', { active: activePage === item.path }]"
@@ -30,31 +30,40 @@
           <span class="material-symbols-outlined">person</span>
         </div>
         <div class="user-card-info">
-          <p class="user-card-name">Super Admin</p>
-          <p class="user-card-email">admin@system.io</p>
+          <p class="user-card-name">{{ auth.user?.name ?? 'Guest' }}</p>
+          <p class="user-card-email">{{ auth.user?.email ?? '' }}</p>
         </div>
-        <RouterLink to="/" class="logout-icon">
+        <button type="button" class="logout-icon" title="Logout" @click="handleLogout">
           <span class="material-symbols-outlined">logout</span>
-        </RouterLink>
+        </button>
       </div>
     </div>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 defineProps<{
   activePage?: string
 }>()
 
-const navItems = [
+const router = useRouter()
+const auth = useAuthStore()
+
+async function handleLogout() {
+  await auth.logout()
+  router.push('/')
+}
+
+const navItems: { path: string; label: string; icon: string; adminOnly?: boolean }[] = [
   { path: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { path: '/packages', label: 'Packages', icon: 'inventory_2' },
   { path: '/warehouses', label: 'Warehouses', icon: 'warehouse' },
   { path: '/carriers', label: 'Companies', icon: 'domain' },
-  { path: '/users', label: 'Users', icon: 'group' },
-  { path: '/settings', label: 'Settings', icon: 'settings' },
+  { path: '/users', label: 'Users', icon: 'group', adminOnly: true },
+  { path: '/settings', label: 'Settings', icon: 'settings', adminOnly: true },
 ]
 </script>
 
@@ -198,7 +207,11 @@ const navItems = [
 }
 
 .logout-icon {
+  padding: 4px;
+  background: transparent;
+  border: none;
   color: var(--text-secondary);
+  cursor: pointer;
   transition: color 0.15s;
 }
 
