@@ -249,34 +249,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="map-wrapper">
-    <div ref="mapContainer" class="map-container"></div>
-    <canvas ref="canvasRef" class="map-canvas"></canvas>
+  <div class="relative w-full h-full rounded-xl overflow-hidden">
+    <div ref="mapContainer" class="w-full h-full"></div>
+    <canvas ref="canvasRef" class="absolute inset-0 pointer-events-none z-[400]"></canvas>
   </div>
 </template>
-
-<style scoped>
-.map-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.map-container {
-  width: 100%;
-  height: 100%;
-}
-
-/* Canvas floats above tiles, below Leaflet controls (z-index 1000) */
-.map-canvas {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 400;
-}
-</style>
 
 <style>
 /* Global Leaflet popup dark theme overrides */

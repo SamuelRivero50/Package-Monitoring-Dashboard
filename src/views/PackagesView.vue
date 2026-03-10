@@ -82,20 +82,19 @@ const form = ref({
   price: 0,
 })
 
-function statusClass(status: string): string {
+function statusBadgeClass(status: string): string {
   const map: Record<string, string> = {
-    'In Transit': 'badgeTransit',
-    Delivered: 'badgeDelivered',
-    Pending: 'badgePending',
-    Exception: 'badgeException',
+    'In Transit': 'bg-amber-500/12 text-amber-500 border border-amber-500/20',
+    Delivered:   'bg-green-500/12 text-green-500 border border-green-500/20',
+    Pending:     'bg-soft/12 text-soft border border-soft/20',
+    Exception:   'bg-red-500/12 text-red-500 border border-red-500/20',
   }
-  return map[status] ?? 'badgePending'
+  return map[status] ?? 'bg-soft/12 text-soft border border-soft/20'
 }
 
 function toggleLog(id: string) {
   expandedRow.value = expandedRow.value === id ? null : id
 }
-
 
 async function submitCreate() {
   if (!form.value.description.trim()) return
@@ -120,12 +119,7 @@ async function confirmDelete(id: string) {
 
 function openAddLog(packageId: string) {
   logPackageId.value = packageId
-  logForm.value = {
-    fromWarehouseId: '',
-    toWarehouseId: '',
-    newStatus: '',
-    description: '',
-  }
+  logForm.value = { fromWarehouseId: '', toWarehouseId: '', newStatus: '', description: '' }
   showLogCreateModal.value = true
 }
 
@@ -175,37 +169,51 @@ async function confirmDeleteLog(logId: string, packageId: string) {
 </script>
 
 <template>
-  <div class="pageLayout">
+  <div class="flex min-h-screen bg-canvas">
     <AppSidebar activePage="/packages" />
 
-    <main class="pageMain">
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <DashboardHeader title="Package Tracking" />
 
-      <div class="pageContent">
-        <!-- Search & Filters -->
-        <div class="filtersBar">
-          <div class="searchWrapper">
-            <span class="material-symbols-outlined searchIcon">search</span>
-            <input v-model="searchQuery" class="filterSearch" placeholder="Search by tracking #..." type="text" />
+      <div class="flex-1 overflow-y-auto p-8 flex flex-col gap-6">
+        <!-- Filters -->
+        <div class="flex flex-col gap-4 md:flex-row">
+          <div class="relative flex-1">
+            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-faded" style="font-size:18px">search</span>
+            <input
+              v-model="searchQuery"
+              class="w-full py-2.5 pl-[42px] pr-4 bg-panel border border-wire rounded-xl text-body text-sm outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-faded focus:border-primary focus:shadow-[0_0_0_3px_rgba(45,212,191,0.12)]"
+              placeholder="Search by tracking #..."
+              type="text"
+            />
           </div>
-          <select v-model="statusFilter" class="filterSelect">
+          <select
+            v-model="statusFilter"
+            class="py-2.5 px-3 bg-panel border border-wire rounded-xl text-body text-sm outline-none cursor-pointer transition-[border-color] duration-200 hover:border-primary focus:border-primary"
+          >
             <option value="All">All Statuses</option>
             <option value="Pending">Pending</option>
             <option value="In Transit">In Transit</option>
             <option value="Delivered">Delivered</option>
             <option value="Exception">Exception</option>
           </select>
-          <select v-model="warehouseFilter" class="filterSelect">
+          <select
+            v-model="warehouseFilter"
+            class="py-2.5 px-3 bg-panel border border-wire rounded-xl text-body text-sm outline-none cursor-pointer transition-[border-color] duration-200 hover:border-primary focus:border-primary"
+          >
             <option value="">All Warehouses</option>
             <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
           </select>
-          <button class="btnPrimary" @click="showCreateModal = true">New Package</button>
+          <button
+            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm whitespace-nowrap transition-[filter] duration-200 hover:brightness-110"
+            @click="showCreateModal = true"
+          >New Package</button>
         </div>
 
         <!-- Status Bar Chart -->
-        <div class="chartCard">
-          <p class="chartTitle">Packages by Status</p>
-          <div class="chartBody">
+        <div class="bg-panel border border-wire rounded-2xl p-6">
+          <p class="text-sm font-bold text-soft mb-4 uppercase tracking-[0.06em]">Packages by Status</p>
+          <div class="h-[200px]">
             <BarChart
               :labels="statusBreakdown.labels"
               :values="statusBreakdown.values"
@@ -215,105 +223,123 @@ async function confirmDeleteLog(logId: string, packageId: string) {
         </div>
 
         <!-- Table -->
-        <div class="tableCard">
-          <table class="dataTable">
-            <thead>
+        <div class="bg-panel border border-wire rounded-2xl overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-sheet border-b border-wire">
               <tr>
-                <th>Tracking #</th>
-                <th>Description</th>
-                <th>User</th>
-                <th>Status</th>
-                <th>Warehouse</th>
-                <th>Updated</th>
-                <th></th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">Tracking #</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">Description</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">User</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">Status</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">Warehouse</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">Updated</th>
+                <th class="px-6 py-4"></th>
               </tr>
             </thead>
             <tbody>
               <template v-for="pkg in filteredPackages" :key="pkg.id">
-                <tr class="tableRow">
-                  <td class="trackingId">{{ pkg.id }}</td>
-                  <td class="cellBold">{{ pkg.description }}</td>
-                  <td>{{ pkg.userId }}</td>
-                  <td>
-                    <span :class="['badge', statusClass(pkg.status)]">{{ pkg.status }}</span>
+                <tr class="border-b border-wire-subtle transition-colors duration-150 hover:bg-primary/4">
+                  <td class="px-6 py-4 text-sm font-mono text-primary font-semibold">{{ pkg.id }}</td>
+                  <td class="px-6 py-4 text-sm font-medium">{{ pkg.description }}</td>
+                  <td class="px-6 py-4 text-sm">{{ pkg.userId }}</td>
+                  <td class="px-6 py-4 text-sm">
+                    <span :class="['inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-[0.04em]', statusBadgeClass(pkg.status)]">
+                      {{ pkg.status }}
+                    </span>
                   </td>
-                  <td>
+                  <td class="px-6 py-4 text-sm">
                     <select
-                      class="whSelect"
+                      class="wh-select py-1.5 pl-2.5 pr-7 bg-sheet border border-wire rounded-lg text-body text-[12px] font-medium outline-none cursor-pointer appearance-none transition-[border-color] duration-200 min-w-[120px] hover:border-primary focus:border-primary"
                       :value="pkg.warehouseId ?? ''"
-                      @change="
-                        store.assignWarehouse(
-                          pkg.id,
-                          ($event.target as HTMLSelectElement).value || null,
-                        )
-                      "
+                      @change="store.assignWarehouse(pkg.id, ($event.target as HTMLSelectElement).value || null)"
                     >
                       <option value="">— None —</option>
-                      <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">
-                        {{ wh.name }}
-                      </option>
+                      <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
                     </select>
                   </td>
-                  <td class="cellMuted">1 hour ago</td>
-                  <td>
-                    <div class="cellActions">
-                      <button class="btnDetails" @click="toggleLog(pkg.id)">
-                        <span class="material-symbols-outlined btnDetailsIcon">{{
-                          expandedRow === pkg.id ? 'expand_less' : 'expand_more'
-                        }}</span>
+                  <td class="px-6 py-4 text-sm text-soft">1 hour ago</td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-2">
+                      <button
+                        class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-[12px] font-semibold whitespace-nowrap text-primary bg-primary/8 border border-primary/18 cursor-pointer transition-[background,border-color] duration-200 hover:bg-primary/16 hover:border-primary"
+                        @click="toggleLog(pkg.id)"
+                      >
+                        <span class="material-symbols-outlined" style="font-size:18px">{{ expandedRow === pkg.id ? 'expand_less' : 'expand_more' }}</span>
                         <span>{{ expandedRow === pkg.id ? 'Hide' : 'Details' }}</span>
                       </button>
                       <button
-                        class="btnDelete"
+                        class="p-1.5 rounded-lg text-faded border border-transparent transition-[color,background] duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:not-disabled:text-red-500 hover:not-disabled:bg-red-500/10"
                         :disabled="deletingId === pkg.id"
                         title="Delete"
                         @click="confirmDelete(pkg.id)"
                       >
-                        <span class="material-symbols-outlined">delete</span>
+                        <span class="material-symbols-outlined" style="font-size:16px">delete</span>
                       </button>
                     </div>
                   </td>
                 </tr>
                 <!-- Tracking log expandable row -->
-                <tr v-if="expandedRow === pkg.id" class="logRow">
-                  <td colspan="7" class="logCell">
-                    <div class="logHeader">
-                      <span class="logHeaderTitle">Tracking Log</span>
-                      <button class="btnLogAdd" @click="openAddLog(pkg.id)">
-                        <span class="material-symbols-outlined">add</span> Add Log
+                <tr v-if="expandedRow === pkg.id" class="bg-sheet">
+                  <td colspan="7" class="px-6 pt-4 pb-6">
+                    <div class="flex items-center justify-between mb-4">
+                      <span class="text-sm font-bold text-body">Tracking Log</span>
+                      <button
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-primary bg-primary/10 border border-primary/25 cursor-pointer transition-colors duration-200 hover:bg-primary/20"
+                        @click="openAddLog(pkg.id)"
+                      >
+                        <span class="material-symbols-outlined" style="font-size:16px">add</span> Add Log
                       </button>
                     </div>
-                    <div class="logTimeline">
-                      <div v-for="(entry, i) in pkg.logHistory" :key="entry.id" class="logEntry">
-                        <div class="logDotCol">
-                          <span class="logDot" :class="{ logDotActive: i === 0 }"></span>
-                          <span v-if="i < pkg.logHistory.length - 1" class="logLine"></span>
+                    <div class="flex flex-col pl-4">
+                      <div
+                        v-for="(entry, i) in pkg.logHistory"
+                        :key="entry.id"
+                        class="flex gap-4 min-h-[48px]"
+                      >
+                        <div class="flex flex-col items-center w-4 shrink-0">
+                          <span
+                            :class="[
+                              'w-2.5 h-2.5 rounded-full shrink-0 mt-1.5',
+                              i === 0
+                                ? 'bg-primary shadow-[0_0_0_3px_rgba(45,212,191,0.2)]'
+                                : 'bg-wire',
+                            ]"
+                          ></span>
+                          <span v-if="i < pkg.logHistory.length - 1" class="flex-1 w-0.5 bg-wire min-h-6"></span>
                         </div>
-                        <div class="logContent">
-                          <p class="logEvent">{{ entry.description }}</p>
-                          <div class="logDetails">
-                            <p class="logMeta">
-                              <span class="logDate">{{ formatLogTimestamp(entry.timestamp) }}</span>
-                              <span v-if="entry.previousStatus || entry.newStatus" class="logStatusChange">
+                        <div class="pb-4 flex-1">
+                          <p class="text-sm font-semibold text-body">{{ entry.description }}</p>
+                          <div class="mt-1">
+                            <p class="flex items-center flex-wrap gap-2 text-[12px] text-soft">
+                              <span class="ml-2 text-faded">{{ formatLogTimestamp(entry.timestamp) }}</span>
+                              <span v-if="entry.previousStatus || entry.newStatus" class="text-primary font-semibold">
                                 {{ entry.previousStatus || '—' }} → {{ entry.newStatus || '—' }}
                               </span>
                             </p>
-                            <p v-if="entry.fromWarehouseId || entry.toWarehouseId" class="logWarehouses">
+                            <p v-if="entry.fromWarehouseId || entry.toWarehouseId" class="text-[11px] text-faded mt-1">
                               <span v-if="entry.fromWarehouseId">
-                                <span class="logLabel">Desde:</span> {{ warehouseName(entry.fromWarehouseId) }}
+                                <span class="font-semibold text-soft">Desde:</span> {{ warehouseName(entry.fromWarehouseId) }}
                               </span>
-                              <span v-if="entry.fromWarehouseId && entry.toWarehouseId" class="logSeparator">·</span>
+                              <span v-if="entry.fromWarehouseId && entry.toWarehouseId" class="mx-1.5 text-wire">·</span>
                               <span v-if="entry.toWarehouseId">
-                                <span class="logLabel">Hacia:</span> {{ warehouseName(entry.toWarehouseId) }}
+                                <span class="font-semibold text-soft">Hacia:</span> {{ warehouseName(entry.toWarehouseId) }}
                               </span>
                             </p>
                           </div>
-                          <div class="logActions">
-                            <button class="logActionBtn" title="Edit" @click="openEditLog(entry, pkg.id)">
-                              <span class="material-symbols-outlined">edit</span>
+                          <div class="flex gap-1 mt-1.5">
+                            <button
+                              class="p-1 rounded-md text-faded transition-[color,background] duration-200 hover:text-primary hover:bg-primary/10"
+                              title="Edit"
+                              @click="openEditLog(entry, pkg.id)"
+                            >
+                              <span class="material-symbols-outlined" style="font-size:14px">edit</span>
                             </button>
-                            <button class="logActionBtn logActionBtnDanger" title="Delete" @click="confirmDeleteLog(entry.id, pkg.id)">
-                              <span class="material-symbols-outlined">delete</span>
+                            <button
+                              class="p-1 rounded-md text-faded transition-[color,background] duration-200 hover:text-red-500 hover:bg-red-500/10"
+                              title="Delete"
+                              @click="confirmDeleteLog(entry.id, pkg.id)"
+                            >
+                              <span class="material-symbols-outlined" style="font-size:14px">delete</span>
                             </button>
                           </div>
                         </div>
@@ -330,119 +356,137 @@ async function confirmDeleteLog(logId: string, packageId: string) {
 
     <!-- Create Package Modal -->
     <AppModal :show="showCreateModal" title="New Package" @close="showCreateModal = false">
-      <form class="formModal" @submit.prevent="submitCreate">
-        <div class="formGroup">
-          <label for="pkg-userId">User</label>
-          <select id="pkg-userId" v-model="form.userId" required>
+      <form class="flex flex-col gap-4" @submit.prevent="submitCreate">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="pkg-userId">User</label>
+          <select id="pkg-userId" v-model="form.userId" required
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
             <option value="">— Select —</option>
-            <option v-for="u in usersStore.users" :key="u.id" :value="u.id">
-              {{ u.name }} ({{ u.email }})
-            </option>
+            <option v-for="u in usersStore.users" :key="u.id" :value="u.id">{{ u.name }} ({{ u.email }})</option>
           </select>
         </div>
-        <div class="formGroup">
-          <label for="pkg-warehouse">Warehouse</label>
-          <select id="pkg-warehouse" v-model="form.warehouseId">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="pkg-warehouse">Warehouse</label>
+          <select id="pkg-warehouse" v-model="form.warehouseId"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
             <option value="">— None —</option>
-            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">
-              {{ wh.name }}
-            </option>
+            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
           </select>
         </div>
-        <div class="formGroup">
-          <label for="pkg-status">Status</label>
-          <select id="pkg-status" v-model="form.status">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="pkg-status">Status</label>
+          <select id="pkg-status" v-model="form.status"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
             <option value="Pending">Pending</option>
             <option value="In Transit">In Transit</option>
             <option value="Delivered">Delivered</option>
             <option value="Exception">Exception</option>
           </select>
         </div>
-        <div class="formGroup">
-          <label for="pkg-desc">Description</label>
-          <input id="pkg-desc" v-model="form.description" required type="text" placeholder="e.g. Electronics Kit" />
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="pkg-desc">Description</label>
+          <input id="pkg-desc" v-model="form.description" required type="text" placeholder="e.g. Electronics Kit"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
         </div>
-        <div class="formGroup">
-          <label for="pkg-price">Price</label>
-          <input id="pkg-price" v-model.number="form.price" required type="number" step="0.01" min="0" />
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="pkg-price">Price</label>
+          <input id="pkg-price" v-model.number="form.price" required type="number" step="0.01" min="0"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
         </div>
-        <div class="formActions">
-          <button type="button" class="btnSecondary" @click="showCreateModal = false">Cancel</button>
-          <button type="submit" class="btnPrimary">Create</button>
+        <div class="flex justify-end gap-2 mt-4">
+          <button type="button"
+            class="px-4.5 py-2.5 rounded-xl bg-sheet text-soft font-semibold text-sm border border-wire transition-[border-color,color] duration-200 hover:border-primary hover:text-primary"
+            @click="showCreateModal = false">Cancel</button>
+          <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110">Create</button>
         </div>
       </form>
     </AppModal>
 
     <!-- Create Log Modal -->
     <AppModal :show="showLogCreateModal" title="Add Log Entry" @close="showLogCreateModal = false">
-      <form class="formModal" @submit.prevent="submitLogCreate">
-        <div class="formGroup">
-          <label for="log-from">From Warehouse</label>
-          <select id="log-from" v-model="logForm.fromWarehouseId">
+      <form class="flex flex-col gap-4" @submit.prevent="submitLogCreate">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="log-from">From Warehouse</label>
+          <select id="log-from" v-model="logForm.fromWarehouseId"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
             <option value="">— None —</option>
             <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
           </select>
         </div>
-        <div class="formGroup">
-          <label for="log-to">To Warehouse</label>
-          <select id="log-to" v-model="logForm.toWarehouseId">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="log-to">To Warehouse</label>
+          <select id="log-to" v-model="logForm.toWarehouseId"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
             <option value="">— None —</option>
             <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
           </select>
         </div>
-        <div class="formGroup">
-          <label for="log-new">New Status</label>
-          <select id="log-new" v-model="logForm.newStatus">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="log-new">New Status</label>
+          <select id="log-new" v-model="logForm.newStatus"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
             <option value="Pending">Pending</option>
             <option value="In Transit">In Transit</option>
             <option value="Delivered">Delivered</option>
             <option value="Exception">Exception</option>
           </select>
         </div>
-        <div class="formGroup">
-          <label for="log-desc">Description</label>
-          <input id="log-desc" v-model="logForm.description" required type="text" placeholder="e.g. Picked up from warehouse" />
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="log-desc">Description</label>
+          <input id="log-desc" v-model="logForm.description" required type="text" placeholder="e.g. Picked up from warehouse"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
         </div>
-        <div class="formActions">
-          <button type="button" class="btnSecondary" @click="showLogCreateModal = false">Cancel</button>
-          <button type="submit" class="btnPrimary">Add</button>
+        <div class="flex justify-end gap-2 mt-4">
+          <button type="button"
+            class="px-4.5 py-2.5 rounded-xl bg-sheet text-soft font-semibold text-sm border border-wire transition-[border-color,color] duration-200 hover:border-primary hover:text-primary"
+            @click="showLogCreateModal = false">Cancel</button>
+          <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110">Add</button>
         </div>
       </form>
     </AppModal>
 
     <!-- Edit Log Modal -->
     <AppModal :show="!!editingLog" title="Edit Log Entry" @close="closeEditLog">
-      <form v-if="editingLog" class="formModal" @submit.prevent="submitLogEdit">
-        <div class="formGroup">
-          <label for="log-edit-from">From Warehouse</label>
-          <select id="log-edit-from" v-model="logForm.fromWarehouseId">
+      <form v-if="editingLog" class="flex flex-col gap-4" @submit.prevent="submitLogEdit">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="log-edit-from">From Warehouse</label>
+          <select id="log-edit-from" v-model="logForm.fromWarehouseId"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
             <option value="">— None —</option>
             <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
           </select>
         </div>
-        <div class="formGroup">
-          <label for="log-edit-to">To Warehouse</label>
-          <select id="log-edit-to" v-model="logForm.toWarehouseId">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="log-edit-to">To Warehouse</label>
+          <select id="log-edit-to" v-model="logForm.toWarehouseId"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
             <option value="">— None —</option>
             <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
           </select>
         </div>
-        <div class="formGroup">
-          <label for="log-edit-new">New Status</label>
-          <select id="log-edit-new" v-model="logForm.newStatus">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="log-edit-new">New Status</label>
+          <select id="log-edit-new" v-model="logForm.newStatus"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
             <option value="Pending">Pending</option>
             <option value="In Transit">In Transit</option>
             <option value="Delivered">Delivered</option>
             <option value="Exception">Exception</option>
           </select>
         </div>
-        <div class="formGroup">
-          <label for="log-edit-desc">Description</label>
-          <input id="log-edit-desc" v-model="logForm.description" required type="text" />
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="log-edit-desc">Description</label>
+          <input id="log-edit-desc" v-model="logForm.description" required type="text"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
         </div>
-        <div class="formActions">
-          <button type="button" class="btnSecondary" @click="closeEditLog">Cancel</button>
-          <button type="submit" class="btnPrimary">Save</button>
+        <div class="flex justify-end gap-2 mt-4">
+          <button type="button"
+            class="px-4.5 py-2.5 rounded-xl bg-sheet text-soft font-semibold text-sm border border-wire transition-[border-color,color] duration-200 hover:border-primary hover:text-primary"
+            @click="closeEditLog">Cancel</button>
+          <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110">Save</button>
         </div>
       </form>
     </AppModal>
@@ -450,523 +494,9 @@ async function confirmDeleteLog(logId: string, packageId: string) {
 </template>
 
 <style scoped>
-.pageLayout {
-  display: flex;
-  min-height: 100vh;
-  background: var(--bg-base);
-}
-
-.pageMain {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.pageContent {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--spacing-xl);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-/* ---- Chart card ---- */
-.chartCard {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-xl);
-  padding: var(--spacing-lg);
-}
-
-.chartTitle {
-  font-size: var(--text-sm);
-  font-weight: 700;
-  color: var(--text-secondary);
-  margin-bottom: var(--spacing-md);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.chartBody {
-  height: 200px;
-}
-
-/* ---- Filters ---- */
-.filtersBar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-@media (min-width: 768px) {
-  .filtersBar {
-    flex-direction: row;
-  }
-}
-
-.searchWrapper {
-  position: relative;
-  flex: 1;
-}
-
-.searchIcon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 18px;
-  color: var(--text-muted);
-}
-
-.filterSearch {
-  width: 100%;
-  padding: 10px 16px 10px 42px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  color: var(--text-primary);
-  font-size: var(--text-sm);
-  outline: none;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-}
-
-.filterSearch::placeholder {
-  color: var(--text-muted);
-}
-
-.filterSearch:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.12);
-}
-
-.filterSelect {
-  padding: 10px 12px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  color: var(--text-primary);
-  font-size: var(--text-sm);
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.2s;
-}
-
-.filterSelect:focus,
-.filterSelect:hover {
-  border-color: var(--color-primary);
-}
-
-.btnPrimary {
-  padding: 10px 20px;
-  border-radius: var(--radius-lg);
-  background: var(--color-primary);
-  color: var(--bg-base);
-  font-weight: 700;
-  font-size: var(--text-sm);
-  border: none;
-  white-space: nowrap;
-  transition: filter 0.2s;
-}
-
-.btnPrimary:hover {
-  filter: brightness(1.1);
-}
-
-/* ---- Cell actions ---- */
-.cellActions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btnDelete {
-  padding: 6px;
-  border-radius: var(--radius-md);
-  color: var(--text-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  transition: color 0.2s, background 0.2s;
-}
-
-.btnDelete:hover:not(:disabled) {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
-}
-
-.btnDelete:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ---- Form modal ---- */
-.formModal {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.formGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.formGroup label {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.formGroup input,
-.formGroup select {
-  padding: 10px 12px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: var(--text-sm);
-}
-
-.formGroup input:focus,
-.formGroup select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-.formActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-md);
-}
-
-.btnSecondary {
-  padding: 10px 18px;
-  border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
-  color: var(--text-secondary);
-  font-weight: 600;
-  font-size: var(--text-sm);
-  border: 1px solid var(--border-default);
-  transition: border-color 0.2s, color 0.2s;
-}
-
-.btnSecondary:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-/* ---- Table ---- */
-.tableCard {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-}
-
-.dataTable {
-  width: 100%;
-  text-align: left;
-  border-collapse: collapse;
-}
-
-.dataTable thead {
-  background: var(--bg-elevated);
-  border-bottom: 1px solid var(--border-default);
-}
-
-.dataTable th {
-  padding: var(--spacing-md) var(--spacing-lg);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-}
-
-.dataTable td {
-  padding: var(--spacing-md) var(--spacing-lg);
-  font-size: var(--text-sm);
-}
-
-.tableRow {
-  border-bottom: 1px solid var(--border-subtle);
-  transition: background 0.15s;
-}
-
-.tableRow:hover {
-  background: rgba(45, 212, 191, 0.04);
-}
-
-.trackingId {
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  color: var(--color-primary);
-  font-weight: 600;
-}
-
-.cellBold {
-  font-weight: 500;
-}
-
-.cellMuted {
-  color: var(--text-secondary);
-}
-
-/* ---- Badges ---- */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 9999px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.badgeTransit {
-  background: rgba(245, 158, 11, 0.12);
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.2);
-}
-
-.badgeDelivered {
-  background: rgba(34, 197, 94, 0.12);
-  color: #22c55e;
-  border: 1px solid rgba(34, 197, 94, 0.2);
-}
-
-.badgePending {
-  background: rgba(139, 148, 158, 0.12);
-  color: var(--text-secondary);
-  border: 1px solid rgba(139, 148, 158, 0.2);
-}
-
-.badgeException {
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-/* ---- Warehouse select ---- */
-.whSelect {
-  padding: 5px 28px 5px 10px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 500;
-  outline: none;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+.wh-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
   background-repeat: no-repeat;
   background-position: right 8px center;
-  transition: border-color 0.2s;
-  min-width: 120px;
-}
-
-.whSelect:focus,
-.whSelect:hover {
-  border-color: var(--color-primary);
-}
-
-/* ---- Details button ---- */
-.btnDetails {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 14px;
-  border-radius: var(--radius-lg);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  color: var(--color-primary);
-  background: rgba(45, 212, 191, 0.08);
-  border: 1px solid rgba(45, 212, 191, 0.18);
-  transition:
-    background 0.2s,
-    border-color 0.2s;
-  cursor: pointer;
-}
-
-.btnDetails:hover {
-  background: rgba(45, 212, 191, 0.16);
-  border-color: var(--color-primary);
-}
-
-.btnDetailsIcon {
-  font-size: 18px;
-}
-
-/* ---- Tracking log row ---- */
-.logRow {
-  background: var(--bg-elevated);
-}
-
-.logCell {
-  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg) var(--spacing-lg) !important;
-}
-
-.logHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-md);
-}
-
-.logHeaderTitle {
-  font-size: var(--text-sm);
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.btnLogAdd {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  border-radius: var(--radius-md);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-primary);
-  background: rgba(45, 212, 191, 0.1);
-  border: 1px solid rgba(45, 212, 191, 0.25);
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btnLogAdd:hover {
-  background: rgba(45, 212, 191, 0.2);
-}
-
-.logTimeline {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  padding-left: var(--spacing-md);
-}
-
-.logEntry {
-  display: flex;
-  gap: var(--spacing-md);
-  min-height: 48px;
-}
-
-.logDotCol {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 16px;
-  flex-shrink: 0;
-}
-
-.logDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--border-default);
-  flex-shrink: 0;
-  margin-top: 5px;
-}
-
-.logDotActive {
-  background: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
-}
-
-.logLine {
-  flex: 1;
-  width: 2px;
-  background: var(--border-default);
-  min-height: 24px;
-}
-
-.logContent {
-  padding-bottom: var(--spacing-md);
-  flex: 1;
-  position: relative;
-}
-
-.logActions {
-  display: flex;
-  gap: 4px;
-  margin-top: 6px;
-}
-
-.logActionBtn {
-  padding: 4px;
-  border-radius: var(--radius-sm);
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: color 0.2s, background 0.2s;
-}
-
-.logActionBtn:hover {
-  color: var(--color-primary);
-  background: rgba(45, 212, 191, 0.1);
-}
-
-.logActionBtnDanger:hover {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
-}
-
-.logEvent {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.logDetails {
-  margin-top: 4px;
-}
-
-.logMeta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.logStatusChange {
-  color: var(--color-primary);
-  font-weight: 600;
-}
-
-.logWarehouses {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
-
-.logLabel {
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.logSeparator {
-  margin: 0 6px;
-  color: var(--border-default);
-}
-
-.logMetaIcon {
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
-.logDate {
-  margin-left: 8px;
-  color: var(--text-muted);
 }
 </style>

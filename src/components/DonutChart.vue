@@ -51,42 +51,14 @@ const chartOptions = {
 </script>
 
 <template>
-  <div class="donut-wrapper">
+  <div class="relative w-[180px] h-[180px]">
     <Doughnut :data="chartData" :options="chartOptions" />
-    <div v-if="centerLabel || centerValue" class="donut-center">
-      <span class="donut-center-value">{{ centerValue }}</span>
-      <span class="donut-center-label">{{ centerLabel }}</span>
+    <div
+      v-if="centerLabel || centerValue"
+      class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
+    >
+      <span class="text-2xl font-bold text-body">{{ centerValue }}</span>
+      <span class="text-[10px] text-soft uppercase font-bold">{{ centerLabel }}</span>
     </div>
   </div>
 </template>
-
-<style scoped>
-.donut-wrapper {
-  position: relative;
-  width: 180px;
-  height: 180px;
-}
-
-.donut-center {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.donut-center-value {
-  font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.donut-center-label {
-  font-size: 10px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  font-weight: 700;
-}
-</style>

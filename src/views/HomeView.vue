@@ -5,54 +5,67 @@ import AppFooter from '@/components/AppFooter.vue'
 </script>
 
 <template>
-  <div class="landing-page">
+  <div class="flex flex-col min-h-screen overflow-x-hidden">
     <AppHeader />
 
-    <main class="landing-main">
+    <main class="flex-1">
       <!-- Hero Section -->
-      <section class="hero-section">
-        <div class="hero-container">
-          <div class="hero-grid">
-            <div class="hero-content">
-              <div class="hero-badge">
-                <span class="badge-dot">
-                  <span class="dot-ping"></span>
-                  <span class="dot-solid"></span>
+      <section
+        class="py-20 pb-24 relative overflow-hidden"
+        style="background: linear-gradient(135deg, #0d1f3c 0%, #0a2744 50%, #0d2d5a 100%)"
+      >
+        <div class="max-w-[1280px] mx-auto px-6">
+          <div class="grid grid-cols-1 gap-12 items-center lg:grid-cols-2">
+            <div class="flex flex-col gap-8 max-w-[600px]">
+              <!-- Badge -->
+              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-[0.05em] w-fit">
+                <span class="relative flex w-2 h-2">
+                  <span class="absolute inline-flex w-full h-full rounded-full bg-primary opacity-75 animate-ping-custom"></span>
+                  <span class="relative inline-flex w-2 h-2 rounded-full bg-primary"></span>
                 </span>
                 Next-Gen Logistics Platform
               </div>
 
-              <h2 class="hero-title">
-                Track Your Packages <span class="hero-highlight">Anywhere</span>, Anytime
+              <h2
+                class="font-black leading-[1.1] tracking-[-1px] text-body"
+                style="font-size: clamp(40px, 5vw, 72px)"
+              >
+                Track Your Packages <span class="text-primary">Anywhere</span>, Anytime
               </h2>
 
-              <p class="hero-description">
+              <p class="text-lg text-soft leading-[1.7]">
                 A comprehensive logistics and warehouse management system designed for modern
                 businesses. Streamline your supply chain with real-time insights and AI-powered
                 automation.
               </p>
 
-              <div class="hero-buttons">
-                <RouterLink to="/signup" class="btn-cta">Get Started Free</RouterLink>
-                <RouterLink to="/login" class="btn-secondary">Sign in</RouterLink>
+              <div class="flex flex-wrap gap-4">
+                <RouterLink
+                  to="/signup"
+                  class="px-8 py-4 rounded-xl bg-cta text-white text-lg font-bold shadow-[0_8px_24px_rgba(224,123,57,0.25)] transition-[background,transform] duration-200 hover:bg-cta-hover hover:-translate-y-0.5"
+                >Get Started Free</RouterLink>
+                <RouterLink
+                  to="/login"
+                  class="px-8 py-4 rounded-xl bg-panel text-body text-lg font-bold border border-wire transition-[background,border-color] duration-200 hover:bg-sheet hover:border-primary hover:text-primary"
+                >Sign in</RouterLink>
               </div>
             </div>
 
-            <div class="hero-visual">
-              <div class="hero-image-wrapper">
-                <div class="hero-image-overlay"></div>
+            <div class="hidden lg:block">
+              <div class="aspect-square rounded-2xl overflow-hidden border border-wire bg-panel relative shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
+                <div class="absolute inset-0 bg-gradient-to-br from-primary/15 to-transparent z-10"></div>
                 <img
                   alt="Logistics Warehouse"
-                  class="hero-image"
+                  class="w-full h-full object-cover"
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuARpb78izFGAo72ZtI8BC-B6g5wjhtjSSJ1YTdNZf3UN42GBPmDf-8urYObtpI1nDZWlauhK0lgN7xo44Eai0esD5IEBmmblOtEV5S7w9zYqZnQ7Izqq6QjK-SvjpPVPamF1Ku-c0xa18rk7dh6p9iB4YbRuEl9pmYW9-RgxVsLgORS95XRjGjpH-xWvW0eWLvTTdNB5PTVRW9-6POTZkxjP39VipVUNMuJNz93BQgF7k-2WtzNi02b8bgfZmLAt0-gSVrntbNPTQ8v"
                 />
-                <div class="hero-card-overlay">
-                  <div class="hero-card-header">
-                    <span class="hero-card-title">Real-time Fleet Status</span>
-                    <span class="hero-card-badge">Active</span>
+                <div class="absolute bottom-6 left-6 right-6 px-5 py-5 rounded-xl bg-white/8 backdrop-blur-lg border border-white/15 z-20">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-white font-bold text-sm">Real-time Fleet Status</span>
+                    <span class="text-xs font-bold text-primary bg-primary/20 px-2.5 py-0.5 rounded-md">Active</span>
                   </div>
-                  <div class="hero-progress-track">
-                    <div class="hero-progress-bar" style="width: 75%"></div>
+                  <div class="h-2 w-full bg-white/15 rounded-full overflow-hidden">
+                    <div class="h-full bg-primary rounded-full" style="width: 75%"></div>
                   </div>
                 </div>
               </div>
@@ -62,86 +75,93 @@ import AppFooter from '@/components/AppFooter.vue'
       </section>
 
       <!-- Stats Section -->
-      <section class="stats-section">
-        <div class="stats-container">
-          <div class="stats-grid">
-            <div class="stat-item">
-              <span class="stat-value">10K+</span>
-              <span class="stat-label">Packages Tracked</span>
+      <section class="py-12 border-t border-wire border-b border-wire bg-panel">
+        <div class="max-w-[1280px] mx-auto px-6">
+          <div class="grid grid-cols-2 gap-8 lg:grid-cols-4">
+            <div class="flex flex-col items-center text-center gap-1">
+              <span class="text-[36px] font-black text-body">10K+</span>
+              <span class="text-soft font-medium">Packages Tracked</span>
             </div>
-            <div class="stat-item">
-              <span class="stat-value">50+</span>
-              <span class="stat-label">Warehouses</span>
+            <div class="flex flex-col items-center text-center gap-1">
+              <span class="text-[36px] font-black text-body">50+</span>
+              <span class="text-soft font-medium">Warehouses</span>
             </div>
-            <div class="stat-item">
-              <span class="stat-value">200+</span>
-              <span class="stat-label">Global Partners</span>
+            <div class="flex flex-col items-center text-center gap-1">
+              <span class="text-[36px] font-black text-body">200+</span>
+              <span class="text-soft font-medium">Global Partners</span>
             </div>
-            <div class="stat-item">
-              <span class="stat-value">99.9%</span>
-              <span class="stat-label">Uptime Guarantee</span>
+            <div class="flex flex-col items-center text-center gap-1">
+              <span class="text-[36px] font-black text-body">99.9%</span>
+              <span class="text-soft font-medium">Uptime Guarantee</span>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Features Section -->
-      <section class="features-section">
-        <div class="features-header">
-          <span class="features-label">Core Features</span>
-          <h2 class="features-title">Why Choose PackTrack?</h2>
-          <p class="features-subtitle">
+      <section class="py-24 px-6 max-w-[1280px] mx-auto">
+        <div class="text-center max-w-[700px] mx-auto mb-16">
+          <span class="text-primary font-bold uppercase tracking-[0.1em] text-sm block mb-4">Core Features</span>
+          <h2 class="font-black text-body mb-6" style="font-size: clamp(28px, 4vw, 48px)">Why Choose PackTrack?</h2>
+          <p class="text-lg text-soft">
             Our system offers unparalleled control over your inventory and shipments with features
             designed for scale.
           </p>
         </div>
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">
-              <span class="material-symbols-outlined">location_on</span>
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div class="p-8 rounded-xl bg-panel border border-wire transition-[border-color] duration-[250ms] hover:border-primary/35 group">
+            <div class="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 transition-transform duration-200 group-hover:scale-110">
+              <span class="material-symbols-outlined" style="font-size:28px">location_on</span>
             </div>
-            <h4 class="feature-name">Real-time Tracking</h4>
-            <p class="feature-desc">
-              Monitor every movement from dispatch to delivery with granular GPS data and status
-              updates.
+            <h4 class="text-[20px] font-bold text-body mb-4">Real-time Tracking</h4>
+            <p class="text-soft leading-[1.7]">
+              Monitor every movement from dispatch to delivery with granular GPS data and status updates.
             </p>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon">
-              <span class="material-symbols-outlined">inventory_2</span>
+          <div class="p-8 rounded-xl bg-panel border border-wire transition-[border-color] duration-[250ms] hover:border-primary/35 group">
+            <div class="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 transition-transform duration-200 group-hover:scale-110">
+              <span class="material-symbols-outlined" style="font-size:28px">inventory_2</span>
             </div>
-            <h4 class="feature-name">Inventory Management</h4>
-            <p class="feature-desc">
+            <h4 class="text-[20px] font-bold text-body mb-4">Inventory Management</h4>
+            <p class="text-soft leading-[1.7]">
               Optimize stock levels with AI-driven analytics and automated replenishment workflows.
             </p>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon">
-              <span class="material-symbols-outlined">cloud_sync</span>
+          <div class="p-8 rounded-xl bg-panel border border-wire transition-[border-color] duration-[250ms] hover:border-primary/35 group">
+            <div class="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 transition-transform duration-200 group-hover:scale-110">
+              <span class="material-symbols-outlined" style="font-size:28px">cloud_sync</span>
             </div>
-            <h4 class="feature-name">Cloud Integration</h4>
-            <p class="feature-desc">
-              Access your data securely from any device. Seamlessly integrate with your existing ERP
-              tools.
+            <h4 class="text-[20px] font-bold text-body mb-4">Cloud Integration</h4>
+            <p class="text-soft leading-[1.7]">
+              Access your data securely from any device. Seamlessly integrate with your existing ERP tools.
             </p>
           </div>
         </div>
       </section>
 
       <!-- CTA Section -->
-      <section class="cta-section">
-        <div class="cta-container">
-          <div class="cta-card">
-            <div class="cta-glow"></div>
-            <div class="cta-content">
-              <h2 class="cta-title">Ready to Transform Your Supply Chain?</h2>
-              <p class="cta-desc">
+      <section class="py-24 bg-panel/40">
+        <div class="max-w-[1280px] mx-auto px-6">
+          <div class="rounded-2xl bg-panel border border-wire p-16 relative overflow-hidden lg:p-20">
+            <!-- Glow -->
+            <div class="absolute -top-30 -right-30 w-96 h-96 bg-primary/15 blur-[100px] rounded-full pointer-events-none"></div>
+            <div class="relative z-10 flex flex-col items-center text-center gap-8 max-w-[800px] mx-auto">
+              <h2
+                class="font-black text-body leading-[1.15]"
+                style="font-size: clamp(28px, 4vw, 56px)"
+              >Ready to Transform Your Supply Chain?</h2>
+              <p class="text-[20px] text-soft">
                 Join 500+ companies already optimizing their logistics with PackTrack. Scale faster
                 and smarter today.
               </p>
-              <div class="cta-buttons">
-                <RouterLink to="/signup" class="btn-cta-lg">Start Free Trial</RouterLink>
-                <button class="btn-outline-lg">Contact Sales</button>
+              <div class="flex flex-wrap justify-center gap-6 mt-4">
+                <RouterLink
+                  to="/signup"
+                  class="px-10 py-5 rounded-xl bg-primary text-canvas text-[20px] font-black transition-transform duration-150 shadow-[0_8px_24px_rgba(45,212,191,0.2)] hover:scale-105"
+                >Start Free Trial</RouterLink>
+                <button class="px-10 py-5 rounded-xl bg-transparent border-2 border-body text-body text-[20px] font-black transition-colors duration-200 hover:bg-white/8">
+                  Contact Sales
+                </button>
               </div>
             </div>
           </div>
@@ -152,483 +172,3 @@ import AppFooter from '@/components/AppFooter.vue'
     <AppFooter />
   </div>
 </template>
-
-<style scoped>
-.landing-page {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-.landing-main {
-  flex: 1;
-}
-
-/* ---- Hero ---- */
-.hero-section {
-  padding: 80px 0 100px;
-  background: var(--bg-hero-gradient);
-  position: relative;
-  overflow: hidden;
-}
-
-.hero-container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-lg);
-}
-
-.hero-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 48px;
-  align-items: center;
-}
-
-@media (min-width: 1024px) {
-  .hero-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.hero-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xl);
-  max-width: 600px;
-}
-
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: 4px 14px;
-  border-radius: 9999px;
-  background: rgba(45, 212, 191, 0.1);
-  border: 1px solid rgba(45, 212, 191, 0.2);
-  color: var(--color-primary);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  width: fit-content;
-}
-
-.badge-dot {
-  position: relative;
-  display: flex;
-  width: 8px;
-  height: 8px;
-}
-
-.dot-ping {
-  position: absolute;
-  display: inline-flex;
-  width: 100%;
-  height: 100%;
-  border-radius: 9999px;
-  background: var(--color-primary);
-  opacity: 0.75;
-  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-.dot-solid {
-  position: relative;
-  display: inline-flex;
-  width: 8px;
-  height: 8px;
-  border-radius: 9999px;
-  background: var(--color-primary);
-}
-
-@keyframes ping {
-  75%,
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-.hero-title {
-  font-size: var(--text-hero);
-  font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -1px;
-  color: var(--text-primary);
-}
-
-.hero-highlight {
-  color: var(--color-primary);
-}
-
-.hero-description {
-  font-size: var(--text-lg);
-  color: var(--text-secondary);
-  line-height: 1.7;
-}
-
-.hero-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-md);
-}
-
-.btn-cta {
-  padding: 16px 32px;
-  border-radius: var(--radius-lg);
-  background: var(--color-cta);
-  color: #fff;
-  font-size: var(--text-lg);
-  font-weight: 700;
-  box-shadow: 0 8px 24px rgba(224, 123, 57, 0.25);
-  transition:
-    background 0.2s,
-    transform 0.15s;
-}
-
-.btn-cta:hover {
-  background: var(--color-cta-hover);
-  transform: translateY(-2px);
-}
-
-.btn-secondary {
-  padding: 16px 32px;
-  border-radius: var(--radius-lg);
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  font-size: var(--text-lg);
-  font-weight: 700;
-  border: 1px solid var(--border-default);
-  transition:
-    background 0.2s,
-    border-color 0.2s;
-}
-
-.btn-secondary:hover {
-  background: var(--bg-elevated);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-/* Hero Visual */
-.hero-visual {
-  display: none;
-}
-
-@media (min-width: 1024px) {
-  .hero-visual {
-    display: block;
-  }
-}
-
-.hero-image-wrapper {
-  aspect-ratio: 1;
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  border: 1px solid var(--border-default);
-  background: var(--bg-surface);
-  position: relative;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-}
-
-.hero-image-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom right, rgba(45, 212, 191, 0.15), transparent);
-  z-index: 1;
-}
-
-.hero-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.hero-card-overlay {
-  position: absolute;
-  bottom: 24px;
-  left: 24px;
-  right: 24px;
-  padding: 20px;
-  border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  z-index: 2;
-}
-
-.hero-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.hero-card-title {
-  color: #fff;
-  font-weight: 700;
-  font-size: var(--text-sm);
-}
-
-.hero-card-badge {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  color: var(--color-primary);
-  background: rgba(45, 212, 191, 0.2);
-  padding: 2px 10px;
-  border-radius: var(--radius-sm);
-}
-
-.hero-progress-track {
-  height: 8px;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 9999px;
-  overflow: hidden;
-}
-
-.hero-progress-bar {
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: 9999px;
-}
-
-/* ---- Stats ---- */
-.stats-section {
-  padding: 48px 0;
-  border-top: 1px solid var(--border-default);
-  border-bottom: 1px solid var(--border-default);
-  background: var(--bg-surface);
-}
-
-.stats-container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-lg);
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-xl);
-}
-
-@media (min-width: 1024px) {
-  .stats-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--spacing-xs);
-}
-
-.stat-value {
-  font-size: 36px;
-  font-weight: 900;
-  color: var(--text-primary);
-}
-
-.stat-label {
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-/* ---- Features ---- */
-.features-section {
-  padding: 96px var(--spacing-lg);
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-.features-header {
-  text-align: center;
-  max-width: 700px;
-  margin: 0 auto 64px;
-}
-
-.features-label {
-  color: var(--color-primary);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: var(--text-sm);
-  display: block;
-  margin-bottom: var(--spacing-md);
-}
-
-.features-title {
-  font-size: clamp(28px, 4vw, 48px);
-  font-weight: 900;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-lg);
-}
-
-.features-subtitle {
-  font-size: var(--text-lg);
-  color: var(--text-secondary);
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--spacing-xl);
-}
-
-@media (min-width: 768px) {
-  .features-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.feature-card {
-  padding: var(--spacing-xl);
-  border-radius: var(--radius-lg);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  transition: border-color 0.25s;
-}
-
-.feature-card:hover {
-  border-color: rgba(45, 212, 191, 0.35);
-}
-
-.feature-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-lg);
-  background: rgba(45, 212, 191, 0.1);
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: var(--spacing-lg);
-  transition: transform 0.2s;
-}
-
-.feature-card:hover .feature-icon {
-  transform: scale(1.1);
-}
-
-.feature-icon .material-symbols-outlined {
-  font-size: 28px;
-}
-
-.feature-name {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-md);
-}
-
-.feature-desc {
-  color: var(--text-secondary);
-  line-height: 1.7;
-}
-
-/* ---- CTA ---- */
-.cta-section {
-  padding: 96px 0;
-  background: rgba(22, 27, 34, 0.4);
-}
-
-.cta-container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-lg);
-}
-
-.cta-card {
-  border-radius: var(--radius-xl);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  padding: 64px;
-  position: relative;
-  overflow: hidden;
-}
-
-@media (min-width: 1024px) {
-  .cta-card {
-    padding: 80px;
-  }
-}
-
-.cta-glow {
-  position: absolute;
-  top: -120px;
-  right: -120px;
-  width: 384px;
-  height: 384px;
-  background: rgba(45, 212, 191, 0.15);
-  filter: blur(100px);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.cta-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--spacing-xl);
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.cta-title {
-  font-size: clamp(28px, 4vw, 56px);
-  font-weight: 900;
-  color: var(--text-primary);
-  line-height: 1.15;
-}
-
-.cta-desc {
-  font-size: 20px;
-  color: var(--text-secondary);
-}
-
-.cta-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--spacing-lg);
-  margin-top: var(--spacing-md);
-}
-
-.btn-cta-lg {
-  padding: 20px 40px;
-  border-radius: var(--radius-lg);
-  background: var(--color-primary);
-  color: var(--bg-base);
-  font-size: 20px;
-  font-weight: 900;
-  transition: transform 0.15s;
-  box-shadow: 0 8px 24px rgba(45, 212, 191, 0.2);
-}
-
-.btn-cta-lg:hover {
-  transform: scale(1.05);
-}
-
-.btn-outline-lg {
-  padding: 20px 40px;
-  border-radius: var(--radius-lg);
-  background: transparent;
-  border: 2px solid var(--text-primary);
-  color: var(--text-primary);
-  font-size: 20px;
-  font-weight: 900;
-  transition: background 0.2s;
-}
-
-.btn-outline-lg:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-</style>
