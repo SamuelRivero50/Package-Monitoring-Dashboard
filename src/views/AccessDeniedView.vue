@@ -26,16 +26,20 @@ function goBack(): void {
       <DashboardHeader title="Access Denied" />
 
       <div class="p-8 flex items-center justify-center flex-1">
-        <div class="text-center max-w-[440px] bg-panel border border-wire rounded-xl px-8 pt-8 pb-6 flex flex-col items-center gap-4">
+        <div
+          class="text-center max-w-[440px] bg-panel border border-wire rounded-xl px-8 pt-8 pb-6 flex flex-col items-center gap-4"
+        >
           <div class="w-16 h-16 rounded-full bg-red-500/12 flex items-center justify-center">
-            <span class="material-symbols-outlined text-red-500" style="font-size:32px">shield_lock</span>
+            <span class="material-symbols-outlined text-red-500" style="font-size: 32px"
+              >shield_lock</span
+            >
           </div>
 
           <h2 class="text-2xl font-bold text-body">Access Denied</h2>
 
           <p class="text-sm text-soft leading-[1.6]">
-            You do not have permission to view this page. This area is restricted to
-            administrators only.
+            You do not have permission to view this page. This area is restricted to administrators
+            only.
           </p>
 
           <button
@@ -43,7 +47,7 @@ function goBack(): void {
             type="button"
             @click="goBack"
           >
-            <span class="material-symbols-outlined" style="font-size:18px">arrow_back</span>
+            <span class="material-symbols-outlined" style="font-size: 18px">arrow_back</span>
             Back to Dashboard
           </button>
         </div>

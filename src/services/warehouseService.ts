@@ -56,9 +56,7 @@ export class WarehouseService {
     const all = loadAll().filter((w) => w.id !== id)
     setToStorage(STORAGE_KEYS.WAREHOUSES, all)
     const pkgs = getFromStorage<PackageInterface[]>(STORAGE_KEYS.PACKAGES) ?? []
-    const updated = pkgs.map((p) =>
-      p.warehouseId === id ? { ...p, warehouseId: null } : p,
-    )
+    const updated = pkgs.map((p) => (p.warehouseId === id ? { ...p, warehouseId: null } : p))
     setToStorage(STORAGE_KEYS.PACKAGES, updated)
   }
 }

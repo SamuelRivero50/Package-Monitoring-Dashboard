@@ -37,7 +37,10 @@ const props = withDefaults(defineProps<Props>(), {
   routes: () => [],
 })
 
-interface Pt { x: number; y: number }
+interface Pt {
+  x: number
+  y: number
+}
 
 interface Particle {
   routeIndex: number
@@ -77,7 +80,7 @@ function arcCtrl(p0: Pt, p2: Pt): Pt {
   const dx = p2.x - p0.x
   const dy = p2.y - p0.y
   const len = Math.sqrt(dx * dx + dy * dy) || 1
-  const lift = Math.min(len * 0.40, 140)
+  const lift = Math.min(len * 0.4, 140)
   // Perpendicular that consistently bows the arc upward on screen
   return { x: mx + (dy / len) * lift, y: my - (dx / len) * lift }
 }
@@ -123,9 +126,7 @@ function drawFrame(): void {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   if (routes.length === 0) return
 
-  const coordMap = new Map(
-    props.markers.map((m) => [m.id, L.latLng(m.lat, m.lng)]),
-  )
+  const coordMap = new Map(props.markers.map((m) => [m.id, L.latLng(m.lat, m.lng)]))
 
   // Pre-compute pixel arcs for this frame (coordinates change on pan/zoom)
   type Arc = { p0: Pt; ctrl: Pt; p2: Pt }
@@ -152,7 +153,7 @@ function drawFrame(): void {
 
   // 2. Comet particles
   const TRAIL_STEPS = 30
-  const TRAIL_LEN  = 0.13
+  const TRAIL_LEN = 0.13
 
   for (const p of particles) {
     const arc = arcs[p.routeIndex]
@@ -182,10 +183,10 @@ function drawFrame(): void {
     // Comet head — bright glowing nucleus
     const head = bezierPt(p.t, arc.p0, arc.ctrl, arc.p2)
     const hGrd = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 9)
-    hGrd.addColorStop(0,    'rgba(255, 255, 255, 1.00)')
-    hGrd.addColorStop(0.20, 'rgba(200, 255, 248, 0.95)')
+    hGrd.addColorStop(0, 'rgba(255, 255, 255, 1.00)')
+    hGrd.addColorStop(0.2, 'rgba(200, 255, 248, 0.95)')
     hGrd.addColorStop(0.55, 'rgba(45,  212, 191, 0.70)')
-    hGrd.addColorStop(1,    'rgba(45,  212, 191, 0.00)')
+    hGrd.addColorStop(1, 'rgba(45,  212, 191, 0.00)')
     ctx.beginPath()
     ctx.arc(head.x, head.y, 9, 0, Math.PI * 2)
     ctx.fillStyle = hGrd
@@ -242,13 +243,29 @@ onMounted(() => {
   drawFrame()
 })
 
-watch(() => props.markers, () => { buildParticles(); renderMarkers() }, { deep: true })
-watch(() => props.routes,  () => { buildParticles() }, { deep: true })
+watch(
+  () => props.markers,
+  () => {
+    buildParticles()
+    renderMarkers()
+  },
+  { deep: true },
+)
+watch(
+  () => props.routes,
+  () => {
+    buildParticles()
+  },
+  { deep: true },
+)
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', syncCanvasSize)
   if (animFrameId !== null) cancelAnimationFrame(animFrameId)
-  if (map) { map.remove(); map = null }
+  if (map) {
+    map.remove()
+    map = null
+  }
 })
 </script>
 

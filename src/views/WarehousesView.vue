@@ -16,6 +16,9 @@ import AppModal from '@/components/AppModal.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
 import LeafletMap from '@/components/LeafletMap.vue'
 
+// utils
+import { statusBadgeClass } from '@/utils/packageStatus'
+
 // types
 import type { WarehouseInterface } from '@/interfaces'
 
@@ -69,16 +72,6 @@ const warehouseRoutes = computed(() => {
   const ids = warehouseMarkers.value.map((m) => m.id)
   return ids.map((id, i) => ({ fromId: id, toId: ids[(i + 1) % ids.length]! }))
 })
-
-function statusBadgeClass(status: string): string {
-  const map: Record<string, string> = {
-    'In Transit': 'bg-amber-500/12 text-amber-500 border border-amber-500/20',
-    Delivered:   'bg-green-500/12 text-green-500 border border-green-500/20',
-    Pending:     'bg-soft/12 text-soft border border-soft/20',
-    Exception:   'bg-red-500/12 text-red-500 border border-red-500/20',
-  }
-  return map[status] ?? 'bg-soft/12 text-soft border border-soft/20'
-}
 
 function toggleWh(id: string) {
   expandedWh.value = expandedWh.value === id ? null : id
@@ -156,18 +149,20 @@ async function confirmDelete(id: string, e: Event) {
           <button
             class="self-start px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm whitespace-nowrap transition-[filter] duration-200 hover:brightness-110"
             @click="openCreate"
-          >Add New Hub</button>
+          >
+            Add New Hub
+          </button>
         </div>
 
         <!-- Cards grid -->
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 [grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]">
+        <div
+          class="grid grid-cols-1 gap-6 sm:grid-cols-2 [grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"
+        >
           <div v-for="wh in store.warehouses" :key="wh.id" class="flex flex-col">
             <div
               :class="[
                 'relative bg-panel border rounded-xl overflow-hidden flex flex-col transition-[border-color] duration-200 cursor-pointer select-none hover:border-primary/25',
-                expandedWh === wh.id
-                  ? '!border-primary rounded-b-none'
-                  : 'border-wire',
+                expandedWh === wh.id ? '!border-primary rounded-b-none' : 'border-wire',
               ]"
               @click="toggleWh(wh.id)"
             >
@@ -178,15 +173,17 @@ async function confirmDelete(id: string, e: Event) {
                   title="Edit"
                   @click.stop="openEdit(wh)"
                 >
-                  <span class="material-symbols-outlined" style="font-size:16px">edit</span>
+                  <span class="material-symbols-outlined" style="font-size: 16px">edit</span>
                 </button>
                 <button
-                  :class="['p-1.5 rounded-lg bg-canvas/72 backdrop-blur text-body border border-wire transition-[background,color] duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:not-disabled:bg-sheet hover:not-disabled:text-red-500']"
+                  :class="[
+                    'p-1.5 rounded-lg bg-canvas/72 backdrop-blur text-body border border-wire transition-[background,color] duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:not-disabled:bg-sheet hover:not-disabled:text-red-500',
+                  ]"
                   :disabled="deletingId === wh.id"
                   title="Delete"
                   @click="confirmDelete(wh.id, $event)"
                 >
-                  <span class="material-symbols-outlined" style="font-size:16px">delete</span>
+                  <span class="material-symbols-outlined" style="font-size: 16px">delete</span>
                 </button>
               </div>
 
@@ -198,11 +195,15 @@ async function confirmDelete(id: string, e: Event) {
                   class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.08]"
                   :class="{ 'scale-[1.08]': expandedWh === wh.id }"
                 />
-                <div class="absolute bottom-3 left-4 bg-primary/20 backdrop-blur px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase text-primary tracking-[0.04em]">
+                <div
+                  class="absolute bottom-3 left-4 bg-primary/20 backdrop-blur px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase text-primary tracking-[0.04em]"
+                >
                   Active
                 </div>
-                <div class="absolute bottom-3 right-3 flex items-center gap-1 bg-canvas/72 backdrop-blur px-2.5 py-0.5 rounded-md text-[11px] font-bold text-body">
-                  <span class="material-symbols-outlined" style="font-size:14px">package_2</span>
+                <div
+                  class="absolute bottom-3 right-3 flex items-center gap-1 bg-canvas/72 backdrop-blur px-2.5 py-0.5 rounded-md text-[11px] font-bold text-body"
+                >
+                  <span class="material-symbols-outlined" style="font-size: 14px">package_2</span>
                   {{ store.packagesForWarehouse(wh.id).length }}
                 </div>
               </div>
@@ -211,22 +212,28 @@ async function confirmDelete(id: string, e: Event) {
               <div class="p-5 flex-1 flex flex-col">
                 <div class="flex items-center justify-between">
                   <h3 class="text-lg font-bold">{{ wh.name }}</h3>
-                  <span class="material-symbols-outlined text-faded" style="font-size:20px">
+                  <span class="material-symbols-outlined text-faded" style="font-size: 20px">
                     {{ expandedWh === wh.id ? 'expand_less' : 'expand_more' }}
                   </span>
                 </div>
                 <p class="flex items-center gap-1 text-soft text-xs mt-1">
-                  <span class="material-symbols-outlined" style="font-size:14px">location_on</span>
+                  <span class="material-symbols-outlined" style="font-size: 14px">location_on</span>
                   {{ wh.location }}
                 </p>
                 <div class="mt-auto pt-4 border-t border-wire-subtle">
                   <div class="flex justify-between text-xs mb-2">
                     <span>Capacity</span>
-                    <span :class="['font-bold', wh.capacity >= 90 ? 'text-red-500' : 'text-primary']">{{ wh.capacity }}%</span>
+                    <span
+                      :class="['font-bold', wh.capacity >= 90 ? 'text-red-500' : 'text-primary']"
+                      >{{ wh.capacity }}%</span
+                    >
                   </div>
                   <div class="h-2 w-full bg-sheet rounded-full overflow-hidden">
                     <div
-                      :class="['h-full rounded-full transition-[width] duration-500', wh.capacity >= 90 ? 'bg-red-500' : 'bg-primary']"
+                      :class="[
+                        'h-full rounded-full transition-[width] duration-500',
+                        wh.capacity >= 90 ? 'bg-red-500' : 'bg-primary',
+                      ]"
                       :style="{ width: wh.capacity + '%' }"
                     ></div>
                   </div>
@@ -235,21 +242,47 @@ async function confirmDelete(id: string, e: Event) {
             </div>
 
             <!-- Expanded packages panel -->
-            <div v-if="expandedWh === wh.id" class="bg-sheet border border-primary border-t-0 rounded-b-xl px-4 pt-4 pb-6 overflow-x-auto">
+            <div
+              v-if="expandedWh === wh.id"
+              class="bg-sheet border border-primary border-t-0 rounded-b-xl px-4 pt-4 pb-6 overflow-x-auto"
+            >
               <p class="text-sm font-bold text-primary mb-4 flex items-center gap-1.5">
-                <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle">package_2</span>
+                <span
+                  class="material-symbols-outlined"
+                  style="font-size: 16px; vertical-align: middle"
+                  >package_2</span
+                >
                 Packages assigned to {{ wh.name }}
               </p>
-              <div v-if="store.packagesForWarehouse(wh.id).length === 0" class="text-sm text-faded text-center py-4">
+              <div
+                v-if="store.packagesForWarehouse(wh.id).length === 0"
+                class="text-sm text-faded text-center py-4"
+              >
                 No packages assigned yet.
               </div>
               <table v-else class="w-full border-collapse text-sm">
                 <thead>
                   <tr>
-                    <th class="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-faded text-left border-b border-wire">Tracking #</th>
-                    <th class="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-faded text-left border-b border-wire">Description</th>
-                    <th class="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-faded text-left border-b border-wire">Status</th>
-                    <th class="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-faded text-left border-b border-wire">User</th>
+                    <th
+                      class="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-faded text-left border-b border-wire"
+                    >
+                      Tracking #
+                    </th>
+                    <th
+                      class="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-faded text-left border-b border-wire"
+                    >
+                      Description
+                    </th>
+                    <th
+                      class="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-faded text-left border-b border-wire"
+                    >
+                      Status
+                    </th>
+                    <th
+                      class="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-faded text-left border-b border-wire"
+                    >
+                      User
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -261,7 +294,13 @@ async function confirmDelete(id: string, e: Event) {
                     <td class="px-3 py-2.5 font-mono text-primary font-semibold">{{ pkg.id }}</td>
                     <td class="px-3 py-2.5">{{ pkg.description }}</td>
                     <td class="px-3 py-2.5">
-                      <span :class="['inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-[0.04em]', statusBadgeClass(pkg.status)]">{{ pkg.status }}</span>
+                      <span
+                        :class="[
+                          'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-[0.04em]',
+                          statusBadgeClass(pkg.status),
+                        ]"
+                        >{{ pkg.status }}</span
+                      >
                     </td>
                     <td class="px-3 py-2.5 text-soft">{{ pkg.userId }}</td>
                   </tr>
@@ -275,10 +314,16 @@ async function confirmDelete(id: string, e: Event) {
         <div class="bg-panel border border-wire rounded-xl overflow-hidden">
           <div class="flex justify-between items-center px-6 py-4 border-b border-wire">
             <h2 class="text-base font-bold flex items-center gap-2">
-              <span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle">map</span>
+              <span
+                class="material-symbols-outlined"
+                style="font-size: 20px; vertical-align: middle"
+                >map</span
+              >
               Hub Locations
             </h2>
-            <span class="text-xs text-soft font-semibold">{{ warehouseMarkers.length }} mapped</span>
+            <span class="text-xs text-soft font-semibold"
+              >{{ warehouseMarkers.length }} mapped</span
+            >
           </div>
           <div class="h-[300px]">
             <LeafletMap :markers="warehouseMarkers" :routes="warehouseRoutes" />
@@ -292,35 +337,72 @@ async function confirmDelete(id: string, e: Event) {
       <form class="flex flex-col gap-4" @submit.prevent="submitCreate">
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="wh-name">Name</label>
-          <input id="wh-name" v-model="form.name" required type="text" placeholder="e.g. Central Hub"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="wh-name"
+            v-model="form.name"
+            required
+            type="text"
+            placeholder="e.g. Central Hub"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="wh-location">Location</label>
-          <input id="wh-location" v-model="form.location" required type="text" placeholder="e.g. Chicago, IL"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="wh-location"
+            v-model="form.location"
+            required
+            type="text"
+            placeholder="e.g. Chicago, IL"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="wh-capacity">Capacity (%)</label>
-          <input id="wh-capacity" v-model.number="form.capacity" required type="number" min="0" max="100"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="wh-capacity"
+            v-model.number="form.capacity"
+            required
+            type="number"
+            min="0"
+            max="100"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="wh-manager">Manager Name</label>
-          <input id="wh-manager" v-model="form.managerName" type="text" placeholder="e.g. John Smith"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="wh-manager"
+            v-model="form.managerName"
+            type="text"
+            placeholder="e.g. John Smith"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="wh-image">Image URL</label>
-          <input id="wh-image" v-model="form.imageUrl" type="url" placeholder="https://..."
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="wh-image"
+            v-model="form.imageUrl"
+            type="url"
+            placeholder="https://..."
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex justify-end gap-2 mt-4">
-          <button type="button"
+          <button
+            type="button"
             class="px-4.5 py-2.5 rounded-xl bg-sheet text-soft font-semibold text-sm border border-wire transition-[border-color,color] duration-200 hover:border-primary hover:text-primary"
-            @click="showCreateModal = false">Cancel</button>
-          <button type="submit"
-            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110">Create</button>
+            @click="showCreateModal = false"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110"
+          >
+            Create
+          </button>
         </div>
       </form>
     </AppModal>
@@ -330,35 +412,68 @@ async function confirmDelete(id: string, e: Event) {
       <form v-if="editingWh" class="flex flex-col gap-4" @submit.prevent="submitEdit">
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="wh-edit-name">Name</label>
-          <input id="wh-edit-name" v-model="form.name" required type="text"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="wh-edit-name"
+            v-model="form.name"
+            required
+            type="text"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="wh-edit-location">Location</label>
-          <input id="wh-edit-location" v-model="form.location" required type="text"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="wh-edit-location"
+            v-model="form.location"
+            required
+            type="text"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="wh-edit-capacity">Capacity (%)</label>
-          <input id="wh-edit-capacity" v-model.number="form.capacity" required type="number" min="0" max="100"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="wh-edit-capacity"
+            v-model.number="form.capacity"
+            required
+            type="number"
+            min="0"
+            max="100"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="wh-edit-manager">Manager Name</label>
-          <input id="wh-edit-manager" v-model="form.managerName" type="text"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="wh-edit-manager"
+            v-model="form.managerName"
+            type="text"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="wh-edit-image">Image URL</label>
-          <input id="wh-edit-image" v-model="form.imageUrl" type="url"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="wh-edit-image"
+            v-model="form.imageUrl"
+            type="url"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex justify-end gap-2 mt-4">
-          <button type="button"
+          <button
+            type="button"
             class="px-4.5 py-2.5 rounded-xl bg-sheet text-soft font-semibold text-sm border border-wire transition-[border-color,color] duration-200 hover:border-primary hover:text-primary"
-            @click="closeEdit">Cancel</button>
-          <button type="submit"
-            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110">Save</button>
+            @click="closeEdit"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110"
+          >
+            Save
+          </button>
         </div>
       </form>
     </AppModal>

@@ -48,7 +48,7 @@ async function submitLogin() {
     <header class="flex items-center justify-between px-6 py-6 border-b border-wire lg:px-20">
       <RouterLink to="/" class="flex items-center gap-2">
         <div class="p-2 bg-primary/15 rounded-lg text-primary flex items-center justify-center">
-          <span class="material-symbols-outlined" style="font-size:24px">package_2</span>
+          <span class="material-symbols-outlined" style="font-size: 24px">package_2</span>
         </div>
         <h1 class="text-[20px] font-bold tracking-[-0.3px]">PackTrack</h1>
       </RouterLink>
@@ -57,7 +57,8 @@ async function submitLogin() {
         <RouterLink
           to="/signup"
           class="px-5 py-2 rounded-lg border border-primary text-primary font-semibold text-sm transition-colors duration-200 hover:bg-primary/10"
-        >Sign up</RouterLink>
+          >Sign up</RouterLink
+        >
       </div>
     </header>
 
@@ -66,10 +67,16 @@ async function submitLogin() {
       <!-- Left panel -->
       <div
         class="flex flex-col justify-center p-8 lg:w-1/2 lg:px-24 lg:py-16"
-        style="background: linear-gradient(135deg, #0d1f3c 0%, #0a1628 100%); border-right: 1px solid #21262d;"
+        style="
+          background: linear-gradient(135deg, #0d1f3c 0%, #0a1628 100%);
+          border-right: 1px solid #21262d;
+        "
       >
         <div class="max-w-[480px]">
-          <h2 class="font-black text-body leading-[1.1] mb-6" style="font-size: clamp(32px, 4vw, 60px)">
+          <h2
+            class="font-black text-body leading-[1.1] mb-6"
+            style="font-size: clamp(32px, 4vw, 60px)"
+          >
             Welcome <span class="text-primary">Back</span>
           </h2>
           <p class="text-soft text-lg mb-10 leading-[1.6]">
@@ -78,14 +85,18 @@ async function submitLogin() {
           </p>
           <div class="flex flex-col gap-6">
             <div class="flex items-start gap-4">
-              <span class="material-symbols-outlined text-primary shrink-0 mt-0.5">check_circle</span>
+              <span class="material-symbols-outlined text-primary shrink-0 mt-0.5"
+                >check_circle</span
+              >
               <div>
                 <h4 class="font-bold text-body mb-0.5">Real-time tracking</h4>
                 <p class="text-sm text-soft">Monitor every movement of your packages.</p>
               </div>
             </div>
             <div class="flex items-start gap-4">
-              <span class="material-symbols-outlined text-primary shrink-0 mt-0.5">check_circle</span>
+              <span class="material-symbols-outlined text-primary shrink-0 mt-0.5"
+                >check_circle</span
+              >
               <div>
                 <h4 class="font-bold text-body mb-0.5">Multi-warehouse support</h4>
                 <p class="text-sm text-soft">Manage inventory across locations.</p>
@@ -107,12 +118,18 @@ async function submitLogin() {
             <p
               v-if="error"
               class="px-3 py-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-sm"
-            >{{ error }}</p>
+            >
+              {{ error }}
+            </p>
 
             <div class="flex flex-col gap-2">
               <label class="text-sm font-medium text-soft" for="login-email">Email</label>
               <div class="relative">
-                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-faded" style="font-size:20px">mail</span>
+                <span
+                  class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-faded"
+                  style="font-size: 20px"
+                  >mail</span
+                >
                 <input
                   id="login-email"
                   v-model="email"
@@ -127,7 +144,11 @@ async function submitLogin() {
             <div class="flex flex-col gap-2">
               <label class="text-sm font-medium text-soft" for="login-password">Password</label>
               <div class="relative">
-                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-faded" style="font-size:20px">lock</span>
+                <span
+                  class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-faded"
+                  style="font-size: 20px"
+                  >lock</span
+                >
                 <input
                   id="login-password"
                   v-model="password"

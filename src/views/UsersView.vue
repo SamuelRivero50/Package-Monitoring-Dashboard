@@ -79,8 +79,7 @@ function closeEdit() {
 }
 
 async function submitCreate() {
-  if (!form.value.name.trim() || !form.value.email.trim() || !form.value.password.trim())
-    return
+  if (!form.value.name.trim() || !form.value.email.trim() || !form.value.password.trim()) return
   await store.createUser({
     name: form.value.name.trim(),
     email: form.value.email.trim(),
@@ -132,14 +131,18 @@ async function confirmDelete(id: string) {
               <h3 class="text-[32px] font-bold mt-1">{{ stat.value }}</h3>
             </div>
             <div class="p-2 bg-primary/15 rounded-lg text-primary flex items-center justify-center">
-              <span class="material-symbols-outlined" style="font-size:22px">{{ stat.icon }}</span>
+              <span class="material-symbols-outlined" style="font-size: 22px">{{ stat.icon }}</span>
             </div>
           </div>
-          <div class="p-6 rounded-xl border border-wire bg-canvas flex items-center justify-center transition-[border-color] duration-200 hover:border-primary/25">
+          <div
+            class="p-6 rounded-xl border border-wire bg-canvas flex items-center justify-center transition-[border-color] duration-200 hover:border-primary/25"
+          >
             <button
               class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm border-none whitespace-nowrap transition-[filter] duration-200 hover:brightness-110"
               @click="openCreate"
-            >New User</button>
+            >
+              New User
+            </button>
           </div>
         </div>
 
@@ -172,9 +175,17 @@ async function confirmDelete(id: string) {
           <table class="w-full text-left border-collapse">
             <thead class="bg-sheet">
               <tr>
-                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">User</th>
-                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">Role</th>
-                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded text-right">Actions</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">
+                  User
+                </th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">
+                  Role
+                </th>
+                <th
+                  class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded text-right"
+                >
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -206,7 +217,7 @@ async function confirmDelete(id: string) {
                       title="Edit"
                       @click="openEdit(user)"
                     >
-                      <span class="material-symbols-outlined" style="font-size:18px">edit</span>
+                      <span class="material-symbols-outlined" style="font-size: 18px">edit</span>
                     </button>
                     <button
                       class="w-8 h-8 flex items-center justify-center rounded-lg text-soft transition-[background,color] duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:not-disabled:bg-red-500/15 hover:not-disabled:text-red-500"
@@ -214,7 +225,7 @@ async function confirmDelete(id: string) {
                       title="Delete"
                       @click="confirmDelete(user.id)"
                     >
-                      <span class="material-symbols-outlined" style="font-size:18px">delete</span>
+                      <span class="material-symbols-outlined" style="font-size: 18px">delete</span>
                     </button>
                   </div>
                 </td>
@@ -230,38 +241,71 @@ async function confirmDelete(id: string) {
       <form class="flex flex-col gap-4" @submit.prevent="submitCreate">
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="user-name">Name</label>
-          <input id="user-name" v-model="form.name" required type="text" placeholder="John Doe"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="user-name"
+            v-model="form.name"
+            required
+            type="text"
+            placeholder="John Doe"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="user-email">Email</label>
-          <input id="user-email" v-model="form.email" required type="email" placeholder="john@example.com"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="user-email"
+            v-model="form.email"
+            required
+            type="email"
+            placeholder="john@example.com"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="user-password">Password</label>
-          <input id="user-password" v-model="form.password" required type="password"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="user-password"
+            v-model="form.password"
+            required
+            type="password"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="user-role">Role</label>
-          <select id="user-role" v-model="form.role"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
+          <select
+            id="user-role"
+            v-model="form.role"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          >
             <option value="User">User</option>
             <option value="Admin">Admin</option>
           </select>
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="user-avatar">Avatar URL</label>
-          <input id="user-avatar" v-model="form.avatarUrl" type="url" placeholder="https://..."
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="user-avatar"
+            v-model="form.avatarUrl"
+            type="url"
+            placeholder="https://..."
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex justify-end gap-2 mt-4">
-          <button type="button"
+          <button
+            type="button"
             class="px-4.5 py-2.5 rounded-xl bg-sheet text-soft font-semibold text-sm border border-wire transition-[border-color,color] duration-200 hover:border-primary hover:text-primary"
-            @click="showCreateModal = false">Cancel</button>
-          <button type="submit"
-            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110">Create</button>
+            @click="showCreateModal = false"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110"
+          >
+            Create
+          </button>
         </div>
       </form>
     </AppModal>
@@ -271,38 +315,70 @@ async function confirmDelete(id: string) {
       <form v-if="editingUser" class="flex flex-col gap-4" @submit.prevent="submitEdit">
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="user-edit-name">Name</label>
-          <input id="user-edit-name" v-model="form.name" required type="text"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="user-edit-name"
+            v-model="form.name"
+            required
+            type="text"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="user-edit-email">Email</label>
-          <input id="user-edit-email" v-model="form.email" required type="email"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="user-edit-email"
+            v-model="form.email"
+            required
+            type="email"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
-          <label class="text-xs font-semibold text-soft" for="user-edit-password">Password (leave blank to keep)</label>
-          <input id="user-edit-password" v-model="form.password" type="password" placeholder="••••••••"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <label class="text-xs font-semibold text-soft" for="user-edit-password"
+            >Password (leave blank to keep)</label
+          >
+          <input
+            id="user-edit-password"
+            v-model="form.password"
+            type="password"
+            placeholder="••••••••"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="user-edit-role">Role</label>
-          <select id="user-edit-role" v-model="form.role"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
+          <select
+            id="user-edit-role"
+            v-model="form.role"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          >
             <option value="User">User</option>
             <option value="Admin">Admin</option>
           </select>
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="user-edit-avatar">Avatar URL</label>
-          <input id="user-edit-avatar" v-model="form.avatarUrl" type="url"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="user-edit-avatar"
+            v-model="form.avatarUrl"
+            type="url"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex justify-end gap-2 mt-4">
-          <button type="button"
+          <button
+            type="button"
             class="px-4.5 py-2.5 rounded-xl bg-sheet text-soft font-semibold text-sm border border-wire transition-[border-color,color] duration-200 hover:border-primary hover:text-primary"
-            @click="closeEdit">Cancel</button>
-          <button type="submit"
-            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110">Save</button>
+            @click="closeEdit"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110"
+          >
+            Save
+          </button>
         </div>
       </form>
     </AppModal>

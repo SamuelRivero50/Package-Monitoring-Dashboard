@@ -4,14 +4,14 @@
  */
 
 export interface SystemAlert {
-  id: string;
-  message: string;
-  type: 'info' | 'warning' | 'error';
-  active: boolean;
-  createdAt: string;
+  id: string
+  message: string
+  type: 'info' | 'warning' | 'error'
+  active: boolean
+  createdAt: string
 }
 
 export interface SystemSettings {
-  maintenanceMode: boolean;
-  alert: SystemAlert | null;
+  maintenanceMode: boolean
+  alert: SystemAlert | null
 }

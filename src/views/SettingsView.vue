@@ -77,11 +77,19 @@ const {
                 'text-[#f87171]': currentAlert.type === 'error',
               }"
             >
-              {{ currentAlert.type === 'error' ? 'error' : currentAlert.type === 'warning' ? 'warning' : 'info' }}
+              {{
+                currentAlert.type === 'error'
+                  ? 'error'
+                  : currentAlert.type === 'warning'
+                    ? 'warning'
+                    : 'info'
+              }}
             </span>
             <div class="flex-1 min-w-0">
               <p class="text-sm font-semibold text-body break-words">{{ currentAlert.message }}</p>
-              <p class="text-xs text-soft mt-1">Active since {{ new Date(currentAlert.createdAt).toLocaleString() }}</p>
+              <p class="text-xs text-soft mt-1">
+                Active since {{ new Date(currentAlert.createdAt).toLocaleString() }}
+              </p>
             </div>
             <button
               class="shrink-0 p-1.5 rounded-lg hover:bg-white/5 transition-colors"
@@ -134,14 +142,21 @@ const {
         <section class="bg-panel border border-wire rounded-xl p-8">
           <h3 class="text-2xl font-bold mb-2">Maintenance Mode</h3>
           <p class="text-soft text-sm mb-6">
-            When enabled, non-admin users are redirected to a maintenance screen and cannot interact with the system.
+            When enabled, non-admin users are redirected to a maintenance screen and cannot interact
+            with the system.
           </p>
 
           <div class="flex items-center justify-between p-4 bg-sheet rounded-lg">
             <div>
-              <p class="font-bold text-sm">{{ maintenanceMode ? 'Maintenance is ON' : 'Maintenance is OFF' }}</p>
+              <p class="font-bold text-sm">
+                {{ maintenanceMode ? 'Maintenance is ON' : 'Maintenance is OFF' }}
+              </p>
               <p class="text-xs text-soft mt-0.5">
-                {{ maintenanceMode ? 'Only administrators can access the dashboard.' : 'All authenticated users have normal access.' }}
+                {{
+                  maintenanceMode
+                    ? 'Only administrators can access the dashboard.'
+                    : 'All authenticated users have normal access.'
+                }}
               </p>
             </div>
             <!-- Toggle switch -->

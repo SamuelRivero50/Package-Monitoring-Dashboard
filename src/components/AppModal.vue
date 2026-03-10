@@ -20,7 +20,9 @@ defineEmits<{ (e: 'close'): void }>()
         class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[1000] p-6"
         @click.self="$emit('close')"
       >
-        <div class="modal-box bg-panel border border-wire rounded-2xl max-w-[480px] w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div
+          class="modal-box bg-panel border border-wire rounded-2xl max-w-[480px] w-full max-h-[90vh] overflow-hidden flex flex-col"
+        >
           <div class="flex items-center justify-between p-6 border-b border-wire">
             <h2 class="text-lg font-bold">{{ title }}</h2>
             <button

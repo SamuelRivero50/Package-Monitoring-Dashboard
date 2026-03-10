@@ -34,10 +34,34 @@ const totalLabel = computed(() => {
 const recentPackages = computed(() => summary.value?.recentPackages ?? [])
 
 const warehouseMarkers = [
-  { id: 'wh-1', label: 'Central Hub', lat: 41.8781, lng: -87.6298, popupHtml: '<b>Central Hub</b><br>Chicago, IL — 85% capacity' },
-  { id: 'wh-2', label: 'West Coast', lat: 34.0522, lng: -118.2437, popupHtml: '<b>West Coast</b><br>Los Angeles, CA — 62% capacity' },
-  { id: 'wh-3', label: 'East Distro', lat: 40.7357, lng: -74.1724, popupHtml: '<b>East Distro</b><br>Newark, NJ — 94% capacity' },
-  { id: 'wh-4', label: 'South Regional', lat: 33.749, lng: -84.388, popupHtml: '<b>South Regional</b><br>Atlanta, GA — 42% capacity' },
+  {
+    id: 'wh-1',
+    label: 'Central Hub',
+    lat: 41.8781,
+    lng: -87.6298,
+    popupHtml: '<b>Central Hub</b><br>Chicago, IL — 85% capacity',
+  },
+  {
+    id: 'wh-2',
+    label: 'West Coast',
+    lat: 34.0522,
+    lng: -118.2437,
+    popupHtml: '<b>West Coast</b><br>Los Angeles, CA — 62% capacity',
+  },
+  {
+    id: 'wh-3',
+    label: 'East Distro',
+    lat: 40.7357,
+    lng: -74.1724,
+    popupHtml: '<b>East Distro</b><br>Newark, NJ — 94% capacity',
+  },
+  {
+    id: 'wh-4',
+    label: 'South Regional',
+    lat: 33.749,
+    lng: -84.388,
+    popupHtml: '<b>South Regional</b><br>Atlanta, GA — 42% capacity',
+  },
 ]
 
 const warehouseRoutes = [
@@ -57,7 +81,6 @@ const warehouseRoutes = [
 
       <!-- Content -->
       <div class="p-8 flex flex-col gap-8 overflow-y-auto">
-
         <!-- Stat Cards -->
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           <div
@@ -66,11 +89,21 @@ const warehouseRoutes = [
             class="bg-panel p-6 rounded-xl border border-wire transition-[border-color] duration-200 hover:border-primary/25"
           >
             <div class="flex justify-between items-start mb-4">
-              <div :class="['p-2 rounded-lg flex items-center justify-center', card.iconColorClass]">
-                <span class="material-symbols-outlined text-white" style="font-size:22px">{{ card.icon }}</span>
+              <div
+                :class="['p-2 rounded-lg flex items-center justify-center', card.iconColorClass]"
+              >
+                <span class="material-symbols-outlined text-white" style="font-size: 22px">{{
+                  card.icon
+                }}</span>
               </div>
-              <span :class="['text-xs font-bold flex items-center gap-0.5', trendClass(card.trend)]">
-                <span v-if="card.trend !== 0" class="material-symbols-outlined" style="font-size:14px">
+              <span
+                :class="['text-xs font-bold flex items-center gap-0.5', trendClass(card.trend)]"
+              >
+                <span
+                  v-if="card.trend !== 0"
+                  class="material-symbols-outlined"
+                  style="font-size: 14px"
+                >
                   {{ card.trend > 0 ? 'trending_up' : 'trending_down' }}
                 </span>
                 {{ trendLabel(card.trend) }}
@@ -84,7 +117,9 @@ const warehouseRoutes = [
         <!-- Middle row: Table + Status summary -->
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
           <!-- Recent Packages -->
-          <div class="bg-panel rounded-xl border border-wire overflow-hidden flex flex-col transition-[border-color] duration-200 hover:border-primary/25">
+          <div
+            class="bg-panel rounded-xl border border-wire overflow-hidden flex flex-col transition-[border-color] duration-200 hover:border-primary/25"
+          >
             <div class="p-6 border-b border-wire flex justify-between items-center">
               <h2 class="text-lg font-bold">Recent Packages</h2>
               <button class="text-primary text-sm font-medium hover:underline">View all</button>
@@ -93,10 +128,18 @@ const warehouseRoutes = [
               <table class="w-full text-left text-sm border-collapse">
                 <thead>
                   <tr class="bg-sheet text-soft">
-                    <th class="px-6 py-3.5 text-[10px] font-semibold uppercase tracking-[0.08em]">Tracking #</th>
-                    <th class="px-6 py-3.5 text-[10px] font-semibold uppercase tracking-[0.08em]">Description</th>
-                    <th class="px-6 py-3.5 text-[10px] font-semibold uppercase tracking-[0.08em]">Status</th>
-                    <th class="px-6 py-3.5 text-[10px] font-semibold uppercase tracking-[0.08em]">Updated</th>
+                    <th class="px-6 py-3.5 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                      Tracking #
+                    </th>
+                    <th class="px-6 py-3.5 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                      Description
+                    </th>
+                    <th class="px-6 py-3.5 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                      Status
+                    </th>
+                    <th class="px-6 py-3.5 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                      Updated
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -105,10 +148,18 @@ const warehouseRoutes = [
                     :key="row.trackingId"
                     class="border-t border-wire transition-colors duration-150 hover:bg-sheet"
                   >
-                    <td class="px-6 py-3.5 font-medium font-mono text-link">{{ row.trackingId }}</td>
+                    <td class="px-6 py-3.5 font-medium font-mono text-link">
+                      {{ row.trackingId }}
+                    </td>
                     <td class="px-6 py-3.5 font-medium">{{ row.description }}</td>
                     <td class="px-6 py-3.5">
-                      <span :class="['rounded px-2.5 py-0.5 text-xs font-medium inline-block', row.statusClass]">{{ row.status }}</span>
+                      <span
+                        :class="[
+                          'rounded px-2.5 py-0.5 text-xs font-medium inline-block',
+                          row.statusClass,
+                        ]"
+                        >{{ row.status }}</span
+                      >
                     </td>
                     <td class="px-6 py-3.5 text-faded">{{ row.updatedAgo }}</td>
                   </tr>
@@ -118,7 +169,9 @@ const warehouseRoutes = [
           </div>
 
           <!-- Status Summary -->
-          <div class="bg-panel rounded-xl border border-wire p-6 flex flex-col transition-[border-color] duration-200 hover:border-primary/25">
+          <div
+            class="bg-panel rounded-xl border border-wire p-6 flex flex-col transition-[border-color] duration-200 hover:border-primary/25"
+          >
             <h2 class="text-lg font-bold mb-4">Status Summary</h2>
             <div class="flex-1 flex flex-col justify-center items-center gap-6">
               <DonutChart
@@ -156,13 +209,19 @@ const warehouseRoutes = [
         </div>
 
         <!-- Warehouses Section -->
-        <div class="bg-panel border border-wire rounded-xl p-6 transition-[border-color] duration-200 hover:border-primary/25">
+        <div
+          class="bg-panel border border-wire rounded-xl p-6 transition-[border-color] duration-200 hover:border-primary/25"
+        >
           <div class="flex justify-between items-start mb-6">
             <div>
               <h2 class="text-lg font-bold">Warehouses</h2>
-              <p class="text-sm text-soft mt-0.5">Real-time capacity and utilization across locations</p>
+              <p class="text-sm text-soft mt-0.5">
+                Real-time capacity and utilization across locations
+              </p>
             </div>
-            <button class="bg-primary text-canvas font-bold px-4 py-2.5 rounded-lg text-sm transition-opacity duration-150 hover:opacity-90">
+            <button
+              class="bg-primary text-canvas font-bold px-4 py-2.5 rounded-lg text-sm transition-opacity duration-150 hover:opacity-90"
+            >
               Add Warehouse
             </button>
           </div>
@@ -170,7 +229,9 @@ const warehouseRoutes = [
             <!-- Warehouse card 1 -->
             <div class="p-4 rounded-xl border border-wire bg-canvas">
               <div class="flex items-center gap-2 mb-4">
-                <div class="w-10 h-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
+                <div
+                  class="w-10 h-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center"
+                >
                   <span class="material-symbols-outlined">location_on</span>
                 </div>
                 <div>
@@ -192,7 +253,9 @@ const warehouseRoutes = [
             <!-- Warehouse card 2 -->
             <div class="p-4 rounded-xl border border-wire bg-canvas">
               <div class="flex items-center gap-2 mb-4">
-                <div class="w-10 h-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
+                <div
+                  class="w-10 h-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center"
+                >
                   <span class="material-symbols-outlined">location_on</span>
                 </div>
                 <div>
@@ -214,7 +277,9 @@ const warehouseRoutes = [
             <!-- Warehouse card 3 -->
             <div class="p-4 rounded-xl border border-wire bg-canvas">
               <div class="flex items-center gap-2 mb-4">
-                <div class="w-10 h-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
+                <div
+                  class="w-10 h-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center"
+                >
                   <span class="material-symbols-outlined">location_on</span>
                 </div>
                 <div>
@@ -239,11 +304,14 @@ const warehouseRoutes = [
         <!-- Live Map -->
         <div class="relative h-[360px] rounded-xl overflow-hidden border border-wire">
           <LeafletMap :markers="warehouseMarkers" :routes="warehouseRoutes" />
-          <div class="absolute top-4 right-4 bg-canvas/80 backdrop-blur px-3 py-1.5 rounded-lg border border-primary/20 z-[1000]">
-            <span class="text-[10px] font-bold uppercase tracking-[0.1em] text-primary">Status: Operational</span>
+          <div
+            class="absolute top-4 right-4 bg-canvas/80 backdrop-blur px-3 py-1.5 rounded-lg border border-primary/20 z-[1000]"
+          >
+            <span class="text-[10px] font-bold uppercase tracking-[0.1em] text-primary"
+              >Status: Operational</span
+            >
           </div>
         </div>
-
       </div>
     </main>
   </div>

@@ -22,11 +22,7 @@ export function buildUrl(path: string): string {
   return `${BASE_URL}${path}`
 }
 
-export async function apiFetch<T>(
-  path: string,
-  options?: RequestInit,
-  _fallback?: T,
-): Promise<T> {
+export async function apiFetch<T>(path: string, options?: RequestInit, _fallback?: T): Promise<T> {
   if (_fallback !== undefined) return Promise.resolve(_fallback)
   throw { status: 501, message: 'Backend not connected' } as ApiError
 }

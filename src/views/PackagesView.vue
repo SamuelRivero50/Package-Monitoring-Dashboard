@@ -17,6 +17,9 @@ import AppModal from '@/components/AppModal.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
 import BarChart from '@/components/BarChart.vue'
 
+// utils
+import { statusBadgeClass } from '@/utils/packageStatus'
+
 // types
 import type { PackageLogInterface } from '@/interfaces'
 
@@ -40,9 +43,7 @@ const logForm = ref({
   description: '',
 })
 
-const warehouseOptions = computed(() =>
-  store.warehouses.map((w) => ({ id: w.id, name: w.name })),
-)
+const warehouseOptions = computed(() => store.warehouses.map((w) => ({ id: w.id, name: w.name })))
 
 function warehouseName(id: string): string {
   if (!id) return '—'
@@ -89,16 +90,6 @@ const form = ref({
   description: '',
   price: 0,
 })
-
-function statusBadgeClass(status: string): string {
-  const map: Record<string, string> = {
-    'In Transit': 'bg-amber-500/12 text-amber-500 border border-amber-500/20',
-    Delivered:   'bg-green-500/12 text-green-500 border border-green-500/20',
-    Pending:     'bg-soft/12 text-soft border border-soft/20',
-    Exception:   'bg-red-500/12 text-red-500 border border-red-500/20',
-  }
-  return map[status] ?? 'bg-soft/12 text-soft border border-soft/20'
-}
 
 function toggleLog(id: string) {
   expandedRow.value = expandedRow.value === id ? null : id
@@ -187,7 +178,11 @@ async function confirmDeleteLog(logId: string, packageId: string) {
         <!-- Filters -->
         <div class="flex flex-col gap-4 md:flex-row">
           <div class="relative flex-1">
-            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-faded" style="font-size:18px">search</span>
+            <span
+              class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-faded"
+              style="font-size: 18px"
+              >search</span
+            >
             <input
               v-model="searchQuery"
               class="w-full py-2.5 pl-[42px] pr-4 bg-panel border border-wire rounded-xl text-body text-sm outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-faded focus:border-primary focus:shadow-[0_0_0_3px_rgba(45,212,191,0.12)]"
@@ -210,17 +205,23 @@ async function confirmDeleteLog(logId: string, packageId: string) {
             class="py-2.5 px-3 bg-panel border border-wire rounded-xl text-body text-sm outline-none cursor-pointer transition-[border-color] duration-200 hover:border-primary focus:border-primary"
           >
             <option value="">All Warehouses</option>
-            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
+            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">
+              {{ wh.name }}
+            </option>
           </select>
           <button
             class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm whitespace-nowrap transition-[filter] duration-200 hover:brightness-110"
             @click="showCreateModal = true"
-          >New Package</button>
+          >
+            New Package
+          </button>
         </div>
 
         <!-- Status Bar Chart -->
         <div class="bg-panel border border-wire rounded-2xl p-6">
-          <p class="text-sm font-bold text-soft mb-4 uppercase tracking-[0.06em]">Packages by Status</p>
+          <p class="text-sm font-bold text-soft mb-4 uppercase tracking-[0.06em]">
+            Packages by Status
+          </p>
           <div class="h-[200px]">
             <BarChart
               :labels="statusBreakdown.labels"
@@ -235,23 +236,44 @@ async function confirmDeleteLog(logId: string, packageId: string) {
           <table class="w-full text-left border-collapse">
             <thead class="bg-sheet border-b border-wire">
               <tr>
-                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">Tracking #</th>
-                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">Description</th>
-                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">User</th>
-                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">Status</th>
-                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">Warehouse</th>
-                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">Updated</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">
+                  Tracking #
+                </th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">
+                  Description
+                </th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">
+                  User
+                </th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">
+                  Status
+                </th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">
+                  Warehouse
+                </th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">
+                  Updated
+                </th>
                 <th class="px-6 py-4"></th>
               </tr>
             </thead>
             <tbody>
               <template v-for="pkg in filteredPackages" :key="pkg.id">
-                <tr class="border-b border-wire-subtle transition-colors duration-150 hover:bg-primary/4">
-                  <td class="px-6 py-4 text-sm font-mono text-primary font-semibold">{{ pkg.id }}</td>
+                <tr
+                  class="border-b border-wire-subtle transition-colors duration-150 hover:bg-primary/4"
+                >
+                  <td class="px-6 py-4 text-sm font-mono text-primary font-semibold">
+                    {{ pkg.id }}
+                  </td>
                   <td class="px-6 py-4 text-sm font-medium">{{ pkg.description }}</td>
                   <td class="px-6 py-4 text-sm">{{ pkg.userId }}</td>
                   <td class="px-6 py-4 text-sm">
-                    <span :class="['inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-[0.04em]', statusBadgeClass(pkg.status)]">
+                    <span
+                      :class="[
+                        'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-[0.04em]',
+                        statusBadgeClass(pkg.status),
+                      ]"
+                    >
                       {{ pkg.status }}
                     </span>
                   </td>
@@ -259,10 +281,17 @@ async function confirmDeleteLog(logId: string, packageId: string) {
                     <select
                       class="wh-select py-1.5 pl-2.5 pr-7 bg-sheet border border-wire rounded-lg text-body text-[12px] font-medium outline-none cursor-pointer appearance-none transition-[border-color] duration-200 min-w-[120px] hover:border-primary focus:border-primary"
                       :value="pkg.warehouseId ?? ''"
-                      @change="store.assignWarehouse(pkg.id, ($event.target as HTMLSelectElement).value || null)"
+                      @change="
+                        store.assignWarehouse(
+                          pkg.id,
+                          ($event.target as HTMLSelectElement).value || null,
+                        )
+                      "
                     >
                       <option value="">— None —</option>
-                      <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
+                      <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">
+                        {{ wh.name }}
+                      </option>
                     </select>
                   </td>
                   <td class="px-6 py-4 text-sm text-soft">1 hour ago</td>
@@ -272,7 +301,9 @@ async function confirmDeleteLog(logId: string, packageId: string) {
                         class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-[12px] font-semibold whitespace-nowrap text-primary bg-primary/8 border border-primary/18 cursor-pointer transition-[background,border-color] duration-200 hover:bg-primary/16 hover:border-primary"
                         @click="toggleLog(pkg.id)"
                       >
-                        <span class="material-symbols-outlined" style="font-size:18px">{{ expandedRow === pkg.id ? 'expand_less' : 'expand_more' }}</span>
+                        <span class="material-symbols-outlined" style="font-size: 18px">{{
+                          expandedRow === pkg.id ? 'expand_less' : 'expand_more'
+                        }}</span>
                         <span>{{ expandedRow === pkg.id ? 'Hide' : 'Details' }}</span>
                       </button>
                       <button
@@ -281,7 +312,9 @@ async function confirmDeleteLog(logId: string, packageId: string) {
                         title="Delete"
                         @click="confirmDelete(pkg.id)"
                       >
-                        <span class="material-symbols-outlined" style="font-size:16px">delete</span>
+                        <span class="material-symbols-outlined" style="font-size: 16px"
+                          >delete</span
+                        >
                       </button>
                     </div>
                   </td>
@@ -295,7 +328,8 @@ async function confirmDeleteLog(logId: string, packageId: string) {
                         class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-primary bg-primary/10 border border-primary/25 cursor-pointer transition-colors duration-200 hover:bg-primary/20"
                         @click="openAddLog(pkg.id)"
                       >
-                        <span class="material-symbols-outlined" style="font-size:16px">add</span> Add Log
+                        <span class="material-symbols-outlined" style="font-size: 16px">add</span>
+                        Add Log
                       </button>
                     </div>
                     <div class="flex flex-col pl-4">
@@ -313,24 +347,41 @@ async function confirmDeleteLog(logId: string, packageId: string) {
                                 : 'bg-wire',
                             ]"
                           ></span>
-                          <span v-if="i < pkg.logHistory.length - 1" class="flex-1 w-0.5 bg-wire min-h-6"></span>
+                          <span
+                            v-if="i < pkg.logHistory.length - 1"
+                            class="flex-1 w-0.5 bg-wire min-h-6"
+                          ></span>
                         </div>
                         <div class="pb-4 flex-1">
                           <p class="text-sm font-semibold text-body">{{ entry.description }}</p>
                           <div class="mt-1">
                             <p class="flex items-center flex-wrap gap-2 text-[12px] text-soft">
-                              <span class="ml-2 text-faded">{{ formatLogTimestamp(entry.timestamp) }}</span>
-                              <span v-if="entry.previousStatus || entry.newStatus" class="text-primary font-semibold">
+                              <span class="ml-2 text-faded">{{
+                                formatLogTimestamp(entry.timestamp)
+                              }}</span>
+                              <span
+                                v-if="entry.previousStatus || entry.newStatus"
+                                class="text-primary font-semibold"
+                              >
                                 {{ entry.previousStatus || '—' }} → {{ entry.newStatus || '—' }}
                               </span>
                             </p>
-                            <p v-if="entry.fromWarehouseId || entry.toWarehouseId" class="text-[11px] text-faded mt-1">
+                            <p
+                              v-if="entry.fromWarehouseId || entry.toWarehouseId"
+                              class="text-[11px] text-faded mt-1"
+                            >
                               <span v-if="entry.fromWarehouseId">
-                                <span class="font-semibold text-soft">Desde:</span> {{ warehouseName(entry.fromWarehouseId) }}
+                                <span class="font-semibold text-soft">Desde:</span>
+                                {{ warehouseName(entry.fromWarehouseId) }}
                               </span>
-                              <span v-if="entry.fromWarehouseId && entry.toWarehouseId" class="mx-1.5 text-wire">·</span>
+                              <span
+                                v-if="entry.fromWarehouseId && entry.toWarehouseId"
+                                class="mx-1.5 text-wire"
+                                >·</span
+                              >
                               <span v-if="entry.toWarehouseId">
-                                <span class="font-semibold text-soft">Hacia:</span> {{ warehouseName(entry.toWarehouseId) }}
+                                <span class="font-semibold text-soft">Hacia:</span>
+                                {{ warehouseName(entry.toWarehouseId) }}
                               </span>
                             </p>
                           </div>
@@ -340,14 +391,18 @@ async function confirmDeleteLog(logId: string, packageId: string) {
                               title="Edit"
                               @click="openEditLog(entry, pkg.id)"
                             >
-                              <span class="material-symbols-outlined" style="font-size:14px">edit</span>
+                              <span class="material-symbols-outlined" style="font-size: 14px"
+                                >edit</span
+                              >
                             </button>
                             <button
                               class="p-1 rounded-md text-faded transition-[color,background] duration-200 hover:text-red-500 hover:bg-red-500/10"
                               title="Delete"
                               @click="confirmDeleteLog(entry.id, pkg.id)"
                             >
-                              <span class="material-symbols-outlined" style="font-size:14px">delete</span>
+                              <span class="material-symbols-outlined" style="font-size: 14px"
+                                >delete</span
+                              >
                             </button>
                           </div>
                         </div>
@@ -367,24 +422,38 @@ async function confirmDeleteLog(logId: string, packageId: string) {
       <form class="flex flex-col gap-4" @submit.prevent="submitCreate">
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="pkg-userId">User</label>
-          <select id="pkg-userId" v-model="form.userId" required
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
+          <select
+            id="pkg-userId"
+            v-model="form.userId"
+            required
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          >
             <option value="">— Select —</option>
-            <option v-for="u in usersStore.users" :key="u.id" :value="u.id">{{ u.name }} ({{ u.email }})</option>
+            <option v-for="u in usersStore.users" :key="u.id" :value="u.id">
+              {{ u.name }} ({{ u.email }})
+            </option>
           </select>
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="pkg-warehouse">Warehouse</label>
-          <select id="pkg-warehouse" v-model="form.warehouseId"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
+          <select
+            id="pkg-warehouse"
+            v-model="form.warehouseId"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          >
             <option value="">— None —</option>
-            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
+            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">
+              {{ wh.name }}
+            </option>
           </select>
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="pkg-status">Status</label>
-          <select id="pkg-status" v-model="form.status"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
+          <select
+            id="pkg-status"
+            v-model="form.status"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          >
             <option value="Pending">Pending</option>
             <option value="In Transit">In Transit</option>
             <option value="Delivered">Delivered</option>
@@ -393,20 +462,41 @@ async function confirmDeleteLog(logId: string, packageId: string) {
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="pkg-desc">Description</label>
-          <input id="pkg-desc" v-model="form.description" required type="text" placeholder="e.g. Electronics Kit"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="pkg-desc"
+            v-model="form.description"
+            required
+            type="text"
+            placeholder="e.g. Electronics Kit"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="pkg-price">Price</label>
-          <input id="pkg-price" v-model.number="form.price" required type="number" step="0.01" min="0"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="pkg-price"
+            v-model.number="form.price"
+            required
+            type="number"
+            step="0.01"
+            min="0"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex justify-end gap-2 mt-4">
-          <button type="button"
+          <button
+            type="button"
             class="px-4.5 py-2.5 rounded-xl bg-sheet text-soft font-semibold text-sm border border-wire transition-[border-color,color] duration-200 hover:border-primary hover:text-primary"
-            @click="showCreateModal = false">Cancel</button>
-          <button type="submit"
-            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110">Create</button>
+            @click="showCreateModal = false"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110"
+          >
+            Create
+          </button>
         </div>
       </form>
     </AppModal>
@@ -416,24 +506,37 @@ async function confirmDeleteLog(logId: string, packageId: string) {
       <form class="flex flex-col gap-4" @submit.prevent="submitLogCreate">
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="log-from">From Warehouse</label>
-          <select id="log-from" v-model="logForm.fromWarehouseId"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
+          <select
+            id="log-from"
+            v-model="logForm.fromWarehouseId"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          >
             <option value="">— None —</option>
-            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
+            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">
+              {{ wh.name }}
+            </option>
           </select>
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="log-to">To Warehouse</label>
-          <select id="log-to" v-model="logForm.toWarehouseId"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
+          <select
+            id="log-to"
+            v-model="logForm.toWarehouseId"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          >
             <option value="">— None —</option>
-            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
+            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">
+              {{ wh.name }}
+            </option>
           </select>
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="log-new">New Status</label>
-          <select id="log-new" v-model="logForm.newStatus"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
+          <select
+            id="log-new"
+            v-model="logForm.newStatus"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          >
             <option value="Pending">Pending</option>
             <option value="In Transit">In Transit</option>
             <option value="Delivered">Delivered</option>
@@ -442,15 +545,29 @@ async function confirmDeleteLog(logId: string, packageId: string) {
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="log-desc">Description</label>
-          <input id="log-desc" v-model="logForm.description" required type="text" placeholder="e.g. Picked up from warehouse"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="log-desc"
+            v-model="logForm.description"
+            required
+            type="text"
+            placeholder="e.g. Picked up from warehouse"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex justify-end gap-2 mt-4">
-          <button type="button"
+          <button
+            type="button"
             class="px-4.5 py-2.5 rounded-xl bg-sheet text-soft font-semibold text-sm border border-wire transition-[border-color,color] duration-200 hover:border-primary hover:text-primary"
-            @click="showLogCreateModal = false">Cancel</button>
-          <button type="submit"
-            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110">Add</button>
+            @click="showLogCreateModal = false"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110"
+          >
+            Add
+          </button>
         </div>
       </form>
     </AppModal>
@@ -460,24 +577,37 @@ async function confirmDeleteLog(logId: string, packageId: string) {
       <form v-if="editingLog" class="flex flex-col gap-4" @submit.prevent="submitLogEdit">
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="log-edit-from">From Warehouse</label>
-          <select id="log-edit-from" v-model="logForm.fromWarehouseId"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
+          <select
+            id="log-edit-from"
+            v-model="logForm.fromWarehouseId"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          >
             <option value="">— None —</option>
-            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
+            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">
+              {{ wh.name }}
+            </option>
           </select>
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="log-edit-to">To Warehouse</label>
-          <select id="log-edit-to" v-model="logForm.toWarehouseId"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
+          <select
+            id="log-edit-to"
+            v-model="logForm.toWarehouseId"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          >
             <option value="">— None —</option>
-            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
+            <option v-for="wh in warehouseOptions" :key="wh.id" :value="wh.id">
+              {{ wh.name }}
+            </option>
           </select>
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="log-edit-new">New Status</label>
-          <select id="log-edit-new" v-model="logForm.newStatus"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
+          <select
+            id="log-edit-new"
+            v-model="logForm.newStatus"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          >
             <option value="Pending">Pending</option>
             <option value="In Transit">In Transit</option>
             <option value="Delivered">Delivered</option>
@@ -486,15 +616,28 @@ async function confirmDeleteLog(logId: string, packageId: string) {
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-soft" for="log-edit-desc">Description</label>
-          <input id="log-edit-desc" v-model="logForm.description" required type="text"
-            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
+          <input
+            id="log-edit-desc"
+            v-model="logForm.description"
+            required
+            type="text"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary"
+          />
         </div>
         <div class="flex justify-end gap-2 mt-4">
-          <button type="button"
+          <button
+            type="button"
             class="px-4.5 py-2.5 rounded-xl bg-sheet text-soft font-semibold text-sm border border-wire transition-[border-color,color] duration-200 hover:border-primary hover:text-primary"
-            @click="closeEditLog">Cancel</button>
-          <button type="submit"
-            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110">Save</button>
+            @click="closeEditLog"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110"
+          >
+            Save
+          </button>
         </div>
       </form>
     </AppModal>

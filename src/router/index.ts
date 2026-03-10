@@ -81,44 +81,48 @@ const router = createRouter({
 })
 
 router.beforeEach(
-  async (to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext): Promise<void> => {
-  const auth = useAuthStore()
-  const isPublic = to.meta.public === true
-  const requiresAuth = to.meta.requiresAuth === true
-  const adminOnly = to.meta.adminOnly === true
+  async (
+    to: RouteLocationNormalized,
+    _from: RouteLocationNormalized,
+    next: NavigationGuardNext,
+  ): Promise<void> => {
+    const auth = useAuthStore()
+    const isPublic = to.meta.public === true
+    const requiresAuth = to.meta.requiresAuth === true
+    const adminOnly = to.meta.adminOnly === true
 
-  // Maintenance-mode check: redirect non-admins to maintenance page
-  if (to.name !== 'maintenance' && to.name !== 'login' && to.name !== 'signup') {
-    const settings = await SettingsService.getAll()
-    if (settings.maintenanceMode && !auth.isAdmin) {
-      next({ name: 'maintenance' })
+    // Maintenance-mode check: redirect non-admins to maintenance page
+    if (to.name !== 'maintenance' && to.name !== 'login' && to.name !== 'signup') {
+      const settings = await SettingsService.getAll()
+      if (settings.maintenanceMode && !auth.isAdmin) {
+        next({ name: 'maintenance' })
+        return
+      }
+    }
+
+    // If on maintenance page but mode is off (or user is admin), redirect away
+    if (to.name === 'maintenance') {
+      const settings = await SettingsService.getAll()
+      if (!settings.maintenanceMode || auth.isAdmin) {
+        next({ name: auth.isAuthenticated ? 'dashboard' : 'home' })
+        return
+      }
+    }
+
+    if (requiresAuth && !auth.isAuthenticated) {
+      next({ name: 'login', query: { redirect: to.fullPath } })
       return
     }
-  }
-
-  // If on maintenance page but mode is off (or user is admin), redirect away
-  if (to.name === 'maintenance') {
-    const settings = await SettingsService.getAll()
-    if (!settings.maintenanceMode || auth.isAdmin) {
-      next({ name: auth.isAuthenticated ? 'dashboard' : 'home' })
+    if (adminOnly && !auth.isAdmin) {
+      next({ name: 'access-denied' })
       return
     }
-  }
-
-  if (requiresAuth && !auth.isAuthenticated) {
-    next({ name: 'login', query: { redirect: to.fullPath } })
-    return
-  }
-  if (adminOnly && !auth.isAdmin) {
-    next({ name: 'access-denied' })
-    return
-  }
-  if (isPublic && auth.isAuthenticated && (to.name === 'login' || to.name === 'signup')) {
-    next({ name: 'dashboard' })
-    return
-  }
-  next()
-},
+    if (isPublic && auth.isAuthenticated && (to.name === 'login' || to.name === 'signup')) {
+      next({ name: 'dashboard' })
+      return
+    }
+    next()
+  },
 )
 
 export default router

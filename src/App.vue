@@ -62,7 +62,9 @@ watch(() => route.fullPath, loadAlert, { immediate: true })
 <style scoped>
 .slide-enter-active,
 .slide-leave-active {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 .slide-enter-from,
 .slide-leave-to {
