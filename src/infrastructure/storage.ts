@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   SEEDED: 'packtracker_seeded',
   AUTH_TOKEN: 'packtracker_auth_token',
   AUTH_USER: 'packtracker_auth_user',
+  SETTINGS: 'packtracker_settings',
 } as const
 
 export function getFromStorage<T>(key: string): T | null {

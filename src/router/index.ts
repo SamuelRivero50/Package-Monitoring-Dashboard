@@ -1,5 +1,5 @@
 /**
- * @description Vue Router configuration with authentication and admin-only guards.
+ * @description Vue Router configuration with authentication, admin-only, and maintenance-mode guards.
  */
 
 // framework
@@ -8,6 +8,9 @@ import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
 
 // stores
 import { useAuthStore } from '@/stores/auth'
+
+// services
+import { SettingsService } from '@/services/settingsService'
 
 // relative
 import HomeView from '../views/HomeView.vue'
@@ -68,15 +71,39 @@ const router = createRouter({
       component: () => import('../views/AccessDeniedView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/maintenance',
+      name: 'maintenance',
+      component: () => import('../views/MaintenanceView.vue'),
+      meta: { public: true },
+    },
   ],
 })
 
 router.beforeEach(
-  (to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext): void => {
+  async (to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext): Promise<void> => {
   const auth = useAuthStore()
   const isPublic = to.meta.public === true
   const requiresAuth = to.meta.requiresAuth === true
   const adminOnly = to.meta.adminOnly === true
+
+  // Maintenance-mode check: redirect non-admins to maintenance page
+  if (to.name !== 'maintenance' && to.name !== 'login' && to.name !== 'signup') {
+    const settings = await SettingsService.getAll()
+    if (settings.maintenanceMode && !auth.isAdmin) {
+      next({ name: 'maintenance' })
+      return
+    }
+  }
+
+  // If on maintenance page but mode is off (or user is admin), redirect away
+  if (to.name === 'maintenance') {
+    const settings = await SettingsService.getAll()
+    if (!settings.maintenanceMode || auth.isAdmin) {
+      next({ name: auth.isAuthenticated ? 'dashboard' : 'home' })
+      return
+    }
+  }
 
   if (requiresAuth && !auth.isAuthenticated) {
     next({ name: 'login', query: { redirect: to.fullPath } })

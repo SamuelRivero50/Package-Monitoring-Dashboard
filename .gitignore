@@ -50,4 +50,4 @@ test-results/
 playwright-report/
 /cypress/videos/
 /cypress/screenshots/
-.github/instructions/rules.instructions.md
+.github/instructions/packtrack.instructions.md

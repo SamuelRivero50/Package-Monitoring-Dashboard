@@ -9,5 +9,6 @@ export { WarehouseService } from './warehouseService'
 export { PackageLogService } from './packageLogService'
 export { UserService } from './userService'
 export { DashboardService } from './dashboardService'
+export { SettingsService } from './settingsService'
 
 export type { PaginatedResponse, ApiError } from './api'
