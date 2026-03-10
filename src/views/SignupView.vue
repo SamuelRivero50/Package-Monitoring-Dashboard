@@ -1,6 +1,62 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+/**
+ * @author Juan Andrés Young Hoyos
+ * @description Package Tracking view - table with warehouse assignment and log history.
+*/
+
+import { ref } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
 import AppFooter from '@/components/AppFooter.vue'
+import { useAuthStore } from '@/stores/auth'
+import { UserService } from '@/services'
+
+const router = useRouter()
+const auth = useAuthStore()
+
+const name = ref('')
+const email = ref('')
+const password = ref('')
+const confirmPassword = ref('')
+const terms = ref(false)
+const error = ref('')
+const isLoading = ref(false)
+
+async function handleSubmit() {
+  error.value = ''
+
+  if (!name.value.trim() || !email.value.trim() || !password.value) {
+    error.value = 'Please fill in all fields.'
+    return
+  }
+  if (password.value !== confirmPassword.value) {
+    error.value = 'Passwords do not match.'
+    return
+  }
+  if (password.value.length < 6) {
+    error.value = 'Password must be at least 6 characters.'
+    return
+  }
+  if (!terms.value) {
+    error.value = 'You must accept the Terms of Service.'
+    return
+  }
+
+  isLoading.value = true
+  try {
+    await UserService.create({
+      name: name.value.trim(),
+      email: email.value.trim(),
+      password: password.value,
+      role: 'User',
+    })
+    await auth.login({ email: email.value.trim(), password: password.value })
+    router.push('/dashboard')
+  } catch (e: unknown) {
+    error.value = (e as { message?: string })?.message ?? 'Registration failed.'
+  } finally {
+    isLoading.value = false
+  }
+}
 </script>
 
 <template>
@@ -86,12 +142,13 @@ import AppFooter from '@/components/AppFooter.vue'
             <p class="text-soft">Join the PackTrack network and start optimizing.</p>
           </div>
 
-          <form class="flex flex-col gap-5">
+          <form class="flex flex-col gap-5" @submit.prevent="handleSubmit">
             <div class="flex flex-col gap-2">
               <label class="text-sm font-medium text-soft">Full Name</label>
               <div class="relative">
                 <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-faded" style="font-size:20px">person</span>
                 <input
+                  v-model="name"
                   type="text"
                   placeholder="John Doe"
                   class="w-full py-3.5 pl-12 pr-4 bg-canvas border border-wire rounded-xl text-body text-base outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-faded focus:border-primary focus:shadow-[0_0_0_3px_rgba(45,212,191,0.12)]"
@@ -104,6 +161,7 @@ import AppFooter from '@/components/AppFooter.vue'
               <div class="relative">
                 <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-faded" style="font-size:20px">mail</span>
                 <input
+                  v-model="email"
                   type="email"
                   placeholder="john@company.com"
                   class="w-full py-3.5 pl-12 pr-4 bg-canvas border border-wire rounded-xl text-body text-base outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-faded focus:border-primary focus:shadow-[0_0_0_3px_rgba(45,212,191,0.12)]"
@@ -117,6 +175,7 @@ import AppFooter from '@/components/AppFooter.vue'
                 <div class="relative">
                   <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-faded" style="font-size:20px">lock</span>
                   <input
+                    v-model="password"
                     type="password"
                     placeholder="••••••••"
                     class="w-full py-3.5 pl-12 pr-4 bg-canvas border border-wire rounded-xl text-body text-base outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-faded focus:border-primary focus:shadow-[0_0_0_3px_rgba(45,212,191,0.12)]"
@@ -128,6 +187,7 @@ import AppFooter from '@/components/AppFooter.vue'
                 <div class="relative">
                   <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-faded" style="font-size:20px">verified_user</span>
                   <input
+                    v-model="confirmPassword"
                     type="password"
                     placeholder="••••••••"
                     class="w-full py-3.5 pl-12 pr-4 bg-canvas border border-wire rounded-xl text-body text-base outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-faded focus:border-primary focus:shadow-[0_0_0_3px_rgba(45,212,191,0.12)]"
@@ -138,6 +198,7 @@ import AppFooter from '@/components/AppFooter.vue'
 
             <div class="flex items-center gap-2 py-2">
               <input
+                v-model="terms"
                 type="checkbox"
                 id="terms"
                 class="w-5 h-5 rounded-md border border-wire bg-transparent accent-primary cursor-pointer"
@@ -149,12 +210,15 @@ import AppFooter from '@/components/AppFooter.vue'
               </label>
             </div>
 
+            <p v-if="error" class="text-red-400 text-sm -mt-1">{{ error }}</p>
+
             <button
               type="submit"
-              class="w-full bg-[#21262d] text-body font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-2 text-base transition-[transform,background] duration-200 active:scale-[0.98] hover:bg-[#2d333b]"
+              :disabled="isLoading"
+              class="w-full bg-[#21262d] text-body font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-2 text-base transition-[transform,background] duration-200 active:scale-[0.98] hover:bg-[#2d333b] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>Create Account</span>
-              <span class="material-symbols-outlined">arrow_forward</span>
+              <span>{{ isLoading ? 'Creating account…' : 'Create Account' }}</span>
+              <span v-if="!isLoading" class="material-symbols-outlined">arrow_forward</span>
             </button>
           </form>
 
