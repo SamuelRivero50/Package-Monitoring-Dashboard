@@ -55,7 +55,10 @@
 </template>
 
 <script setup lang="ts">
+// framework
 import { RouterLink, useRouter } from 'vue-router'
+
+// stores
 import { useAuthStore } from '@/stores/auth'
 
 defineProps<{

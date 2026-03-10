@@ -3,7 +3,10 @@
  * @description CRUD operations for PackageLog entries. Logs stored within package.logHistory.
  */
 
+// data
 import { getFromStorage, setToStorage, STORAGE_KEYS } from '@/infrastructure/storage'
+
+// types
 import type { PackageInterface, PackageLogInterface } from '@/interfaces'
 import type { CreatePackageLogDTO, UpdatePackageLogDTO } from '@/dtos'
 

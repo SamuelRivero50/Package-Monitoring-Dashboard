@@ -4,8 +4,13 @@
 // User Management page.
 // =============================================================
 
+// framework
 import { ref, onMounted } from 'vue'
+
+// services
 import { UserService } from '@/services'
+
+// types
 import type { UserInterface } from '@/interfaces'
 
 export function useUsersViewModel() {

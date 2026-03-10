@@ -3,7 +3,11 @@
  * @author Law
  * @description Access denied page shown when a non-admin user tries to reach an admin-only route.
  */
+
+// framework
 import { useRouter } from 'vue-router'
+
+// components
 import AppSidebar from '@/components/AppSidebar.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
 

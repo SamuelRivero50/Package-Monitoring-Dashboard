@@ -3,10 +3,17 @@
  * @description Pinia store for authentication. Token and user persisted in LocalStorage.
  */
 
+// framework
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+
+// services
 import { UserService } from '@/services'
+
+// data
 import { getFromStorage, setToStorage, STORAGE_KEYS } from '@/infrastructure/storage'
+
+// types
 import type { UserInterface } from '@/interfaces'
 import type { LoginDTO } from '@/dtos'
 

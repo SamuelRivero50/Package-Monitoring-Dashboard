@@ -2,10 +2,15 @@
  * @description Vue Router configuration with authentication and admin-only guards.
  */
 
+// framework
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+
+// stores
 import { useAuthStore } from '@/stores/auth'
+
+// relative
+import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

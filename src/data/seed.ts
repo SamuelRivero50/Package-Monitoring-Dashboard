@@ -3,7 +3,10 @@
  * @description Seed fictional data on first application load.
  */
 
+// data
 import { setToStorage, isSeeded, markSeeded, STORAGE_KEYS } from '@/infrastructure/storage'
+
+// types
 import type { PackageInterface, UserInterface, WarehouseInterface } from '@/interfaces'
 
 const SEED_WAREHOUSES: WarehouseInterface[] = [

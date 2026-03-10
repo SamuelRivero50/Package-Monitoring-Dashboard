@@ -3,9 +3,14 @@
  * @description Pinia store for users.
  */
 
+// framework
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+
+// services
 import { UserService } from '@/services'
+
+// types
 import type { UserInterface } from '@/interfaces'
 import type { CreateUserDTO, UpdateUserDTO } from '@/dtos'
 

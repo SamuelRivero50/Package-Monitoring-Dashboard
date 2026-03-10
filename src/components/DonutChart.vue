@@ -3,8 +3,12 @@
  * @author Law
  * @description Reusable donut chart component using Chart.js via vue-chartjs.
  */
+
+// framework
 import { computed } from 'vue'
 import { Doughnut } from 'vue-chartjs'
+
+// chart.js plugin registration
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 
 ChartJS.register(ArcElement, Tooltip, Legend)

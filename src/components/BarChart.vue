@@ -3,8 +3,12 @@
  * @author Juan Andrés Young Hoyos
  * @description Reusable vertical bar chart component using Chart.js via vue-chartjs.
  */
+
+// framework
 import { computed } from 'vue'
 import { Bar } from 'vue-chartjs'
+
+// chart.js plugin registration
 import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js'
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend)

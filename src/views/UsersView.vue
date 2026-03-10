@@ -3,12 +3,20 @@
  * @author Samuel Rivero, Juan Andrés Young Hoyos(dropdown)
  * @description User management view - CRUD for users.
  */
+
+// framework
 import { ref, computed } from 'vue'
+
+// stores
+import { useUsersStore } from '@/stores/users'
+
+// components
 import AppSidebar from '@/components/AppSidebar.vue'
 import AppModal from '@/components/AppModal.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
-import { useUsersStore } from '@/stores/users'
 import BarChart from '@/components/BarChart.vue'
+
+// types
 import type { UserInterface } from '@/interfaces'
 
 const store = useUsersStore()

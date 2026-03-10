@@ -4,8 +4,13 @@
 // The component only binds to what this composable exposes.
 // =============================================================
 
+// framework
 import { ref, computed, onMounted } from 'vue'
+
+// services
 import { DashboardService } from '@/services'
+
+// types
 import type { DashboardSummary, DashboardStatCard } from '@/types'
 
 export function useDashboardViewModel() {

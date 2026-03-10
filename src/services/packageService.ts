@@ -3,7 +3,10 @@
  * @description CRUD operations for the Package entity. Persisted in LocalStorage.
  */
 
+// data
 import { getFromStorage, setToStorage, STORAGE_KEYS } from '@/infrastructure/storage'
+
+// types
 import type { PackageInterface } from '@/interfaces'
 import type { CreatePackageDTO, UpdatePackageDTO } from '@/dtos'
 

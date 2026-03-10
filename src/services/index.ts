@@ -4,9 +4,10 @@
  */
 
 export { apiFetch, buildUrl } from './api'
-export type { PaginatedResponse, ApiError } from './api'
 export { PackageService } from './packageService'
 export { WarehouseService } from './warehouseService'
 export { PackageLogService } from './packageLogService'
 export { UserService } from './userService'
 export { DashboardService } from './dashboardService'
+
+export type { PaginatedResponse, ApiError } from './api'

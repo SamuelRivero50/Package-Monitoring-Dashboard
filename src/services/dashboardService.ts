@@ -3,7 +3,10 @@
  * @description Aggregated data for the system overview page.
  */
 
+// relative
 import { apiFetch } from './api'
+
+// types
 import type { DashboardSummary, RecentPackageRow } from '@/types'
 
 const MOCK_RECENT: RecentPackageRow[] = [

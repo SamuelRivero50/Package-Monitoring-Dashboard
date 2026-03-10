@@ -3,11 +3,16 @@
  * @author Samuel Rivero
  * @description Login page - email/password authentication. Redirects to dashboard on success.
  */
+
+// framework
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { RouterLink } from 'vue-router'
-import AppFooter from '@/components/AppFooter.vue'
+import { RouterLink, useRouter } from 'vue-router'
+
+// stores
 import { useAuthStore } from '@/stores/auth'
+
+// components
+import AppFooter from '@/components/AppFooter.vue'
 
 const router = useRouter()
 const auth = useAuthStore()

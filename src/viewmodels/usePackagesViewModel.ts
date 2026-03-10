@@ -4,8 +4,13 @@
 // warehouse assignment for the Package Tracking page.
 // =============================================================
 
+// framework
 import { ref, computed, onMounted } from 'vue'
+
+// services
 import { PackageService } from '@/services'
+
+// types
 import type { PackageInterface } from '@/interfaces'
 
 export function usePackagesViewModel() {

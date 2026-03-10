@@ -3,17 +3,23 @@
  * @description Pinia store for packages and warehouses.
  */
 
+// framework
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+
+// services
 import { PackageService, WarehouseService, PackageLogService } from '@/services'
+
+// types
 import type { PackageInterface, WarehouseInterface } from '@/interfaces'
 import type {
   CreatePackageDTO,
   UpdatePackageDTO,
   CreatePackageLogDTO,
   UpdatePackageLogDTO,
+  CreateWarehouseDTO,
+  UpdateWarehouseDTO,
 } from '@/dtos'
-import type { CreateWarehouseDTO, UpdateWarehouseDTO } from '@/dtos'
 
 export const usePackagesStore = defineStore('packages', () => {
   const warehouses = ref<WarehouseInterface[]>([])

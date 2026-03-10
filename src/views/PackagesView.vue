@@ -2,14 +2,22 @@
 /**
  * @author Samuel Rivero , Juan Andrés Young Hoyos
  * @description Package Tracking view - table with warehouse assignment and log history.
-*/
+ */
+
+// framework
 import { ref, computed } from 'vue'
+
+// stores
+import { usePackagesStore } from '@/stores/packages'
+import { useUsersStore } from '@/stores/users'
+
+// components
 import AppSidebar from '@/components/AppSidebar.vue'
 import AppModal from '@/components/AppModal.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
-import { usePackagesStore } from '@/stores/packages'
-import { useUsersStore } from '@/stores/users'
 import BarChart from '@/components/BarChart.vue'
+
+// types
 import type { PackageLogInterface } from '@/interfaces'
 
 const store = usePackagesStore()

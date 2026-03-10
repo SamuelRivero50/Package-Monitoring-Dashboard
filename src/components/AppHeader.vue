@@ -45,7 +45,10 @@
 </template>
 
 <script setup lang="ts">
+// framework
 import { RouterLink } from 'vue-router'
+
+// stores
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()

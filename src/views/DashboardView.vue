@@ -3,12 +3,18 @@
  * @author Samuel Rivero, Law
  * @description System overview dashboard with Chart.js donut and Leaflet live map.
  */
+
+// framework
 import { computed } from 'vue'
+
+// viewmodels
+import { useDashboardViewModel } from '@/viewmodels'
+
+// components
 import AppSidebar from '@/components/AppSidebar.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
 import DonutChart from '@/components/DonutChart.vue'
 import LeafletMap from '@/components/LeafletMap.vue'
-import { useDashboardViewModel } from '@/viewmodels'
 
 const { summary, statCards, trendLabel, trendClass } = useDashboardViewModel()
 

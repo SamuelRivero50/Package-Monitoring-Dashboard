@@ -3,9 +3,11 @@
  * @description CRUD operations for the Warehouse entity. Persisted in LocalStorage.
  */
 
+// data
 import { getFromStorage, setToStorage, STORAGE_KEYS } from '@/infrastructure/storage'
-import type { PackageInterface } from '@/interfaces'
-import type { WarehouseInterface } from '@/interfaces'
+
+// types
+import type { PackageInterface, WarehouseInterface } from '@/interfaces'
 import type { CreateWarehouseDTO, UpdateWarehouseDTO } from '@/dtos'
 
 function loadAll(): WarehouseInterface[] {

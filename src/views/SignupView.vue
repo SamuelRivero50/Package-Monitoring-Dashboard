@@ -4,11 +4,18 @@
  * @description Package Tracking view - table with warehouse assignment and log history.
 */
 
+// framework
 import { ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import AppFooter from '@/components/AppFooter.vue'
+
+// stores
 import { useAuthStore } from '@/stores/auth'
+
+// services
 import { UserService } from '@/services'
+
+// components
+import AppFooter from '@/components/AppFooter.vue'
 
 const router = useRouter()
 const auth = useAuthStore()

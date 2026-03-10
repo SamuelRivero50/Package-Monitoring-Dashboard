@@ -4,8 +4,13 @@
 // expand/collapse panel that shows packages per warehouse.
 // =============================================================
 
+// framework
 import { ref, onMounted } from 'vue'
+
+// services
 import { WarehouseService, PackageService } from '@/services'
+
+// types
 import type { WarehouseInterface, PackageInterface } from '@/interfaces'
 
 export function useWarehousesViewModel() {

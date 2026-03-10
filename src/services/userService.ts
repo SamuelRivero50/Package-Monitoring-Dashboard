@@ -3,7 +3,10 @@
  * @description CRUD operations and authentication for the User entity. Persisted in LocalStorage.
  */
 
+// data
 import { getFromStorage, setToStorage, STORAGE_KEYS } from '@/infrastructure/storage'
+
+// types
 import type { UserInterface } from '@/interfaces'
 import type { CreateUserDTO, UpdateUserDTO, LoginDTO, AuthResponseDTO } from '@/dtos'
 

@@ -3,6 +3,7 @@
  * @author Samuel Rivero
  * @description Reusable modal for forms and confirmations.
  */
+
 interface Props {
   show: boolean
   title: string

@@ -3,12 +3,20 @@
  * @author Samuel Rivero, Law
  * @description Warehouse management view - capacity cards, Leaflet map, and packages per warehouse.
  */
+
+// framework
 import { ref, computed } from 'vue'
+
+// stores
+import { usePackagesStore } from '@/stores/packages'
+
+// components
 import AppSidebar from '@/components/AppSidebar.vue'
 import AppModal from '@/components/AppModal.vue'
 import DashboardHeader from '@/components/DashboardHeader.vue'
 import LeafletMap from '@/components/LeafletMap.vue'
-import { usePackagesStore } from '@/stores/packages'
+
+// types
 import type { WarehouseInterface } from '@/interfaces'
 
 const store = usePackagesStore()
