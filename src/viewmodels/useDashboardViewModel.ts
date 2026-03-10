@@ -1,3 +1,8 @@
+/**
+ * @author Samuel Enrique Rivero Urribarrí, David Hernández Herrera, Juan Andrés Young Hoyos
+ * @description ViewModel for the Dashboard page: fetches summary and computes stat cards.
+ */
+
 // =============================================================
 // Dashboard ViewModel
 // Handles data fetching and derived state for the Dashboard page.

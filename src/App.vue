@@ -2,7 +2,7 @@
 /**
  * @author David Hernandez
  * @description Root component. Renders the router view and a global alert banner when active.
- */
+*/
 
 // framework
 import { ref, watch } from 'vue'

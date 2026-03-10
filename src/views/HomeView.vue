@@ -1,4 +1,9 @@
 <script setup lang="ts">
+/**
+ * @author Samuel Enrique Rivero Urribarrí, David Hernández Herrera, Juan Andrés Young Hoyos
+ * @description Public landing page with hero, stats, features, and CTA sections.
+ */
+
 import { RouterLink } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import AppFooter from '@/components/AppFooter.vue'

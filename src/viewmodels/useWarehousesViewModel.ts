@@ -1,3 +1,8 @@
+/**
+ * @author Samuel Enrique Rivero Urribarrí, David Hernández Herrera, Juan Andrés Young Hoyos
+ * @description ViewModel for the Warehouses page: loads warehouses and packages, handles expand panels.
+ */
+
 // =============================================================
 // Warehouses ViewModel
 // Loads warehouses and packages in parallel; handles the

@@ -1,3 +1,7 @@
+<!--
+  @author Samuel Enrique Rivero Urribarrí, David Hernández Herrera, Juan Andrés Young Hoyos
+  @description Site-wide footer with brand, copyright, and quick links.
+-->
 <template>
   <footer class="border-t border-wire py-12 bg-canvas">
     <div

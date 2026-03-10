@@ -7,6 +7,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @author Samuel Enrique Rivero Urribarrí, David Hernández Herrera, Juan Andrés Young Hoyos
+ * @description Sticky top bar for dashboard pages showing the page title.
+ */
+
 defineProps<{
   title: string
 }>()

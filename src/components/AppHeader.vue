@@ -1,4 +1,11 @@
+
+/**
+  * @author David Hernandez, Samuel, Juan Andrés
+  * @description Header component. Renders the navigation bar and user actions.
+*/
+
 <template>
+
   <header class="sticky top-0 z-50 w-full border-b border-wire bg-canvas/85 backdrop-blur-md">
     <div class="max-w-[1280px] mx-auto px-6 h-[72px] flex items-center justify-between">
       <RouterLink to="/" class="flex items-center gap-2">

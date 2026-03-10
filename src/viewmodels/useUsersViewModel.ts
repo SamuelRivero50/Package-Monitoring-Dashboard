@@ -1,3 +1,8 @@
+/**
+ * @author Samuel Enrique Rivero Urribarrí, David Hernández Herrera, Juan Andrés Young Hoyos
+ * @description ViewModel for the User Management page: loads users and exposes delete action.
+ */
+
 // =============================================================
 // Users ViewModel
 // Loads user list and exposes a delete action for the

@@ -1,6 +1,7 @@
 /**
+ * @author Juan Andrés, David Hernandez
  * @description Vue Router configuration with authentication, admin-only, and maintenance-mode guards.
- */
+*/
 
 // framework
 import { createRouter, createWebHistory } from 'vue-router'

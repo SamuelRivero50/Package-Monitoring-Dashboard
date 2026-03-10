@@ -1,3 +1,8 @@
+/**
+ * @author Juan Andrés, Samuel, David
+ * @description Root component. Renders the router view and a global alert banner when active.
+*/
+
 import './assets/main.css'
 
 // framework

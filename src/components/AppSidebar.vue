@@ -59,6 +59,11 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * @author Samuel Enrique Rivero Urribarrí, David Hernández Herrera, Juan Andrés Young Hoyos
+ * @description Dashboard sidebar with role-based nav items and user session card.
+ */
+
 // framework
 import { RouterLink, useRouter } from 'vue-router'
 

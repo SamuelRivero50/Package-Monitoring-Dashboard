@@ -1,3 +1,8 @@
+/**
+ * @author Samuel Enrique Rivero Urribarrí, David Hernández Herrera, Juan Andrés Young Hoyos
+ * @description ViewModel for the Packages page: filtering, search, row expand, warehouse assignment.
+ */
+
 // =============================================================
 // Packages ViewModel
 // Handles filtering, search, expand/collapse rows, and
