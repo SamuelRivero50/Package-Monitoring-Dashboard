@@ -33,11 +33,11 @@ const form = ref({
 })
 
 const roleBreakdown = computed(() => {
-  const roles = ['User', 'Manager', 'Admin']
+  const roles = ['User', 'Admin']
   return {
     labels: roles,
     values: roles.map((r) => store.users.filter((u) => u.role === r).length),
-    colors: ['#8b949e', '#f59e0b', '#2dd4bf'],
+    colors: ['#8b949e', '#2dd4bf'],
   }
 })
 
@@ -143,7 +143,6 @@ async function confirmDelete(id: string) {
           >
             <option value="All">All Roles</option>
             <option value="User">User</option>
-            <option value="Manager">Manager</option>
             <option value="Admin">Admin</option>
           </select>
         </div>
@@ -241,7 +240,6 @@ async function confirmDelete(id: string) {
           <select id="user-role" v-model="form.role"
             class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
             <option value="User">User</option>
-            <option value="Manager">Manager</option>
             <option value="Admin">Admin</option>
           </select>
         </div>
@@ -283,7 +281,6 @@ async function confirmDelete(id: string) {
           <select id="user-edit-role" v-model="form.role"
             class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
             <option value="User">User</option>
-            <option value="Manager">Manager</option>
             <option value="Admin">Admin</option>
           </select>
         </div>

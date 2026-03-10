@@ -128,8 +128,8 @@ const SEED_USERS: UserInterface[] = [
     id: 'user-2',
     name: 'Maria Garcia',
     email: 'maria.g@global.net',
-    password: 'manager123',
-    role: 'Manager',
+    password: 'user123',
+    role: 'User',
     avatarUrl:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuC3vpmkxarpB0SV14Zfz2Awz17xzM2i1PmP41oBTau5jzTecGJKl8C90bzRlS7SYiRT-yxW6R5QUdl0SJ46G9chewMrSepfTYj61WiSKgL-PGj9sB-7yr5NYAi30sD8l2GunGeYT-X7WPiXTL4qZpO35o7asIyxvEYreIhvJWJnL70MFIcsZeOtoW5jS-SPnpTgetncxKB1lmwkxwLY_Q5KNWYoV5v89Bpn8X_-ALusTBUrnQmjDpZGcoAQServcjMJ0uOPqwwduHxU',
   },
