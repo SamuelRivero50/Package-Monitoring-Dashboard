@@ -34,5 +34,14 @@ export default defineConfigWithVueTs(
 
   ...pluginOxlint.buildFromOxlintConfigFile('.oxlintrc.json'),
 
+  {
+    name: 'app/strict-types',
+    rules: {
+      // Banning `any` is the single most impactful TypeScript rule in production codebases.
+      // It prevents bypassing the type system entirely, which defeats the purpose of TypeScript.
+      '@typescript-eslint/no-explicit-any': 'error',
+    },
+  },
+
   skipFormatting,
 )
