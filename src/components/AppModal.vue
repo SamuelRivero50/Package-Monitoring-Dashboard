@@ -14,15 +14,23 @@ defineEmits<{ (e: 'close'): void }>()
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="show" class="modalOverlay" @click.self="$emit('close')">
-        <div class="modalBox">
-          <div class="modalHeader">
-            <h2 class="modalTitle">{{ title }}</h2>
-            <button class="modalClose" aria-label="Close" @click="$emit('close')">
+      <div
+        v-if="show"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[1000] p-6"
+        @click.self="$emit('close')"
+      >
+        <div class="modal-box bg-panel border border-wire rounded-2xl max-w-[480px] w-full max-h-[90vh] overflow-hidden flex flex-col">
+          <div class="flex items-center justify-between p-6 border-b border-wire">
+            <h2 class="text-lg font-bold">{{ title }}</h2>
+            <button
+              class="p-1.5 rounded-lg text-faded hover:text-body hover:bg-sheet transition-colors duration-200"
+              aria-label="Close"
+              @click="$emit('close')"
+            >
               <span class="material-symbols-outlined">close</span>
             </button>
           </div>
-          <div class="modalBody">
+          <div class="p-6 overflow-y-auto">
             <slot></slot>
           </div>
         </div>
@@ -32,79 +40,20 @@ defineEmits<{ (e: 'close'): void }>()
 </template>
 
 <style scoped>
-.modalOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: var(--spacing-lg);
-}
-
-.modalBox {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-xl);
-  max-width: 480px;
-  width: 100%;
-  max-height: 90vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.modalHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-default);
-}
-
-.modalTitle {
-  font-size: var(--text-lg);
-  font-weight: 700;
-}
-
-.modalClose {
-  padding: 6px;
-  border-radius: var(--radius-md);
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
-  transition: color 0.2s, background 0.2s;
-}
-
-.modalClose:hover {
-  color: var(--text-primary);
-  background: var(--bg-elevated);
-}
-
-.modalBody {
-  padding: var(--spacing-lg);
-  overflow-y: auto;
-}
-
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity 0.2s ease;
 }
-
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
 }
-
-.modal-enter-active .modalBox,
-.modal-leave-active .modalBox {
+.modal-enter-active .modal-box,
+.modal-leave-active .modal-box {
   transition: transform 0.2s ease;
 }
-
-.modal-enter-from .modalBox,
-.modal-leave-to .modalBox {
+.modal-enter-from .modal-box,
+.modal-leave-to .modal-box {
   transform: scale(0.95);
 }
 </style>

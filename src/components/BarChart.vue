@@ -60,14 +60,7 @@ const chartOptions = {
 </script>
 
 <template>
-  <div class="bar-wrapper">
+  <div class="w-full h-full">
     <Bar :data="chartData" :options="chartOptions" />
   </div>
 </template>
-
-<style scoped>
-.bar-wrapper {
-  width: 100%;
-  height: 100%;
-}
-</style>

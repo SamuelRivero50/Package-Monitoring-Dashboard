@@ -1,40 +1,53 @@
 <template>
-  <aside class="sidebar">
-    <div class="sidebar-brand">
-      <RouterLink to="/" class="brand-link">
-        <div class="brand-icon">
-          <span class="material-symbols-outlined">package_2</span>
+  <aside class="w-64 min-w-[256px] border-r border-wire flex flex-col h-screen sticky top-0 bg-canvas">
+    <!-- Brand -->
+    <div class="p-6">
+      <RouterLink to="/" class="flex items-center gap-2">
+        <div class="bg-primary/15 p-2 rounded-lg text-primary flex items-center justify-center">
+          <span class="material-symbols-outlined" style="font-size:24px">package_2</span>
         </div>
         <div>
-          <h1 class="brand-name">Admin Console</h1>
-          <p class="brand-version">System v4.2.0</p>
+          <h1 class="font-bold text-base leading-[1.2] tracking-[-0.3px]">Admin Console</h1>
+          <p class="text-xs text-soft mt-0.5">System v4.2.0</p>
         </div>
       </RouterLink>
     </div>
 
-    <nav class="sidebar-nav">
+    <!-- Nav -->
+    <nav class="flex-1 px-4 flex flex-col gap-0.5 mt-4">
       <RouterLink
         v-for="item in navItems.filter((i) => !i.adminOnly || auth.isAdmin)"
         :key="item.path"
         :to="item.path"
-        :class="['nav-item', { active: activePage === item.path }]"
+        :class="[
+          'flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-[background,color] duration-150',
+          activePage === item.path
+            ? 'bg-primary/15 text-primary font-bold'
+            : 'text-soft hover:bg-primary/8 hover:text-primary',
+        ]"
       >
-        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        <span class="material-symbols-outlined" style="font-size:20px">{{ item.icon }}</span>
         <span>{{ item.label }}</span>
       </RouterLink>
     </nav>
 
-    <div class="sidebar-footer">
-      <div class="user-card">
-        <div class="user-avatar-sm">
-          <span class="material-symbols-outlined">person</span>
+    <!-- Footer user card -->
+    <div class="p-4 border-t border-wire">
+      <div class="flex items-center gap-2 p-2 bg-primary/5 rounded-xl">
+        <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
+          <span class="material-symbols-outlined" style="font-size:16px">person</span>
         </div>
-        <div class="user-card-info">
-          <p class="user-card-name">{{ auth.user?.name ?? 'Guest' }}</p>
-          <p class="user-card-email">{{ auth.user?.email ?? '' }}</p>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-bold truncate">{{ auth.user?.name ?? 'Guest' }}</p>
+          <p class="text-[10px] text-soft truncate">{{ auth.user?.email ?? '' }}</p>
         </div>
-        <button type="button" class="logout-icon" title="Logout" @click="handleLogout">
-          <span class="material-symbols-outlined">logout</span>
+        <button
+          type="button"
+          class="p-1 text-soft transition-colors duration-150 hover:text-red-400"
+          title="Logout"
+          @click="handleLogout"
+        >
+          <span class="material-symbols-outlined" style="font-size:16px">logout</span>
         </button>
       </div>
     </div>
@@ -65,160 +78,3 @@ const navItems: { path: string; label: string; icon: string; adminOnly?: boolean
   { path: '/settings', label: 'Settings', icon: 'settings', adminOnly: true },
 ]
 </script>
-
-<style scoped>
-.sidebar {
-  width: 256px;
-  min-width: 256px;
-  border-right: 1px solid var(--border-default);
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  position: sticky;
-  top: 0;
-  background: var(--bg-base);
-}
-
-.sidebar-brand {
-  padding: var(--spacing-lg);
-}
-
-.brand-link {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.brand-icon {
-  background: rgba(45, 212, 191, 0.15);
-  padding: 8px;
-  border-radius: var(--radius-md);
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.brand-icon .material-symbols-outlined {
-  font-size: 24px;
-}
-
-.brand-name {
-  font-weight: 700;
-  font-size: var(--text-base);
-  line-height: 1.2;
-  letter-spacing: -0.3px;
-}
-
-.brand-version {
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
-  margin-top: 2px;
-}
-
-.sidebar-nav {
-  flex: 1;
-  padding: 0 var(--spacing-md);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: var(--spacing-md);
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: 10px 14px;
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  transition:
-    background 0.15s,
-    color 0.15s;
-}
-
-.nav-item .material-symbols-outlined {
-  font-size: 20px;
-}
-
-.nav-item:hover {
-  background: rgba(45, 212, 191, 0.08);
-  color: var(--color-primary);
-}
-
-.nav-item.active {
-  background: rgba(45, 212, 191, 0.15);
-  color: var(--color-primary);
-  font-weight: 700;
-}
-
-.sidebar-footer {
-  padding: var(--spacing-md);
-  border-top: 1px solid var(--border-default);
-}
-
-.user-card {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: 8px;
-  background: rgba(45, 212, 191, 0.05);
-  border-radius: var(--radius-lg);
-}
-
-.user-avatar-sm {
-  width: 32px;
-  height: 32px;
-  border-radius: 9999px;
-  background: rgba(45, 212, 191, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-primary);
-  flex-shrink: 0;
-}
-
-.user-avatar-sm .material-symbols-outlined {
-  font-size: 16px;
-}
-
-.user-card-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.user-card-name {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.user-card-email {
-  font-size: 10px;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.logout-icon {
-  padding: 4px;
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: color 0.15s;
-}
-
-.logout-icon .material-symbols-outlined {
-  font-size: 16px;
-}
-
-.logout-icon:hover {
-  color: #f87171;
-}
-</style>

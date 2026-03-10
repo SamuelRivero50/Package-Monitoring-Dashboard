@@ -1,15 +1,19 @@
 <template>
-  <header class="dashHeader">
-    <div class="dashHeaderLeft">
-      <h2 class="dashHeaderTitle">{{ title }}</h2>
-      <div class="dashHeaderSearch">
-        <span class="material-symbols-outlined searchIcon">search</span>
-        <input class="searchInput" placeholder="Search..." type="text" />
+  <header class="h-16 flex items-center justify-between px-8 border-b border-wire sticky top-0 z-10 bg-canvas/85 backdrop-blur-md">
+    <div class="flex items-center gap-6 flex-1">
+      <h2 class="text-lg font-bold tracking-[-0.3px] whitespace-nowrap">{{ title }}</h2>
+      <div class="relative max-w-[280px] w-full hidden sm:block">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-faded" style="font-size:16px">search</span>
+        <input
+          class="w-full bg-primary/5 border border-wire rounded-lg py-2 pl-[38px] pr-3.5 text-body text-sm outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-faded focus:border-primary focus:shadow-[0_0_0_3px_rgba(45,212,191,0.12)]"
+          placeholder="Search..."
+          type="text"
+        />
       </div>
     </div>
-    <div class="dashHeaderActions">
-      <button class="notificationBtn">
-        <span class="material-symbols-outlined">notifications</span>
+    <div class="flex items-center gap-2">
+      <button class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary/5 text-soft transition-[color,background] duration-200 hover:text-primary hover:bg-primary/10">
+        <span class="material-symbols-outlined" style="font-size:20px">notifications</span>
       </button>
     </div>
   </header>
@@ -20,108 +24,3 @@ defineProps<{
   title: string
 }>()
 </script>
-
-<style scoped>
-.dashHeader {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--spacing-xl);
-  border-bottom: 1px solid var(--border-default);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: rgba(13, 17, 23, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.dashHeaderLeft {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
-  flex: 1;
-}
-
-.dashHeaderTitle {
-  font-size: var(--text-lg);
-  font-weight: 700;
-  letter-spacing: -0.3px;
-  white-space: nowrap;
-}
-
-.dashHeaderSearch {
-  position: relative;
-  max-width: 280px;
-  width: 100%;
-}
-
-.searchIcon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 16px;
-  color: var(--text-muted);
-}
-
-.searchInput {
-  width: 100%;
-  background: rgba(45, 212, 191, 0.05);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  padding: 8px 14px 8px 38px;
-  color: var(--text-primary);
-  font-size: var(--text-sm);
-  outline: none;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-}
-
-.searchInput::placeholder {
-  color: var(--text-muted);
-}
-
-.searchInput:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.12);
-}
-
-.dashHeaderActions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.notificationBtn {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-md);
-  background: rgba(45, 212, 191, 0.05);
-  color: var(--text-secondary);
-  transition:
-    color 0.2s,
-    background 0.2s;
-}
-
-.notificationBtn .material-symbols-outlined {
-  font-size: 20px;
-}
-
-.notificationBtn:hover {
-  color: var(--color-primary);
-  background: rgba(45, 212, 191, 0.1);
-}
-
-
-@media (max-width: 640px) {
-  .dashHeaderSearch {
-    display: none;
-  }
-}
-</style>
