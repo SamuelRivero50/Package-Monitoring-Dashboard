@@ -105,32 +105,42 @@ async function confirmDelete(id: string) {
 </script>
 
 <template>
-  <div class="pageLayout">
+  <div class="flex min-h-screen bg-canvas">
     <AppSidebar activePage="/users" />
 
-    <main class="pageMain">
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
       <DashboardHeader title="User Management" />
 
-      <div class="pageContent">
+      <div class="p-8 flex flex-col gap-8">
         <!-- Stat cards -->
-        <div class="statsRow">
-          <div v-for="stat in statCards" :key="stat.label" class="userStatCard">
-            <div class="userStatLeft">
-              <p class="userStatLabel">{{ stat.label }}</p>
-              <h3 class="userStatValue">{{ stat.value }}</h3>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div
+            v-for="stat in statCards"
+            :key="stat.label"
+            class="p-6 rounded-xl border border-wire bg-canvas flex justify-between items-start transition-[border-color] duration-200 hover:border-primary/25"
+          >
+            <div>
+              <p class="text-sm text-soft">{{ stat.label }}</p>
+              <h3 class="text-[32px] font-bold mt-1">{{ stat.value }}</h3>
             </div>
-            <div class="userStatIcon">
-              <span class="material-symbols-outlined">{{ stat.icon }}</span>
+            <div class="p-2 bg-primary/15 rounded-lg text-primary flex items-center justify-center">
+              <span class="material-symbols-outlined" style="font-size:22px">{{ stat.icon }}</span>
             </div>
           </div>
-          <div class="userStatCard userStatCardAction">
-            <button class="btnPrimary" @click="openCreate">New User</button>
+          <div class="p-6 rounded-xl border border-wire bg-canvas flex items-center justify-center transition-[border-color] duration-200 hover:border-primary/25">
+            <button
+              class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm border-none whitespace-nowrap transition-[filter] duration-200 hover:brightness-110"
+              @click="openCreate"
+            >New User</button>
           </div>
         </div>
 
         <!-- Filter bar -->
-        <div class="filtersBar">
-          <select v-model="roleFilter" class="filterSelect">
+        <div class="flex gap-4">
+          <select
+            v-model="roleFilter"
+            class="px-3 py-2.5 bg-canvas border border-wire rounded-xl text-body text-sm outline-none cursor-pointer transition-[border-color] duration-200 hover:border-primary focus:border-primary"
+          >
             <option value="All">All Roles</option>
             <option value="User">User</option>
             <option value="Manager">Manager</option>
@@ -139,9 +149,9 @@ async function confirmDelete(id: string) {
         </div>
 
         <!-- Role Bar Chart -->
-        <div class="chartCard">
-          <p class="chartTitle">Users by Role</p>
-          <div class="chartBody">
+        <div class="bg-canvas border border-wire rounded-xl p-6">
+          <p class="text-sm font-bold text-soft mb-4 uppercase tracking-[0.06em]">Users by Role</p>
+          <div class="h-[200px]">
             <BarChart
               :labels="roleBreakdown.labels"
               :values="roleBreakdown.values"
@@ -151,45 +161,53 @@ async function confirmDelete(id: string) {
         </div>
 
         <!-- Users table -->
-        <div class="tableCard">
-          <table class="dataTable">
-            <thead>
+        <div class="bg-canvas border border-wire rounded-xl overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-sheet">
               <tr>
-                <th>User</th>
-                <th>Role</th>
-                <th class="thRight">Actions</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">User</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded">Role</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.06em] text-faded text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="user in filteredUsers" :key="user.id" class="tableRow">
-                <td>
-                  <div class="userCell">
+              <tr
+                v-for="user in filteredUsers"
+                :key="user.id"
+                class="border-b border-wire-subtle transition-colors duration-150 hover:bg-primary/4"
+              >
+                <td class="px-6 py-4 text-sm">
+                  <div class="flex items-center gap-2">
                     <div
-                      class="userCellAvatar"
+                      class="w-10 h-10 rounded-full bg-cover bg-center shrink-0"
                       :style="{
                         backgroundImage: user.avatarUrl ? `url(${user.avatarUrl})` : 'none',
-                        backgroundColor: user.avatarUrl ? 'transparent' : 'var(--bg-elevated)',
+                        backgroundColor: user.avatarUrl ? 'transparent' : '#1c2333',
                       }"
                     ></div>
                     <div>
-                      <p class="userCellName">{{ user.name }}</p>
-                      <p class="userCellEmail">{{ user.email }}</p>
+                      <p class="text-sm font-bold">{{ user.name }}</p>
+                      <p class="text-xs text-soft">{{ user.email }}</p>
                     </div>
                   </div>
                 </td>
-                <td class="roleCell">{{ user.role }}</td>
-                <td class="actionsCell">
-                  <div class="actionBtns">
-                    <button class="actionEdit" title="Edit" @click="openEdit(user)">
-                      <span class="material-symbols-outlined">edit</span>
+                <td class="px-6 py-4 text-xs font-bold text-primary">{{ user.role }}</td>
+                <td class="px-6 py-4 text-right">
+                  <div class="flex items-center justify-end gap-1">
+                    <button
+                      class="w-8 h-8 flex items-center justify-center rounded-lg text-soft transition-[background,color] duration-150 hover:bg-primary/15 hover:text-primary"
+                      title="Edit"
+                      @click="openEdit(user)"
+                    >
+                      <span class="material-symbols-outlined" style="font-size:18px">edit</span>
                     </button>
                     <button
-                      class="actionDelete"
+                      class="w-8 h-8 flex items-center justify-center rounded-lg text-soft transition-[background,color] duration-150 disabled:opacity-50 disabled:cursor-not-allowed hover:not-disabled:bg-red-500/15 hover:not-disabled:text-red-500"
                       :disabled="deletingId === user.id"
                       title="Delete"
                       @click="confirmDelete(user.id)"
                     >
-                      <span class="material-symbols-outlined">delete</span>
+                      <span class="material-symbols-outlined" style="font-size:18px">delete</span>
                     </button>
                   </div>
                 </td>
@@ -202,393 +220,86 @@ async function confirmDelete(id: string) {
 
     <!-- Create User Modal -->
     <AppModal :show="showCreateModal" title="New User" @close="showCreateModal = false">
-      <form class="formModal" @submit.prevent="submitCreate">
-        <div class="formGroup">
-          <label for="user-name">Name</label>
-          <input id="user-name" v-model="form.name" required type="text" placeholder="John Doe" />
+      <form class="flex flex-col gap-4" @submit.prevent="submitCreate">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="user-name">Name</label>
+          <input id="user-name" v-model="form.name" required type="text" placeholder="John Doe"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
         </div>
-        <div class="formGroup">
-          <label for="user-email">Email</label>
-          <input id="user-email" v-model="form.email" required type="email" placeholder="john@example.com" />
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="user-email">Email</label>
+          <input id="user-email" v-model="form.email" required type="email" placeholder="john@example.com"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
         </div>
-        <div class="formGroup">
-          <label for="user-password">Password</label>
-          <input id="user-password" v-model="form.password" required type="password" />
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="user-password">Password</label>
+          <input id="user-password" v-model="form.password" required type="password"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
         </div>
-        <div class="formGroup">
-          <label for="user-role">Role</label>
-          <select id="user-role" v-model="form.role">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="user-role">Role</label>
+          <select id="user-role" v-model="form.role"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
             <option value="User">User</option>
             <option value="Manager">Manager</option>
             <option value="Admin">Admin</option>
           </select>
         </div>
-        <div class="formGroup">
-          <label for="user-avatar">Avatar URL</label>
-          <input id="user-avatar" v-model="form.avatarUrl" type="url" placeholder="https://..." />
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="user-avatar">Avatar URL</label>
+          <input id="user-avatar" v-model="form.avatarUrl" type="url" placeholder="https://..."
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
         </div>
-        <div class="formActions">
-          <button type="button" class="btnSecondary" @click="showCreateModal = false">Cancel</button>
-          <button type="submit" class="btnPrimary">Create</button>
+        <div class="flex justify-end gap-2 mt-4">
+          <button type="button"
+            class="px-4.5 py-2.5 rounded-xl bg-sheet text-soft font-semibold text-sm border border-wire transition-[border-color,color] duration-200 hover:border-primary hover:text-primary"
+            @click="showCreateModal = false">Cancel</button>
+          <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110">Create</button>
         </div>
       </form>
     </AppModal>
 
     <!-- Edit User Modal -->
     <AppModal :show="!!editingUser" title="Edit User" @close="closeEdit">
-      <form v-if="editingUser" class="formModal" @submit.prevent="submitEdit">
-        <div class="formGroup">
-          <label for="user-edit-name">Name</label>
-          <input id="user-edit-name" v-model="form.name" required type="text" />
+      <form v-if="editingUser" class="flex flex-col gap-4" @submit.prevent="submitEdit">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="user-edit-name">Name</label>
+          <input id="user-edit-name" v-model="form.name" required type="text"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
         </div>
-        <div class="formGroup">
-          <label for="user-edit-email">Email</label>
-          <input id="user-edit-email" v-model="form.email" required type="email" />
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="user-edit-email">Email</label>
+          <input id="user-edit-email" v-model="form.email" required type="email"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
         </div>
-        <div class="formGroup">
-          <label for="user-edit-password">Password (leave blank to keep)</label>
-          <input id="user-edit-password" v-model="form.password" type="password" placeholder="••••••••" />
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="user-edit-password">Password (leave blank to keep)</label>
+          <input id="user-edit-password" v-model="form.password" type="password" placeholder="••••••••"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
         </div>
-        <div class="formGroup">
-          <label for="user-edit-role">Role</label>
-          <select id="user-edit-role" v-model="form.role">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="user-edit-role">Role</label>
+          <select id="user-edit-role" v-model="form.role"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary">
             <option value="User">User</option>
             <option value="Manager">Manager</option>
             <option value="Admin">Admin</option>
           </select>
         </div>
-        <div class="formGroup">
-          <label for="user-edit-avatar">Avatar URL</label>
-          <input id="user-edit-avatar" v-model="form.avatarUrl" type="url" />
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-soft" for="user-edit-avatar">Avatar URL</label>
+          <input id="user-edit-avatar" v-model="form.avatarUrl" type="url"
+            class="py-2.5 px-3 bg-sheet border border-wire rounded-lg text-body text-sm outline-none focus:border-primary" />
         </div>
-        <div class="formActions">
-          <button type="button" class="btnSecondary" @click="closeEdit">Cancel</button>
-          <button type="submit" class="btnPrimary">Save</button>
+        <div class="flex justify-end gap-2 mt-4">
+          <button type="button"
+            class="px-4.5 py-2.5 rounded-xl bg-sheet text-soft font-semibold text-sm border border-wire transition-[border-color,color] duration-200 hover:border-primary hover:text-primary"
+            @click="closeEdit">Cancel</button>
+          <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-primary text-canvas font-bold text-sm transition-[filter] duration-200 hover:brightness-110">Save</button>
         </div>
       </form>
     </AppModal>
   </div>
 </template>
-
-<style scoped>
-.pageLayout {
-  display: flex;
-  min-height: 100vh;
-  background: var(--bg-base);
-}
-
-.pageMain {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  overflow-y: auto;
-}
-
-.pageContent {
-  padding: var(--spacing-xl);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xl);
-}
-
-/* ---- Stat Cards ---- */
-.statsRow {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--spacing-lg);
-}
-
-@media (min-width: 768px) {
-  .statsRow {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.userStatCard {
-  padding: var(--spacing-lg);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-default);
-  background: var(--bg-base);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  transition: border-color 0.2s;
-}
-
-.userStatCard:hover {
-  border-color: rgba(45, 212, 191, 0.25);
-}
-
-.userStatCardAction {
-  align-items: center;
-  justify-content: center;
-}
-
-.btnPrimary {
-  padding: 10px 20px;
-  border-radius: var(--radius-lg);
-  background: var(--color-primary);
-  color: var(--bg-base);
-  font-weight: 700;
-  font-size: var(--text-sm);
-  border: none;
-  white-space: nowrap;
-  transition: filter 0.2s;
-}
-
-.btnPrimary:hover {
-  filter: brightness(1.1);
-}
-
-.userStatLabel {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-}
-
-.userStatValue {
-  font-size: var(--text-2xl);
-  font-weight: 700;
-  margin-top: 4px;
-}
-
-.userStatIcon {
-  padding: 8px;
-  background: rgba(45, 212, 191, 0.15);
-  border-radius: var(--radius-md);
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.userStatIcon .material-symbols-outlined {
-  font-size: 22px;
-}
-
-/* ---- Filter bar ---- */
-.filtersBar {
-  display: flex;
-  gap: var(--spacing-md);
-}
-
-.filterSelect {
-  padding: 10px 12px;
-  background: var(--bg-base);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  color: var(--text-primary);
-  font-size: var(--text-sm);
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.2s;
-}
-
-.filterSelect:focus,
-.filterSelect:hover {
-  border-color: var(--color-primary);
-}
-
-/* ---- Chart card ---- */
-.chartCard {
-  background: var(--bg-base);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-}
-
-.chartTitle {
-  font-size: var(--text-sm);
-  font-weight: 700;
-  color: var(--text-secondary);
-  margin-bottom: var(--spacing-md);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.chartBody {
-  height: 200px;
-}
-
-/* ---- Table ---- */
-.tableCard {
-  background: var(--bg-base);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.dataTable {
-  width: 100%;
-  text-align: left;
-  border-collapse: collapse;
-}
-
-.dataTable thead {
-  background: var(--bg-elevated);
-}
-
-.dataTable th {
-  padding: var(--spacing-md) var(--spacing-lg);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-}
-
-.thRight {
-  text-align: right;
-}
-
-.dataTable td {
-  padding: var(--spacing-md) var(--spacing-lg);
-  font-size: var(--text-sm);
-}
-
-.tableRow {
-  border-bottom: 1px solid var(--border-subtle);
-  transition: background 0.15s;
-}
-
-.tableRow:hover {
-  background: rgba(45, 212, 191, 0.04);
-}
-
-/* ---- User cell ---- */
-.userCell {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.userCellAvatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 9999px;
-  background-size: cover;
-  background-position: center;
-  flex-shrink: 0;
-}
-
-.userCellName {
-  font-size: var(--text-sm);
-  font-weight: 700;
-}
-
-.userCellEmail {
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
-}
-
-/* ---- Role ---- */
-.roleCell {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-/* ---- Actions ---- */
-.actionsCell {
-  text-align: right;
-}
-
-.actionBtns {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
-}
-
-.actionEdit,
-.actionDelete {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-md);
-  transition: background 0.15s, color 0.15s;
-  color: var(--text-secondary);
-  background: transparent;
-  border: none;
-}
-
-.actionEdit .material-symbols-outlined,
-.actionDelete .material-symbols-outlined {
-  font-size: 18px;
-}
-
-.actionEdit:hover {
-  background: rgba(45, 212, 191, 0.15);
-  color: var(--color-primary);
-}
-
-.actionDelete:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-}
-
-.actionDelete:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ---- Form modal ---- */
-.formModal {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.formGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.formGroup label {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.formGroup input,
-.formGroup select {
-  padding: 10px 12px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: var(--text-sm);
-}
-
-.formGroup input:focus,
-.formGroup select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-.formActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-md);
-}
-
-.btnSecondary {
-  padding: 10px 18px;
-  border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
-  color: var(--text-secondary);
-  font-weight: 600;
-  font-size: var(--text-sm);
-  border: 1px solid var(--border-default);
-  transition: border-color 0.2s, color 0.2s;
-}
-
-.btnSecondary:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-</style>

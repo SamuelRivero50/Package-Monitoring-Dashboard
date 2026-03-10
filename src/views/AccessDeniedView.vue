@@ -15,27 +15,31 @@ function goBack(): void {
 </script>
 
 <template>
-  <div class="pageLayout">
+  <div class="flex min-h-screen bg-canvas">
     <AppSidebar />
 
-    <main class="pageMain">
+    <main class="flex-1 flex flex-col min-w-0">
       <DashboardHeader title="Access Denied" />
 
-      <div class="pageContent">
-        <div class="denied-card">
-          <div class="denied-icon">
-            <span class="material-symbols-outlined">shield_lock</span>
+      <div class="p-8 flex items-center justify-center flex-1">
+        <div class="text-center max-w-[440px] bg-panel border border-wire rounded-xl px-8 pt-8 pb-6 flex flex-col items-center gap-4">
+          <div class="w-16 h-16 rounded-full bg-red-500/12 flex items-center justify-center">
+            <span class="material-symbols-outlined text-red-500" style="font-size:32px">shield_lock</span>
           </div>
 
-          <h2 class="denied-title">Access Denied</h2>
+          <h2 class="text-2xl font-bold text-body">Access Denied</h2>
 
-          <p class="denied-message">
+          <p class="text-sm text-soft leading-[1.6]">
             You do not have permission to view this page. This area is restricted to
             administrators only.
           </p>
 
-          <button class="denied-btn" type="button" @click="goBack">
-            <span class="material-symbols-outlined">arrow_back</span>
+          <button
+            class="mt-2 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-canvas font-semibold text-sm border-none cursor-pointer transition-colors duration-150 hover:bg-primary-dark"
+            type="button"
+            @click="goBack"
+          >
+            <span class="material-symbols-outlined" style="font-size:18px">arrow_back</span>
             Back to Dashboard
           </button>
         </div>
@@ -43,90 +47,3 @@ function goBack(): void {
     </main>
   </div>
 </template>
-
-<style scoped>
-.pageLayout {
-  display: flex;
-  min-height: 100vh;
-  background: var(--bg-base);
-}
-
-.pageMain {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.pageContent {
-  padding: var(--spacing-xl);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-}
-
-.denied-card {
-  text-align: center;
-  max-width: 440px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.denied-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: rgba(239, 68, 68, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.denied-icon .material-symbols-outlined {
-  font-size: 32px;
-  color: #ef4444;
-}
-
-.denied-title {
-  font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.denied-message {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.denied-btn {
-  margin-top: var(--spacing-sm);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: 10px 20px;
-  border-radius: var(--radius-md);
-  background: var(--color-primary);
-  color: #0d1117;
-  font-weight: 600;
-  font-size: var(--text-sm);
-  border: none;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.denied-btn:hover {
-  background: var(--color-primary-dark);
-}
-
-.denied-btn .material-symbols-outlined {
-  font-size: 18px;
-}
-</style>

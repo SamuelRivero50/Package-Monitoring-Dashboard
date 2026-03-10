@@ -31,273 +31,80 @@ const carriers = [
 </script>
 
 <template>
-  <div class="pageLayout">
+  <div class="flex min-h-screen bg-canvas">
     <AppSidebar activePage="/carriers" />
 
-    <main class="pageMain">
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <DashboardHeader title="Carrier Directory" />
 
-      <div class="pageContent">
-        <div class="contentInner">
+      <div class="flex-1 overflow-y-auto p-8">
+        <div class="max-w-[1200px] mx-auto flex flex-col gap-10">
+
           <!-- Carrier Cards -->
-          <div class="carrierGrid">
-            <div v-for="carrier in carriers" :key="carrier.name" class="carrierCard">
-              <div class="carrierBanner" :style="{ background: carrier.gradient }">
-                <span class="carrierBannerName">{{ carrier.name }}</span>
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div
+              v-for="carrier in carriers"
+              :key="carrier.name"
+              class="bg-panel border border-wire rounded-2xl overflow-hidden transition-[border-color,transform] duration-200 hover:border-primary/25 hover:-translate-y-0.5"
+            >
+              <div
+                class="h-24 flex items-center justify-center"
+                :style="{ background: carrier.gradient }"
+              >
+                <span class="text-white text-2xl font-black tracking-[-0.5px] [text-shadow:0_2px_8px_rgba(0,0,0,0.3)]">
+                  {{ carrier.name }}
+                </span>
               </div>
-              <div class="carrierBody">
-                <h3 class="carrierTitle">{{ carrier.name }} Express</h3>
-                <div class="carrierStats">
-                  <div class="carrierStat">
-                    <span class="material-symbols-outlined statIcon">package</span>
+              <div class="p-5">
+                <h3 class="font-bold text-base mb-2">{{ carrier.name }} Express</h3>
+                <div class="flex flex-col gap-1.5">
+                  <div class="flex items-center gap-2 text-xs text-soft">
+                    <span class="material-symbols-outlined" style="font-size:16px">package</span>
                     <span>{{ carrier.packages }} active</span>
                   </div>
-                  <div class="carrierStat">
-                    <span class="material-symbols-outlined statIcon">schedule</span>
+                  <div class="flex items-center gap-2 text-xs text-soft">
+                    <span class="material-symbols-outlined" style="font-size:16px">schedule</span>
                     <span>{{ carrier.avgDays }} days avg.</span>
                   </div>
                 </div>
-                <button class="manageBtn">Manage</button>
+                <button class="w-full mt-4 py-2.5 rounded-xl bg-sheet text-soft text-xs font-bold transition-[background,color] duration-200 hover:bg-primary hover:text-canvas">
+                  Manage
+                </button>
               </div>
             </div>
           </div>
 
           <!-- Live Network Coverage -->
-          <div class="networkSection">
-            <h3 class="networkTitle">Live Network Coverage</h3>
-            <div class="mapContainer">
+          <div class="p-6 bg-panel border border-wire rounded-2xl">
+            <h3 class="text-lg font-bold mb-4">Live Network Coverage</h3>
+            <div class="relative aspect-video rounded-xl overflow-hidden bg-sheet">
               <img
                 src="https://placeholder.pics/svg/800x450/0d1117/2dd4bf?text=GLOBAL%20LOGISTICS%20MAP"
                 alt="Global logistics map"
-                class="mapImage"
+                class="w-full h-full object-cover opacity-50"
               />
-              <div class="mapOverlay"></div>
-              <div class="mapDot mapDot1">
-                <span class="dotPing"></span>
-                <span class="dotSolid"></span>
+              <div class="absolute inset-0 bg-primary/4 pointer-events-none"></div>
+
+              <!-- Map dot 1 -->
+              <div class="absolute w-3 h-3" style="top:25%;left:33%">
+                <span class="absolute inset-0 rounded-full bg-primary opacity-60 animate-ping-map"></span>
+                <span class="absolute inset-[2px] rounded-full bg-primary shadow-[0_0_10px_#2dd4bf]"></span>
               </div>
-              <div class="mapDot mapDot2">
-                <span class="dotPing"></span>
-                <span class="dotSolid"></span>
+              <!-- Map dot 2 -->
+              <div class="absolute w-3 h-3" style="top:50%;left:55%">
+                <span class="absolute inset-0 rounded-full bg-primary opacity-60 animate-ping-map"></span>
+                <span class="absolute inset-[2px] rounded-full bg-primary shadow-[0_0_10px_#2dd4bf]"></span>
               </div>
-              <div class="mapDot mapDot3">
-                <span class="dotPing"></span>
-                <span class="dotSolid"></span>
+              <!-- Map dot 3 -->
+              <div class="absolute w-3 h-3" style="top:35%;left:72%">
+                <span class="absolute inset-0 rounded-full bg-primary opacity-60 animate-ping-map"></span>
+                <span class="absolute inset-[2px] rounded-full bg-primary shadow-[0_0_10px_#2dd4bf]"></span>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </main>
   </div>
 </template>
-
-<style scoped>
-.pageLayout {
-  display: flex;
-  min-height: 100vh;
-  background: var(--bg-base);
-}
-
-.pageMain {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.pageContent {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--spacing-xl);
-}
-
-.contentInner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
-
-/* ---- Carrier Grid ---- */
-.carrierGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--spacing-lg);
-}
-
-@media (min-width: 640px) {
-  .carrierGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .carrierGrid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.carrierCard {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  transition:
-    border-color 0.2s,
-    transform 0.2s;
-}
-
-.carrierCard:hover {
-  border-color: rgba(45, 212, 191, 0.25);
-  transform: translateY(-2px);
-}
-
-.carrierBanner {
-  height: 96px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.carrierBannerName {
-  color: #fff;
-  font-size: var(--text-xl);
-  font-weight: 900;
-  letter-spacing: -0.5px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.carrierBody {
-  padding: 20px;
-}
-
-.carrierTitle {
-  font-weight: 700;
-  font-size: var(--text-base);
-  margin-bottom: var(--spacing-sm);
-}
-
-.carrierStats {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.carrierStat {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
-}
-
-.statIcon {
-  font-size: 16px;
-}
-
-.manageBtn {
-  width: 100%;
-  margin-top: var(--spacing-md);
-  padding: 10px;
-  border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
-  color: var(--text-secondary);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  transition:
-    background 0.2s,
-    color 0.2s;
-}
-
-.manageBtn:hover {
-  background: var(--color-primary);
-  color: var(--bg-base);
-}
-
-/* ---- Network Section ---- */
-.networkSection {
-  padding: var(--spacing-lg);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-xl);
-}
-
-.networkTitle {
-  font-size: var(--text-lg);
-  font-weight: 700;
-  margin-bottom: var(--spacing-md);
-}
-
-.mapContainer {
-  position: relative;
-  aspect-ratio: 16 / 9;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: var(--bg-elevated);
-}
-
-.mapImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.5;
-}
-
-.mapOverlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(45, 212, 191, 0.04);
-  pointer-events: none;
-}
-
-.mapDot {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-}
-
-.mapDot1 {
-  top: 25%;
-  left: 33%;
-}
-.mapDot2 {
-  top: 50%;
-  left: 55%;
-}
-.mapDot3 {
-  top: 35%;
-  left: 72%;
-}
-
-.dotPing {
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  background: var(--color-primary);
-  opacity: 0.6;
-  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-.dotSolid {
-  position: absolute;
-  inset: 2px;
-  border-radius: 9999px;
-  background: var(--color-primary);
-  box-shadow: 0 0 10px var(--color-primary);
-}
-
-@keyframes ping {
-  0% {
-    transform: scale(1);
-    opacity: 0.6;
-  }
-  75%,
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
-  }
-}
-</style>

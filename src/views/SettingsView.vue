@@ -4,169 +4,46 @@ import DashboardHeader from '@/components/DashboardHeader.vue'
 </script>
 
 <template>
-  <div class="pageLayout">
+  <div class="flex min-h-screen bg-canvas">
     <AppSidebar activePage="/settings" />
 
-    <main class="pageMain">
+    <main class="flex-1 flex flex-col min-w-0">
       <DashboardHeader title="System Settings" />
 
-      <div class="pageContent">
-        <div class="settingsCard">
-          <h3 class="settingsTitle">General Configuration</h3>
+      <div class="p-8">
+        <div class="max-w-[640px] bg-panel border border-wire rounded-xl p-8">
+          <h3 class="text-2xl font-bold mb-8">General Configuration</h3>
 
-          <div class="settingsForm">
+          <div class="flex flex-col gap-6">
             <!-- System Name -->
-            <div class="formGroup">
-              <label class="formLabel" for="systemName">System Name</label>
-              <input id="systemName" class="formInput" type="text" value="PackTrack Logistics v4" />
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-semibold" for="systemName">System Name</label>
+              <input
+                id="systemName"
+                class="bg-sheet border border-wire rounded-lg py-3 px-4 text-body text-sm outline-none transition-[border-color,box-shadow] duration-200 focus:border-primary focus:shadow-[0_0_0_3px_rgba(45,212,191,0.12)]"
+                type="text"
+                value="PackTrack Logistics v4"
+              />
             </div>
 
             <!-- Maintenance Mode -->
-            <div class="toggleRow">
+            <div class="flex items-center justify-between p-4 bg-sheet rounded-lg">
               <div>
-                <p class="toggleTitle">Maintenance Mode</p>
-                <p class="toggleDesc">Restricts user access while updating</p>
+                <p class="font-bold text-sm">Maintenance Mode</p>
+                <p class="text-xs text-soft mt-0.5">Restricts user access while updating</p>
               </div>
-              <div class="toggleSwitch">
-                <div class="toggleThumb"></div>
+              <div class="w-12 h-6 bg-soft rounded-full relative cursor-pointer transition-colors duration-200 shrink-0">
+                <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200"></div>
               </div>
             </div>
 
             <!-- Save -->
-            <button class="saveBtn">Save Changes</button>
+            <button class="w-full py-3.5 rounded-xl bg-primary text-canvas font-black text-base transition-[filter] duration-200 mt-2 hover:brightness-110">
+              Save Changes
+            </button>
           </div>
         </div>
       </div>
     </main>
   </div>
 </template>
-
-<style scoped>
-.pageLayout {
-  display: flex;
-  min-height: 100vh;
-  background: var(--bg-base);
-}
-
-.pageMain {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.pageContent {
-  padding: var(--spacing-xl);
-}
-
-/* ---- Settings Card ---- */
-.settingsCard {
-  max-width: 640px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-}
-
-.settingsTitle {
-  font-size: var(--text-xl);
-  font-weight: 700;
-  margin-bottom: var(--spacing-xl);
-}
-
-.settingsForm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-/* ---- Form group ---- */
-.formGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.formLabel {
-  font-size: var(--text-sm);
-  font-weight: 600;
-}
-
-.formInput {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  padding: 12px var(--spacing-md);
-  color: var(--text-primary);
-  font-size: var(--text-sm);
-  outline: none;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-}
-
-.formInput:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.12);
-}
-
-/* ---- Toggle row ---- */
-.toggleRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-md);
-  background: var(--bg-elevated);
-  border-radius: var(--radius-md);
-}
-
-.toggleTitle {
-  font-weight: 700;
-  font-size: var(--text-sm);
-}
-
-.toggleDesc {
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
-  margin-top: 2px;
-}
-
-.toggleSwitch {
-  width: 48px;
-  height: 24px;
-  background: var(--text-secondary);
-  border-radius: 9999px;
-  position: relative;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.2s;
-}
-
-.toggleThumb {
-  position: absolute;
-  left: 4px;
-  top: 4px;
-  width: 16px;
-  height: 16px;
-  background: #fff;
-  border-radius: 9999px;
-  transition: transform 0.2s;
-}
-
-/* ---- Save button ---- */
-.saveBtn {
-  width: 100%;
-  padding: 14px;
-  border-radius: var(--radius-lg);
-  background: var(--color-primary);
-  color: var(--bg-base);
-  font-weight: 900;
-  font-size: var(--text-base);
-  transition: filter 0.2s;
-  margin-top: var(--spacing-sm);
-}
-
-.saveBtn:hover {
-  filter: brightness(1.1);
-}
-</style>
