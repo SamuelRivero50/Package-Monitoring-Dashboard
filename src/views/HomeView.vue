@@ -1,92 +1,141 @@
+<!-- @author David Hdez -->
 <script setup lang="ts">
-/**
- * @author Samuel Enrique Rivero Urribarrí, David Hernández Herrera, Juan Andrés Young Hoyos
- * @description Public landing page with hero, stats, features, and CTA sections.
- */
+// external imports
+import { computed } from "vue";
+import { RouterLink } from "vue-router";
 
-import { RouterLink } from 'vue-router'
-import AppHeader from '@/components/AppHeader.vue'
-import AppFooter from '@/components/AppFooter.vue'
+// internal imports
+import { AuthService } from "@/services/AuthService";
+
+const isAuthenticated = computed(() => AuthService.isAuthenticated());
+
+const primaryActionLabel = computed(() =>
+  isAuthenticated.value ? "Open Dashboard" : "Get Started",
+);
+const primaryActionPath = computed(() =>
+  isAuthenticated.value ? "/dashboard" : "/signup",
+);
+const secondaryActionPath = computed(() =>
+  isAuthenticated.value ? "/packages" : "/login",
+);
+const secondaryActionLabel = computed(() =>
+  isAuthenticated.value ? "Track Packages" : "Sign In",
+);
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen overflow-x-hidden">
-    <AppHeader />
-
-    <main class="flex-1">
-      <!-- Hero Section -->
-      <section
-        class="py-20 pb-24 relative overflow-hidden"
-        style="background: linear-gradient(135deg, #0d1f3c 0%, #0a2744 50%, #0d2d5a 100%)"
+  <div class="min-h-screen bg-base text-text-primary">
+    <header
+      class="sticky top-0 z-40 border-b border-border-default bg-base/80 backdrop-blur-md"
+    >
+      <div
+        class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between"
       >
-        <div class="max-w-[1280px] mx-auto px-6">
-          <div class="grid grid-cols-1 gap-12 items-center lg:grid-cols-2">
-            <div class="flex flex-col gap-8 max-w-[600px]">
-              <!-- Badge -->
-              <div
-                class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-[0.05em] w-fit"
+        <RouterLink to="/" class="flex items-center gap-3">
+          <div
+            class="size-10 rounded-lg bg-primary/15 border border-primary/30 text-primary flex items-center justify-center"
+          >
+            <span class="material-symbols-outlined text-2xl">package_2</span>
+          </div>
+          <h1 class="text-2xl font-black tracking-tight">PackTrack</h1>
+        </RouterLink>
+
+        <nav class="hidden md:flex items-center gap-8">
+          <RouterLink
+            to="/"
+            class="text-sm font-semibold text-text-secondary hover:text-primary transition-colors"
+            >Home</RouterLink
+          >
+          <RouterLink
+            to="/dashboard"
+            class="text-sm font-semibold text-text-secondary hover:text-primary transition-colors"
+            >Dashboard</RouterLink
+          >
+          <RouterLink
+            to="/login"
+            class="text-sm font-semibold text-text-secondary hover:text-primary transition-colors"
+            >Sign In</RouterLink
+          >
+        </nav>
+
+        <RouterLink
+          :to="primaryActionPath"
+          class="px-6 py-2.5 rounded-xl bg-primary text-base font-black text-sm hover:bg-primary-dark transition-colors"
+        >
+          {{ primaryActionLabel }}
+        </RouterLink>
+      </div>
+    </header>
+
+    <main>
+      <section
+        class="relative py-20 lg:py-28 overflow-hidden border-b border-border-default"
+      >
+        <div
+          class="absolute -top-36 -right-20 w-96 h-96 rounded-full bg-primary/10 blur-[80px]"
+        ></div>
+        <div
+          class="absolute -bottom-44 -left-20 w-96 h-96 rounded-full bg-cta/10 blur-[100px]"
+        ></div>
+
+        <div
+          class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-14 items-center relative"
+        >
+          <div class="space-y-8">
+            <span
+              class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wide"
+            >
+              Next logistics platform
+            </span>
+
+            <h2
+              class="text-5xl lg:text-6xl font-black leading-[1.05] tracking-tight max-w-xl"
+            >
+              Track every shipment with live warehouse intelligence
+            </h2>
+
+            <p class="text-lg text-text-secondary max-w-xl leading-relaxed">
+              Keep your operations in sync with package monitoring, warehouse
+              utilization insights, and role-based workflows in one command
+              center.
+            </p>
+
+            <div class="flex flex-wrap gap-4">
+              <RouterLink
+                :to="primaryActionPath"
+                class="px-8 py-4 rounded-xl bg-cta text-base font-black hover:bg-cta-hover transition-colors"
               >
-                <span class="relative flex w-2 h-2">
-                  <span
-                    class="absolute inline-flex w-full h-full rounded-full bg-primary opacity-75 animate-ping-custom"
-                  ></span>
-                  <span class="relative inline-flex w-2 h-2 rounded-full bg-primary"></span>
-                </span>
-                Next-Gen Logistics Platform
-              </div>
-
-              <h2
-                class="font-black leading-[1.1] tracking-[-1px] text-body"
-                style="font-size: clamp(40px, 5vw, 72px)"
+                {{ primaryActionLabel }}
+              </RouterLink>
+              <RouterLink
+                :to="secondaryActionPath"
+                class="px-8 py-4 rounded-xl border border-border-default bg-surface text-text-primary font-black hover:border-primary/50 hover:text-primary transition-colors"
               >
-                Track Your Packages <span class="text-primary">Anywhere</span>, Anytime
-              </h2>
-
-              <p class="text-lg text-soft leading-[1.7]">
-                A comprehensive logistics and warehouse management system designed for modern
-                businesses. Streamline your supply chain with real-time insights and AI-powered
-                automation.
-              </p>
-
-              <div class="flex flex-wrap gap-4">
-                <RouterLink
-                  to="/signup"
-                  class="px-8 py-4 rounded-xl bg-cta text-white text-lg font-bold shadow-[0_8px_24px_rgba(224,123,57,0.25)] transition-[background,transform] duration-200 hover:bg-cta-hover hover:-translate-y-0.5"
-                  >Get Started Free</RouterLink
-                >
-                <RouterLink
-                  to="/login"
-                  class="px-8 py-4 rounded-xl bg-panel text-body text-lg font-bold border border-wire transition-[background,border-color] duration-200 hover:bg-sheet hover:border-primary hover:text-primary"
-                  >Sign in</RouterLink
-                >
-              </div>
+                {{ secondaryActionLabel }}
+              </RouterLink>
             </div>
+          </div>
 
-            <div class="hidden lg:block">
+          <div class="relative">
+            <div
+              class="rounded-3xl overflow-hidden border border-border-default bg-surface shadow-[0_20px_70px_rgba(0,0,0,0.35)]"
+            >
+              <img
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuARpb78izFGAo72ZtI8BC-B6g5wjhtjSSJ1YTdNZf3UN42GBPmDf-8urYObtpI1nDZWlauhK0lgN7xo44Eai0esD5IEBmmblOtEV5S7w9zYqZnQ7Izqq6QjK-SvjpPVPamF1Ku-c0xa18rk7dh6p9iB4YbRuEl9pmYW9-RgxVsLgORS95XRjGjpH-xWvW0eWLvTTdNB5PTVRW9-6POTZkxjP39VipVUNMuJNz93BQgF7k-2WtzNi02b8bgfZmLAt0-gSVrntbNPTQ8v"
+                alt="PackTrack logistics operations"
+                class="w-full h-105 object-cover"
+              />
               <div
-                class="aspect-square rounded-2xl overflow-hidden border border-wire bg-panel relative shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
+                class="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-base/75 backdrop-blur-sm border border-border-default"
               >
-                <div
-                  class="absolute inset-0 bg-gradient-to-br from-primary/15 to-transparent z-10"
-                ></div>
-                <img
-                  alt="Logistics Warehouse"
-                  class="w-full h-full object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuARpb78izFGAo72ZtI8BC-B6g5wjhtjSSJ1YTdNZf3UN42GBPmDf-8urYObtpI1nDZWlauhK0lgN7xo44Eai0esD5IEBmmblOtEV5S7w9zYqZnQ7Izqq6QjK-SvjpPVPamF1Ku-c0xa18rk7dh6p9iB4YbRuEl9pmYW9-RgxVsLgORS95XRjGjpH-xWvW0eWLvTTdNB5PTVRW9-6POTZkxjP39VipVUNMuJNz93BQgF7k-2WtzNi02b8bgfZmLAt0-gSVrntbNPTQ8v"
-                />
-                <div
-                  class="absolute bottom-6 left-6 right-6 px-5 py-5 rounded-xl bg-white/8 backdrop-blur-lg border border-white/15 z-20"
-                >
-                  <div class="flex items-center justify-between mb-3">
-                    <span class="text-white font-bold text-sm">Real-time Fleet Status</span>
-                    <span
-                      class="text-xs font-bold text-primary bg-primary/20 px-2.5 py-0.5 rounded-md"
-                      >Active</span
-                    >
-                  </div>
-                  <div class="h-2 w-full bg-white/15 rounded-full overflow-hidden">
-                    <div class="h-full bg-primary rounded-full" style="width: 75%"></div>
-                  </div>
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-sm font-bold">Live Network</p>
+                  <span class="text-[11px] text-primary font-black uppercase"
+                    >Operational</span
+                  >
+                </div>
+                <div class="h-2 rounded-full bg-elevated overflow-hidden">
+                  <div class="h-full w-[78%] bg-primary"></div>
                 </div>
               </div>
             </div>
@@ -94,130 +143,135 @@ import AppFooter from '@/components/AppFooter.vue'
         </div>
       </section>
 
-      <!-- Stats Section -->
-      <section class="py-12 border-t border-wire border-b border-wire bg-panel">
-        <div class="max-w-[1280px] mx-auto px-6">
-          <div class="grid grid-cols-2 gap-8 lg:grid-cols-4">
-            <div class="flex flex-col items-center text-center gap-1">
-              <span class="text-[36px] font-black text-body">10K+</span>
-              <span class="text-soft font-medium">Packages Tracked</span>
-            </div>
-            <div class="flex flex-col items-center text-center gap-1">
-              <span class="text-[36px] font-black text-body">50+</span>
-              <span class="text-soft font-medium">Warehouses</span>
-            </div>
-            <div class="flex flex-col items-center text-center gap-1">
-              <span class="text-[36px] font-black text-body">200+</span>
-              <span class="text-soft font-medium">Global Partners</span>
-            </div>
-            <div class="flex flex-col items-center text-center gap-1">
-              <span class="text-[36px] font-black text-body">99.9%</span>
-              <span class="text-soft font-medium">Uptime Guarantee</span>
-            </div>
+      <section class="py-12 border-b border-border-default bg-surface/35">
+        <div
+          class="max-w-7xl mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-8"
+        >
+          <div class="text-center">
+            <p class="text-4xl font-black text-primary">10K+</p>
+            <p class="text-sm text-text-secondary mt-2">Packages tracked</p>
+          </div>
+          <div class="text-center">
+            <p class="text-4xl font-black text-primary">50+</p>
+            <p class="text-sm text-text-secondary mt-2">Warehouse hubs</p>
+          </div>
+          <div class="text-center">
+            <p class="text-4xl font-black text-primary">200+</p>
+            <p class="text-sm text-text-secondary mt-2">Connected partners</p>
+          </div>
+          <div class="text-center">
+            <p class="text-4xl font-black text-primary">99.9%</p>
+            <p class="text-sm text-text-secondary mt-2">Platform uptime</p>
           </div>
         </div>
       </section>
 
-      <!-- Features Section -->
-      <section class="py-24 px-6 max-w-[1280px] mx-auto">
-        <div class="text-center max-w-[700px] mx-auto mb-16">
-          <span class="text-primary font-bold uppercase tracking-[0.1em] text-sm block mb-4"
-            >Core Features</span
-          >
-          <h2 class="font-black text-body mb-6" style="font-size: clamp(28px, 4vw, 48px)">
-            Why Choose PackTrack?
-          </h2>
-          <p class="text-lg text-soft">
-            Our system offers unparalleled control over your inventory and shipments with features
-            designed for scale.
-          </p>
-        </div>
-        <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-          <div
-            class="p-8 rounded-xl bg-panel border border-wire transition-[border-color] duration-[250ms] hover:border-primary/35 group"
-          >
-            <div
-              class="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 transition-transform duration-200 group-hover:scale-110"
+      <section class="py-20">
+        <div class="max-w-7xl mx-auto px-6">
+          <div class="max-w-2xl mb-12">
+            <p
+              class="text-primary text-xs font-black uppercase tracking-[0.2em] mb-3"
             >
-              <span class="material-symbols-outlined" style="font-size: 28px">location_on</span>
-            </div>
-            <h4 class="text-[20px] font-bold text-body mb-4">Real-time Tracking</h4>
-            <p class="text-soft leading-[1.7]">
-              Monitor every movement from dispatch to delivery with granular GPS data and status
-              updates.
+              Core Features
             </p>
+            <h3 class="text-4xl font-black tracking-tight">
+              Built for modern logistics teams
+            </h3>
           </div>
-          <div
-            class="p-8 rounded-xl bg-panel border border-wire transition-[border-color] duration-[250ms] hover:border-primary/35 group"
-          >
-            <div
-              class="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 transition-transform duration-200 group-hover:scale-110"
-            >
-              <span class="material-symbols-outlined" style="font-size: 28px">inventory_2</span>
-            </div>
-            <h4 class="text-[20px] font-bold text-body mb-4">Inventory Management</h4>
-            <p class="text-soft leading-[1.7]">
-              Optimize stock levels with AI-driven analytics and automated replenishment workflows.
-            </p>
-          </div>
-          <div
-            class="p-8 rounded-xl bg-panel border border-wire transition-[border-color] duration-[250ms] hover:border-primary/35 group"
-          >
-            <div
-              class="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 transition-transform duration-200 group-hover:scale-110"
-            >
-              <span class="material-symbols-outlined" style="font-size: 28px">cloud_sync</span>
-            </div>
-            <h4 class="text-[20px] font-bold text-body mb-4">Cloud Integration</h4>
-            <p class="text-soft leading-[1.7]">
-              Access your data securely from any device. Seamlessly integrate with your existing ERP
-              tools.
-            </p>
-          </div>
-        </div>
-      </section>
 
-      <!-- CTA Section -->
-      <section class="py-24 bg-panel/40">
-        <div class="max-w-[1280px] mx-auto px-6">
-          <div
-            class="rounded-2xl bg-panel border border-wire p-16 relative overflow-hidden lg:p-20"
-          >
-            <!-- Glow -->
-            <div
-              class="absolute -top-30 -right-30 w-96 h-96 bg-primary/15 blur-[100px] rounded-full pointer-events-none"
-            ></div>
-            <div
-              class="relative z-10 flex flex-col items-center text-center gap-8 max-w-[800px] mx-auto"
+          <div class="grid md:grid-cols-3 gap-6">
+            <article
+              class="bg-surface border border-border-default rounded-2xl p-7 hover:border-primary/40 transition-colors"
             >
-              <h2
-                class="font-black text-body leading-[1.15]"
-                style="font-size: clamp(28px, 4vw, 56px)"
+              <div
+                class="size-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-5"
               >
-                Ready to Transform Your Supply Chain?
-              </h2>
-              <p class="text-[20px] text-soft">
-                Join 500+ companies already optimizing their logistics with PackTrack. Scale faster
-                and smarter today.
-              </p>
-              <div class="flex flex-wrap justify-center gap-6 mt-4">
-                <RouterLink
-                  to="/signup"
-                  class="px-10 py-5 rounded-xl bg-primary text-canvas text-[20px] font-black transition-transform duration-150 shadow-[0_8px_24px_rgba(45,212,191,0.2)] hover:scale-105"
-                  >Start Free Trial</RouterLink
-                >
-                <button
-                  class="px-10 py-5 rounded-xl bg-transparent border-2 border-body text-body text-[20px] font-black transition-colors duration-200 hover:bg-white/8"
-                >
-                  Contact Sales
-                </button>
+                <span class="material-symbols-outlined">location_on</span>
               </div>
+              <h4 class="text-xl font-black mb-3">Real-time tracking</h4>
+              <p class="text-sm text-text-secondary leading-relaxed">
+                Monitor route updates from dispatch to delivery with detailed
+                timeline logs.
+              </p>
+            </article>
+
+            <article
+              class="bg-surface border border-border-default rounded-2xl p-7 hover:border-primary/40 transition-colors"
+            >
+              <div
+                class="size-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-5"
+              >
+                <span class="material-symbols-outlined">inventory_2</span>
+              </div>
+              <h4 class="text-xl font-black mb-3">Package command center</h4>
+              <p class="text-sm text-text-secondary leading-relaxed">
+                Filter, prioritize, and resolve shipment exceptions with
+                contextual activity history.
+              </p>
+            </article>
+
+            <article
+              class="bg-surface border border-border-default rounded-2xl p-7 hover:border-primary/40 transition-colors"
+            >
+              <div
+                class="size-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-5"
+              >
+                <span class="material-symbols-outlined">warehouse</span>
+              </div>
+              <h4 class="text-xl font-black mb-3">Warehouse visibility</h4>
+              <p class="text-sm text-text-secondary leading-relaxed">
+                Track capacity utilization and maintenance status across all
+                regional hubs.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="py-20 bg-surface border-y border-border-default">
+        <div class="max-w-5xl mx-auto px-6">
+          <div
+            class="rounded-3xl border border-primary/25 bg-hero p-10 lg:p-14 text-center space-y-6"
+          >
+            <h3 class="text-4xl lg:text-5xl font-black tracking-tight">
+              Ready to optimize your logistics flow?
+            </h3>
+            <p class="text-text-secondary text-lg max-w-3xl mx-auto">
+              Join teams already using PackTrack to coordinate packages and
+              warehouses with one operational view.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+              <RouterLink
+                :to="primaryActionPath"
+                class="px-8 py-3 rounded-xl bg-primary text-base font-black hover:bg-primary-dark transition-colors"
+              >
+                {{ primaryActionLabel }}
+              </RouterLink>
+              <RouterLink
+                to="/login"
+                class="px-8 py-3 rounded-xl border border-border-default text-text-primary font-black hover:border-primary/50 hover:text-primary transition-colors"
+              >
+                Sign In
+              </RouterLink>
             </div>
           </div>
         </div>
       </section>
     </main>
 
-    <AppFooter />
+    <footer class="py-10 border-t border-border-default">
+      <div
+        class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row gap-4 md:gap-6 items-center justify-between"
+      >
+        <p class="text-sm text-text-muted">
+          © 2026 PackTrack Systems. All rights reserved.
+        </p>
+        <div class="flex gap-5 text-sm text-text-secondary">
+          <span>Privacy</span>
+          <span>Terms</span>
+          <span>Support</span>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>

@@ -1,0 +1,26 @@
+/** @author David Hdez */
+export function formatWeight(weight: number): string {
+  return `${weight.toFixed(1)} kg`;
+}
+
+export function formatDate(iso?: string | Date): string {
+  if (!iso) return "";
+  const date = typeof iso === "string" ? new Date(iso) : iso;
+  return date.toLocaleDateString("es-CO", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+export function formatDateTime(iso?: string | Date): string {
+  if (!iso) return "";
+  const date = typeof iso === "string" ? new Date(iso) : iso;
+  return date.toLocaleString("es-CO", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}

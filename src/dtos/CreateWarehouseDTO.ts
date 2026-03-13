@@ -1,12 +1,5 @@
-/**
- * @author Samuel Rivero
- * @description DTO for creating a Warehouse.
- */
+/** @author David Hdez */
+// internal imports
+import type { WarehouseInterface } from "@/interfaces/WarehouseInterface";
 
-export interface CreateWarehouseDTO {
-  name: string
-  location: string
-  capacity: number
-  managerName: string
-  imageUrl?: string
-}
+export type CreateWarehouseDTO = Omit<WarehouseInterface, "id">;

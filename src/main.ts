@@ -1,24 +1,18 @@
-/**
- * @author Juan Andrés, Samuel, David
- * @description Root component. Renders the router view and a global alert banner when active.
-*/
+/** @author David Hdez */
+// external imports
+import "./assets/css/input.css";
 
-import './assets/main.css'
+import { createApp } from "vue";
 
-// framework
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import App from "./App.vue";
+import router from "./router";
 
-// data
-import { seedIfEmpty } from '@/data/seed'
+// internal imports
+import PiniaConfig from "./PiniaConfig";
 
-// relative
-import App from './App.vue'
-import router from './router'
+const app = createApp(App);
 
-seedIfEmpty()
+app.use(PiniaConfig.init());
+app.use(router);
 
-const app = createApp(App)
-app.use(createPinia())
-app.use(router)
-app.mount('#app')
+app.mount("#app");

@@ -1,12 +1,5 @@
-/**
- * @author Samuel Rivero
- * @description DTO for creating a Package.
- */
+/** @author David Hdez */
+// internal imports
+import type { PackageInterface } from "@/interfaces/PackageInterface";
 
-export interface CreatePackageDTO {
-  userId: string
-  warehouseId?: string | null
-  status: string
-  description: string
-  price: number
-}
+export type CreatePackageDTO = Omit<PackageInterface, "id">;

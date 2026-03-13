@@ -1,129 +1,103 @@
-/**
- * @author Juan Andrés, David Hernandez
- * @description Vue Router configuration with authentication, admin-only, and maintenance-mode guards.
-*/
+/** @author David Hdez */
+// external imports
+import { createRouter, createWebHistory } from "vue-router";
 
-// framework
-import { createRouter, createWebHistory } from 'vue-router'
-import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
+// internal imports
+import { AuthService } from "@/services/AuthService";
 
-// stores
-import { useAuthStore } from '@/stores/auth'
+import HomeView from "@/views/HomeView.vue";
+import DashboardView from "@/views/DashboardView.vue";
+import LoginView from "@/views/LoginView.vue";
+import SignUpView from "@/views/SignUpView.vue";
 
-// services
-import { SettingsService } from '@/services/settingsService'
+import PackagesIndexView from "@/views/PackagesIndexView.vue";
+import PackagesShowView from "@/views/PackagesShowView.vue";
+import PackagesCreateView from "@/views/PackagesCreateView.vue";
 
-// relative
-import HomeView from '../views/HomeView.vue'
+import WarehousesIndexView from "@/views/WarehousesIndexView.vue";
+import UsersIndexView from "@/views/UsersIndexView.vue";
+import SettingsView from "@/views/SettingsView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    { path: "/", name: "home", component: HomeView, meta: { title: "Home" } },
+
     {
-      path: '/',
-      name: 'home',
-      component: HomeView,
+      path: "/login",
+      name: "login",
+      component: LoginView,
+      meta: { title: "Sign In", guestOnly: true },
     },
     {
-      path: '/login',
-      name: 'login',
-      component: () => import('../views/LoginView.vue'),
-      meta: { public: true },
+      path: "/signup",
+      name: "signup",
+      component: SignUpView,
+      meta: { title: "Sign Up", guestOnly: true },
+    },
+
+    {
+      path: "/dashboard",
+      name: "dashboard",
+      component: DashboardView,
+      meta: { title: "Dashboard", requiresAuth: true },
+    },
+
+    {
+      path: "/packages",
+      name: "packages",
+      component: PackagesIndexView,
+      meta: { title: "Packages", requiresAuth: true },
     },
     {
-      path: '/signup',
-      name: 'signup',
-      component: () => import('../views/SignupView.vue'),
-      meta: { public: true },
+      path: "/packages/create",
+      name: "packages.create",
+      component: PackagesCreateView,
+      meta: { title: "Create Package", requiresAuth: true },
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('../views/DashboardView.vue'),
-      meta: { requiresAuth: true },
+      path: "/packages/:id",
+      name: "packages.show",
+      component: PackagesShowView,
+      meta: { title: "Package Details", requiresAuth: true },
+    },
+
+    {
+      path: "/warehouses",
+      name: "warehouses",
+      component: WarehousesIndexView,
+      meta: { title: "Warehouses", requiresAuth: true },
     },
     {
-      path: '/packages',
-      name: 'packages',
-      component: () => import('../views/PackagesView.vue'),
-      meta: { requiresAuth: true },
+      path: "/users",
+      name: "users",
+      component: UsersIndexView,
+      meta: { title: "Users", requiresAuth: true, requiresAdmin: true },
     },
     {
-      path: '/warehouses',
-      name: 'warehouses',
-      component: () => import('../views/WarehousesView.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/users',
-      name: 'users',
-      component: () => import('../views/UsersView.vue'),
-      meta: { requiresAuth: true, adminOnly: true },
-    },
-    {
-      path: '/settings',
-      name: 'settings',
-      component: () => import('../views/SettingsView.vue'),
-      meta: { requiresAuth: true, adminOnly: true },
-    },
-    {
-      path: '/access-denied',
-      name: 'access-denied',
-      component: () => import('../views/AccessDeniedView.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/maintenance',
-      name: 'maintenance',
-      component: () => import('../views/MaintenanceView.vue'),
-      meta: { public: true },
+      path: "/settings",
+      name: "settings",
+      component: SettingsView,
+      meta: { title: "Settings", requiresAuth: true, requiresAdmin: true },
     },
   ],
-})
+});
 
-router.beforeEach(
-  async (
-    to: RouteLocationNormalized,
-    _from: RouteLocationNormalized,
-    next: NavigationGuardNext,
-  ): Promise<void> => {
-    const auth = useAuthStore()
-    const isPublic = to.meta.public === true
-    const requiresAuth = to.meta.requiresAuth === true
-    const adminOnly = to.meta.adminOnly === true
+router.beforeEach((to) => {
+  const isAuthenticated = AuthService.isAuthenticated();
+  const isAdmin = AuthService.isAdmin();
 
-    // Maintenance-mode check: redirect non-admins to maintenance page
-    if (to.name !== 'maintenance' && to.name !== 'login' && to.name !== 'signup') {
-      const settings = await SettingsService.getAll()
-      if (settings.maintenanceMode && !auth.isAdmin) {
-        next({ name: 'maintenance' })
-        return
-      }
-    }
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    return { name: "login", query: { redirect: to.fullPath } };
+  }
 
-    // If on maintenance page but mode is off (or user is admin), redirect away
-    if (to.name === 'maintenance') {
-      const settings = await SettingsService.getAll()
-      if (!settings.maintenanceMode || auth.isAdmin) {
-        next({ name: auth.isAuthenticated ? 'dashboard' : 'home' })
-        return
-      }
-    }
+  if (to.meta.guestOnly && isAuthenticated) {
+    return { name: "dashboard" };
+  }
 
-    if (requiresAuth && !auth.isAuthenticated) {
-      next({ name: 'login', query: { redirect: to.fullPath } })
-      return
-    }
-    if (adminOnly && !auth.isAdmin) {
-      next({ name: 'access-denied' })
-      return
-    }
-    if (isPublic && auth.isAuthenticated && (to.name === 'login' || to.name === 'signup')) {
-      next({ name: 'dashboard' })
-      return
-    }
-    next()
-  },
-)
+  if (to.meta.requiresAdmin && !isAdmin) {
+    return { name: "dashboard" };
+  }
+});
 
-export default router
+export default router;

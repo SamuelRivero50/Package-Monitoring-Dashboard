@@ -1,56 +1,33 @@
-/**
- * @author David Hernandez
- * @description CRUD-like operations for system settings (alert + maintenance mode). Persisted in LocalStorage.
- */
-
-// data
-import { getFromStorage, setToStorage, STORAGE_KEYS } from '@/infrastructure/storage'
-
-// types
-import type { SystemAlert, SystemSettings } from '@/types'
-
-const DEFAULT_SETTINGS: SystemSettings = {
-  maintenanceMode: false,
-  alert: null,
-}
-
-function load(): SystemSettings {
-  return getFromStorage<SystemSettings>(STORAGE_KEYS.SETTINGS) ?? { ...DEFAULT_SETTINGS }
-}
-
-function save(settings: SystemSettings): void {
-  setToStorage(STORAGE_KEYS.SETTINGS, settings)
-}
+/** @author David Hdez */
+// internal imports
+import type { SystemSettingInterface } from "@/interfaces/SystemSettingInterface";
+import { useSettingsStore } from "@/stores/settingsstore";
 
 export class SettingsService {
-  static async getAll(): Promise<SystemSettings> {
-    return load()
+  static getSettings(): SystemSettingInterface {
+    return useSettingsStore().settings;
   }
 
-  static async setMaintenanceMode(enabled: boolean): Promise<SystemSettings> {
-    const settings = load()
-    settings.maintenanceMode = enabled
-    save(settings)
-    return settings
+  static isMaintenanceModeEnabled(): boolean {
+    return useSettingsStore().settings.maintenanceModeEnabled;
   }
 
-  static async createAlert(message: string, type: SystemAlert['type']): Promise<SystemSettings> {
-    const settings = load()
-    settings.alert = {
-      id: `alert-${Date.now()}`,
-      message,
-      type,
-      active: true,
-      createdAt: new Date().toISOString(),
-    }
-    save(settings)
-    return settings
+  static setMaintenanceMode(enabled: boolean): void {
+    useSettingsStore().settings.maintenanceModeEnabled = enabled;
   }
 
-  static async dismissAlert(): Promise<SystemSettings> {
-    const settings = load()
-    settings.alert = null
-    save(settings)
-    return settings
+  static isUserNotificationEnabled(): boolean {
+    return useSettingsStore().settings.userNotificationEnabled;
+  }
+
+  static getUserNotificationMessage(): string {
+    return useSettingsStore().settings.userNotificationMessage;
+  }
+
+  static updateUserNotification(message: string, enabled: boolean): void {
+    const trimmedMessage = message.trim();
+    useSettingsStore().settings.userNotificationMessage = trimmedMessage;
+    useSettingsStore().settings.userNotificationEnabled =
+      enabled && trimmedMessage.length > 0;
   }
 }

@@ -1,90 +1,65 @@
-/**
- * @author Samuel Rivero
- * @description CRUD operations for the Package entity. Persisted in LocalStorage.
- */
-
-// data
-import { getFromStorage, setToStorage, STORAGE_KEYS } from '@/infrastructure/storage'
-
-// types
-import type { PackageInterface } from '@/interfaces'
-import type { CreatePackageDTO, UpdatePackageDTO } from '@/dtos'
-
-function loadAll(): PackageInterface[] {
-  return getFromStorage<PackageInterface[]>(STORAGE_KEYS.PACKAGES) ?? []
-}
-
-function nextPackageId(existing: PackageInterface[]): string {
-  const TIMESTAMP_THRESHOLD = 1e9
-  let max = 0
-  for (const p of existing) {
-    const m = p.id.match(/^pkg-(\d+)$/)
-    if (m?.[1]) {
-      const n = parseInt(m[1], 10)
-      if (n < TIMESTAMP_THRESHOLD && n > max) max = n
-    }
-  }
-  return `pkg-${max + 1}`
-}
+/** @author David Hdez */
+// internal imports
+import type { PackageInterface } from "@/interfaces/PackageInterface";
+import { usePackageStore } from "@/stores/packagestore";
+import { WarehouseService } from "@/services/WarehouseService";
+import type { CreatePackageDTO } from "@/dtos/CreatePackageDTO";
 
 export class PackageService {
-  static async getAll(status?: string): Promise<PackageInterface[]> {
-    const all = loadAll()
-    if (status && status !== 'All') return all.filter((p) => p.status === status)
-    return all
+  static getPackages(): PackageInterface[] {
+    this.ensureWarehouseAssignments();
+    return usePackageStore().packages;
   }
 
-  static async getById(id: string): Promise<PackageInterface | undefined> {
-    return loadAll().find((p) => p.id === id)
+  static ensureWarehouseAssignments(): void {
+    const packageStore = usePackageStore();
+    const warehouses = WarehouseService.getWarehouses();
+    if (warehouses.length === 0) return;
+
+    const warehouseIds = warehouses.map((warehouse) => warehouse.id);
+    const validWarehouseIds = new Set<number>(warehouseIds);
+
+    packageStore.packages.forEach((pkg, index) => {
+      if (!validWarehouseIds.has(pkg.warehouseId)) {
+        const nextWarehouseId =
+          warehouseIds[index % warehouseIds.length] ?? warehouseIds[0];
+        if (nextWarehouseId !== undefined) {
+          pkg.warehouseId = nextWarehouseId;
+        }
+      }
+    });
   }
 
-  static async create(dto: CreatePackageDTO): Promise<PackageInterface> {
-    const all = loadAll()
-    const now = new Date().toISOString()
-    const pkgId = nextPackageId(all)
-    const newPkg: PackageInterface = {
-      id: pkgId,
-      userId: dto.userId,
-      warehouseId: dto.warehouseId ?? null,
-      status: dto.status,
-      description: dto.description,
-      price: dto.price,
-      createdAt: now,
-      updatedAt: now,
-      logHistory: [
-        {
-          id: `log-${Date.now()}`,
-          packageId: pkgId,
-          fromWarehouseId: '',
-          toWarehouseId: dto.warehouseId ?? '',
-          previousStatus: '',
-          newStatus: dto.status,
-          description: 'Created',
-          timestamp: now,
-        },
-      ],
-    }
-    all.push(newPkg)
-    setToStorage(STORAGE_KEYS.PACKAGES, all)
-    return newPkg
+  static getUniqueStatuses(): string[] {
+    const packages = this.getPackages();
+    const statuses = packages.map((pkg) => pkg.status);
+    const uniqueStatuses = new Set(statuses);
+
+    return Array.from(uniqueStatuses);
   }
 
-  static async update(dto: UpdatePackageDTO): Promise<PackageInterface | undefined> {
-    const all = loadAll()
-    const idx = all.findIndex((p) => p.id === dto.id)
-    const pkg = idx !== -1 ? all[idx] : undefined
-    if (!pkg) return undefined
-    if (dto.warehouseId !== undefined) pkg.warehouseId = dto.warehouseId
-    if (dto.status !== undefined) pkg.status = dto.status
-    if (dto.description !== undefined) pkg.description = dto.description
-    if (dto.price !== undefined) pkg.price = dto.price
-    pkg.updatedAt = new Date().toISOString()
-    setToStorage(STORAGE_KEYS.PACKAGES, all)
-    return pkg
+  static getUniqueCarriers(): string[] {
+    const packages = this.getPackages();
+    return Array.from(new Set(packages.map((pkg) => pkg.carrier)));
   }
 
-  static async remove(id: string): Promise<void> {
-    const all = loadAll().filter((p) => p.id !== id)
-    setToStorage(STORAGE_KEYS.PACKAGES, all)
+  static getPackageById(id: number): PackageInterface | undefined {
+    return usePackageStore().packages.find((pkg) => pkg.id === id);
+  }
+
+  static createPackage(pkg: CreatePackageDTO): void {
+    const warehouses = WarehouseService.getWarehouses();
+    const warehouseIds = warehouses.map((warehouse) => warehouse.id);
+    const fallbackWarehouseId = warehouseIds[0] ?? 1;
+    const assignedWarehouseId = warehouseIds.includes(pkg.warehouseId)
+      ? pkg.warehouseId
+      : fallbackWarehouseId;
+
+    const id = usePackageStore().packages.length + 1;
+    usePackageStore().packages.push({
+      id,
+      ...pkg,
+      warehouseId: assignedWarehouseId,
+    });
   }
 }

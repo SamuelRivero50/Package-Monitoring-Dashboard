@@ -1,12 +1,5 @@
-/**
- * @author Samuel Rivero
- * @description DTO for creating a User.
- */
+/** @author David Hdez */
+// internal imports
+import type { UserInterface } from "@/interfaces/UserInterface";
 
-export interface CreateUserDTO {
-  name: string
-  email: string
-  password: string
-  role: string
-  avatarUrl?: string
-}
+export type CreateUserDTO = Omit<UserInterface, "id">;

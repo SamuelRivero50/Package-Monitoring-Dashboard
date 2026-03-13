@@ -1,318 +1,265 @@
+<!-- @author David Hdez -->
 <script setup lang="ts">
-/**
- * @author Samuel Rivero, Law
- * @description System overview dashboard with Chart.js donut and Leaflet live map.
- */
+// external imports
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { RouterLink } from "vue-router";
+import type { Chart } from "chart.js";
 
-// framework
-import { computed } from 'vue'
+// internal imports
+import { PackageService } from "@/services/PackageService";
+import { WarehouseService } from "@/services/WarehouseService";
+import { UserService } from "@/services/UserService";
+import { ChartUtils } from "@/utils/ChartUtils";
 
-// viewmodels
-import { useDashboardViewModel } from '@/viewmodels'
+const packages = computed(() => PackageService.getPackages());
+const warehouses = computed(() => WarehouseService.getWarehouses());
+const recentPackages = computed(() =>
+  [...packages.value].sort((a, b) => b.id - a.id).slice(0, 5),
+);
 
-// components
-import AppSidebar from '@/components/AppSidebar.vue'
-import DashboardHeader from '@/components/DashboardHeader.vue'
-import DonutChart from '@/components/DonutChart.vue'
-import LeafletMap from '@/components/LeafletMap.vue'
+const statusColors: Record<string, string> = {
+  Delivered: "#10b981",
+  "In Transit": "#f59e0b",
+  "At Warehouse": "#2dd4bf",
+  Pending: "#6b7280",
+  Exception: "#f43f5e",
+};
 
-const { summary, statCards, trendLabel, trendClass } = useDashboardViewModel()
+const canvasRef = ref<HTMLCanvasElement | null>(null);
+let chartInstance: Chart | null = null;
 
-const chartLabels = computed(() => ['Delivered', 'In Transit', 'Warehouse'])
-const chartValues = computed(() => {
-  const s = summary.value?.statusBreakdown
-  return s ? [s.delivered, s.inTransit, s.atWarehouse] : [65, 25, 10]
-})
-const chartColors = ['#2dd4bf', '#f59e0b', '#8b949e']
+function getWarehouseName(warehouseId: number): string {
+  return (
+    WarehouseService.getWarehouseById(warehouseId)?.name ?? "Unknown Warehouse"
+  );
+}
 
-const totalLabel = computed(() => {
-  if (!summary.value) return '12.8k'
-  const t = summary.value.totalPackages
-  return t >= 1000 ? `${(t / 1000).toFixed(1)}k` : String(t)
-})
+onMounted(() => {
+  if (!canvasRef.value) return;
+  const counts: Record<string, number> = {};
+  for (const pkg of packages.value) {
+    counts[pkg.status] = (counts[pkg.status] ?? 0) + 1;
+  }
+  const labels = Object.keys(counts);
+  const data = Object.values(counts);
+  const colors = labels.map((label) => statusColors[label] ?? "#8b949e");
+  chartInstance = ChartUtils.buildPieChart(
+    canvasRef.value,
+    labels,
+    data,
+    colors,
+  );
+});
 
-const recentPackages = computed(() => summary.value?.recentPackages ?? [])
-
-const warehouseMarkers = [
-  {
-    id: 'wh-1',
-    label: 'Central Hub',
-    lat: 41.8781,
-    lng: -87.6298,
-    popupHtml: '<b>Central Hub</b><br>Chicago, IL — 85% capacity',
-  },
-  {
-    id: 'wh-2',
-    label: 'West Coast',
-    lat: 34.0522,
-    lng: -118.2437,
-    popupHtml: '<b>West Coast</b><br>Los Angeles, CA — 62% capacity',
-  },
-  {
-    id: 'wh-3',
-    label: 'East Distro',
-    lat: 40.7357,
-    lng: -74.1724,
-    popupHtml: '<b>East Distro</b><br>Newark, NJ — 94% capacity',
-  },
-  {
-    id: 'wh-4',
-    label: 'South Regional',
-    lat: 33.749,
-    lng: -84.388,
-    popupHtml: '<b>South Regional</b><br>Atlanta, GA — 42% capacity',
-  },
-]
-
-const warehouseRoutes = [
-  { fromId: 'wh-2', toId: 'wh-1' },
-  { fromId: 'wh-1', toId: 'wh-3' },
-  { fromId: 'wh-1', toId: 'wh-4' },
-  { fromId: 'wh-4', toId: 'wh-3' },
-]
+onUnmounted(() => {
+  chartInstance?.destroy();
+  chartInstance = null;
+});
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-canvas">
-    <AppSidebar activePage="/dashboard" />
-
-    <main class="flex-1 flex flex-col min-w-0">
-      <DashboardHeader title="System Overview" />
-
-      <!-- Content -->
-      <div class="p-8 flex flex-col gap-8 overflow-y-auto">
-        <!-- Stat Cards -->
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+  <section class="space-y-8">
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div
+        v-for="(stat, i) in [
+          {
+            icon: 'inventory_2',
+            label: 'Total Packages',
+            val: packages.length,
+            color: 'packages',
+          },
+          {
+            icon: 'warehouse',
+            label: 'Warehouses',
+            val: warehouses.length,
+            color: 'warehouses',
+          },
+          {
+            icon: 'group',
+            label: 'Users',
+            val: UserService.getUsers().length,
+            color: 'users',
+          },
+          {
+            icon: 'check_circle',
+            label: 'Delivered',
+            val: packages.filter((pkg) => pkg.status === 'Delivered').length,
+            color: 'primary',
+          },
+        ]"
+        :key="i"
+        class="bg-surface p-6 rounded-xl border border-border-default"
+      >
+        <div class="flex justify-between items-start mb-4">
           <div
-            v-for="card in statCards"
-            :key="card.label"
-            class="bg-panel p-6 rounded-xl border border-wire transition-[border-color] duration-200 hover:border-primary/25"
+            class="p-2 rounded-lg"
+            :class="{
+              'bg-packages/15 text-packages': stat.color === 'packages',
+              'bg-warehouses/15 text-warehouses': stat.color === 'warehouses',
+              'bg-users/15 text-users': stat.color === 'users',
+              'bg-primary/15 text-primary': stat.color === 'primary',
+            }"
           >
-            <div class="flex justify-between items-start mb-4">
-              <div
-                :class="['p-2 rounded-lg flex items-center justify-center', card.iconColorClass]"
-              >
-                <span class="material-symbols-outlined text-white" style="font-size: 22px">{{
-                  card.icon
-                }}</span>
-              </div>
-              <span
-                :class="['text-xs font-bold flex items-center gap-0.5', trendClass(card.trend)]"
-              >
-                <span
-                  v-if="card.trend !== 0"
-                  class="material-symbols-outlined"
-                  style="font-size: 14px"
-                >
-                  {{ card.trend > 0 ? 'trending_up' : 'trending_down' }}
-                </span>
-                {{ trendLabel(card.trend) }}
-              </span>
-            </div>
-            <p class="text-sm font-medium text-soft">{{ card.label }}</p>
-            <h3 class="text-2xl font-bold mt-1 leading-none">{{ card.value }}</h3>
+            <span class="material-symbols-outlined">{{ stat.icon }}</span>
           </div>
         </div>
+        <p class="text-text-secondary text-sm font-medium">{{ stat.label }}</p>
+        <h3 class="text-2xl font-bold mt-1 text-text-primary">
+          {{ stat.val }}
+        </h3>
+      </div>
+    </div>
 
-        <!-- Middle row: Table + Status summary -->
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
-          <!-- Recent Packages -->
-          <div
-            class="bg-panel rounded-xl border border-wire overflow-hidden flex flex-col transition-[border-color] duration-200 hover:border-primary/25"
-          >
-            <div class="p-6 border-b border-wire flex justify-between items-center">
-              <h2 class="text-lg font-bold">Recent Packages</h2>
-              <button class="text-primary text-sm font-medium hover:underline">View all</button>
-            </div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-sm border-collapse">
-                <thead>
-                  <tr class="bg-sheet text-soft">
-                    <th class="px-6 py-3.5 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                      Tracking #
-                    </th>
-                    <th class="px-6 py-3.5 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                      Description
-                    </th>
-                    <th class="px-6 py-3.5 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                      Status
-                    </th>
-                    <th class="px-6 py-3.5 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                      Updated
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="row in recentPackages"
-                    :key="row.trackingId"
-                    class="border-t border-wire transition-colors duration-150 hover:bg-sheet"
-                  >
-                    <td class="px-6 py-3.5 font-medium font-mono text-link">
-                      {{ row.trackingId }}
-                    </td>
-                    <td class="px-6 py-3.5 font-medium">{{ row.description }}</td>
-                    <td class="px-6 py-3.5">
-                      <span
-                        :class="[
-                          'rounded px-2.5 py-0.5 text-xs font-medium inline-block',
-                          row.statusClass,
-                        ]"
-                        >{{ row.status }}</span
-                      >
-                    </td>
-                    <td class="px-6 py-3.5 text-faded">{{ row.updatedAgo }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Status Summary -->
-          <div
-            class="bg-panel rounded-xl border border-wire p-6 flex flex-col transition-[border-color] duration-200 hover:border-primary/25"
-          >
-            <h2 class="text-lg font-bold mb-4">Status Summary</h2>
-            <div class="flex-1 flex flex-col justify-center items-center gap-6">
-              <DonutChart
-                :labels="chartLabels"
-                :values="chartValues"
-                :colors="chartColors"
-                :center-value="totalLabel"
-                center-label="Total"
-              />
-              <div class="w-full mt-8 flex flex-col gap-2">
-                <div class="flex items-center justify-between text-sm font-medium">
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-primary"></span>
-                    <span>Delivered</span>
-                  </div>
-                  <span class="font-bold text-sm">65%</span>
-                </div>
-                <div class="flex items-center justify-between text-sm font-medium">
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                    <span>In Transit</span>
-                  </div>
-                  <span class="font-bold text-sm">25%</span>
-                </div>
-                <div class="flex items-center justify-between text-sm font-medium">
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-soft"></span>
-                    <span>Warehouse</span>
-                  </div>
-                  <span class="font-bold text-sm">10%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Warehouses Section -->
-        <div
-          class="bg-panel border border-wire rounded-xl p-6 transition-[border-color] duration-200 hover:border-primary/25"
-        >
-          <div class="flex justify-between items-start mb-6">
-            <div>
-              <h2 class="text-lg font-bold">Warehouses</h2>
-              <p class="text-sm text-soft mt-0.5">
-                Real-time capacity and utilization across locations
-              </p>
-            </div>
-            <button
-              class="bg-primary text-canvas font-bold px-4 py-2.5 rounded-lg text-sm transition-opacity duration-150 hover:opacity-90"
-            >
-              Add Warehouse
-            </button>
-          </div>
-          <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-            <!-- Warehouse card 1 -->
-            <div class="p-4 rounded-xl border border-wire bg-canvas">
-              <div class="flex items-center gap-2 mb-4">
-                <div
-                  class="w-10 h-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center"
-                >
-                  <span class="material-symbols-outlined">location_on</span>
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold">North Region Hub</h4>
-                  <p class="text-[11px] text-soft uppercase font-bold">Chicago, IL</p>
-                </div>
-              </div>
-              <div class="flex flex-col gap-2">
-                <div class="flex justify-between text-xs font-semibold">
-                  <span class="text-soft">Capacity</span>
-                  <span>88%</span>
-                </div>
-                <div class="h-2 w-full bg-wire-subtle rounded-full overflow-hidden">
-                  <div class="h-full bg-primary rounded-full" style="width: 88%"></div>
-                </div>
-                <p class="text-[10px] text-faded text-right">8,800 / 10,000 pallets</p>
-              </div>
-            </div>
-            <!-- Warehouse card 2 -->
-            <div class="p-4 rounded-xl border border-wire bg-canvas">
-              <div class="flex items-center gap-2 mb-4">
-                <div
-                  class="w-10 h-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center"
-                >
-                  <span class="material-symbols-outlined">location_on</span>
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold">West Coast Center</h4>
-                  <p class="text-[11px] text-soft uppercase font-bold">Long Beach, CA</p>
-                </div>
-              </div>
-              <div class="flex flex-col gap-2">
-                <div class="flex justify-between text-xs font-semibold">
-                  <span class="text-soft">Capacity</span>
-                  <span>42%</span>
-                </div>
-                <div class="h-2 w-full bg-wire-subtle rounded-full overflow-hidden">
-                  <div class="h-full bg-primary rounded-full" style="width: 42%"></div>
-                </div>
-                <p class="text-[10px] text-faded text-right">6,300 / 15,000 pallets</p>
-              </div>
-            </div>
-            <!-- Warehouse card 3 -->
-            <div class="p-4 rounded-xl border border-wire bg-canvas">
-              <div class="flex items-center gap-2 mb-4">
-                <div
-                  class="w-10 h-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center"
-                >
-                  <span class="material-symbols-outlined">location_on</span>
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold">East Distribution</h4>
-                  <p class="text-[11px] text-soft uppercase font-bold">Newark, NJ</p>
-                </div>
-              </div>
-              <div class="flex flex-col gap-2">
-                <div class="flex justify-between text-xs font-semibold">
-                  <span class="text-soft">Capacity</span>
-                  <span class="text-red-400 font-bold">94%</span>
-                </div>
-                <div class="h-2 w-full bg-wire-subtle rounded-full overflow-hidden">
-                  <div class="h-full bg-red-400 rounded-full" style="width: 94%"></div>
-                </div>
-                <p class="text-[10px] text-faded text-right">11,280 / 12,000 pallets</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Live Map -->
-        <div class="relative h-[360px] rounded-xl overflow-hidden border border-wire">
-          <LeafletMap :markers="warehouseMarkers" :routes="warehouseRoutes" />
-          <div
-            class="absolute top-4 right-4 bg-canvas/80 backdrop-blur px-3 py-1.5 rounded-lg border border-primary/20 z-[1000]"
-          >
-            <span class="text-[10px] font-bold uppercase tracking-[0.1em] text-primary"
-              >Status: Operational</span
-            >
-          </div>
+    <!-- Chart + Recent Packages -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-surface border border-border-default rounded-xl p-6">
+        <h2 class="font-bold text-lg text-text-primary mb-1">Package Status</h2>
+        <p class="text-xs text-text-muted mb-4">
+          Distribution by current status
+        </p>
+        <div class="h-64">
+          <canvas ref="canvasRef" />
         </div>
       </div>
-    </main>
-  </div>
+
+      <div
+        class="bg-surface rounded-xl border border-border-default overflow-hidden"
+      >
+        <div
+          class="p-6 border-b border-border-default flex justify-between items-center"
+        >
+          <h2 class="font-bold text-lg text-text-primary">Recent Packages</h2>
+          <RouterLink
+            to="/packages"
+            class="text-link text-sm font-medium hover:underline"
+            >View all</RouterLink
+          >
+        </div>
+        <table class="w-full text-left text-sm">
+          <thead class="text-text-muted bg-elevated">
+            <tr>
+              <th
+                class="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]"
+              >
+                Tracking #
+              </th>
+              <th
+                class="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]"
+              >
+                Status
+              </th>
+              <th
+                class="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]"
+              >
+                Warehouse
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border-subtle">
+            <tr
+              v-for="pkg in recentPackages"
+              :key="pkg.id"
+              class="hover:bg-elevated/50 transition-colors"
+            >
+              <td class="px-6 py-4 font-mono text-packages">
+                {{ pkg.trackingNumber }}
+              </td>
+              <td class="px-6 py-4">
+                <span
+                  class="px-2 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide"
+                  :class="{
+                    'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20':
+                      pkg.status === 'Delivered',
+                    'bg-amber-500/10 text-amber-400 border border-amber-500/20':
+                      pkg.status === 'In Transit',
+                    'bg-primary/10 text-primary border border-primary/20':
+                      pkg.status === 'At Warehouse',
+                    'bg-gray-500/10 text-text-muted border border-gray-500/20':
+                      pkg.status === 'Pending',
+                    'bg-rose-500/10 text-rose-400 border border-rose-500/20':
+                      pkg.status === 'Exception',
+                  }"
+                >
+                  {{ pkg.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-text-secondary">
+                {{ getWarehouseName(pkg.warehouseId) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Warehouse Overview -->
+    <div
+      class="bg-surface border border-border-default rounded-xl p-6 space-y-4"
+    >
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold text-text-primary">Warehouses</h2>
+          <p class="text-xs text-text-muted">Capacity overview</p>
+        </div>
+        <RouterLink
+          to="/warehouses"
+          class="px-4 py-2 rounded-lg bg-warehouses/10 text-warehouses text-sm font-bold hover:bg-warehouses/20 transition-colors"
+        >
+          Manage
+        </RouterLink>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <RouterLink
+          v-for="wh in warehouses"
+          :key="wh.id"
+          to="/warehouses"
+          class="p-4 bg-elevated rounded-lg border border-border-subtle hover:border-warehouses/40 transition-colors group"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <h4
+              class="text-sm font-bold text-text-primary group-hover:text-warehouses transition-colors"
+            >
+              {{ wh.name }}
+            </h4>
+            <span
+              class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase"
+              :class="
+                wh.status === 'Active'
+                  ? 'bg-users/10 text-users'
+                  : 'bg-companies/10 text-companies'
+              "
+            >
+              {{ wh.status }}
+            </span>
+          </div>
+          <p class="text-text-muted text-xs flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs">location_on</span
+            >{{ wh.location }}
+          </p>
+          <div class="mt-3">
+            <div class="flex justify-between text-[10px] mb-1">
+              <span class="text-text-secondary">Capacity</span>
+              <span class="font-bold text-primary"
+                >{{ Math.round((wh.currentLoad / wh.capacity) * 100) }}%</span
+              >
+            </div>
+            <div class="h-1.5 w-full bg-base rounded-full overflow-hidden">
+              <div
+                class="h-full rounded-full transition-all"
+                :class="
+                  wh.currentLoad / wh.capacity > 0.9
+                    ? 'bg-red-500'
+                    : 'bg-primary'
+                "
+                :style="{
+                  width: Math.round((wh.currentLoad / wh.capacity) * 100) + '%',
+                }"
+              ></div>
+            </div>
+          </div>
+        </RouterLink>
+      </div>
+    </div>
+  </section>
 </template>

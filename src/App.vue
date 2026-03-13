@@ -1,74 +1,200 @@
+<!-- @author David Hdez -->
 <script setup lang="ts">
-/**
- * @author David Hernandez
- * @description Root component. Renders the router view and a global alert banner when active.
-*/
+// external imports
+import { computed } from "vue";
+import { RouterLink, RouterView, useRoute, useRouter } from "vue-router";
 
-// framework
-import { ref, watch } from 'vue'
-import { RouterView, useRoute } from 'vue-router'
+// internal imports
+import { AuthService } from "@/services/AuthService";
+import { SettingsService } from "@/services/SettingsService";
 
-// services
-import { SettingsService } from '@/services/settingsService'
+const route = useRoute();
+const router = useRouter();
 
-// types
-import type { SystemAlert } from '@/types'
+const isAuthenticated = computed(() => AuthService.isAuthenticated());
+const showAuthenticatedLayout = computed(
+  () => Boolean(route.meta.requiresAuth) && isAuthenticated.value,
+);
+const currentUser = computed(() => AuthService.getCurrentUser());
+const userNotificationMessage = computed(() =>
+  SettingsService.getUserNotificationMessage(),
+);
+const showUserNotification = computed(
+  () =>
+    currentUser.value?.role === "User" &&
+    SettingsService.isUserNotificationEnabled() &&
+    userNotificationMessage.value.length > 0,
+);
+const showMaintenanceScreen = computed(
+  () =>
+    showAuthenticatedLayout.value &&
+    currentUser.value?.role === "User" &&
+    SettingsService.isMaintenanceModeEnabled(),
+);
 
-const route = useRoute()
-const alert = ref<SystemAlert | null>(null)
-const dismissed = ref(false)
-
-async function loadAlert(): Promise<void> {
-  const settings = await SettingsService.getAll()
-  alert.value = settings.alert
-  dismissed.value = false
+function handleLogout(): void {
+  AuthService.logout();
+  router.push({ name: "login" });
 }
-
-// Reload alert state on every route change so it stays fresh
-watch(() => route.fullPath, loadAlert, { immediate: true })
 </script>
 
 <template>
-  <!-- Global alert banner -->
-  <Transition name="slide">
-    <div
-      v-if="alert && alert.active && !dismissed"
-      class="fixed top-0 left-0 right-0 z-[9999] flex items-center gap-3 px-5 py-3 text-sm font-semibold"
-      :class="{
-        'bg-[#0c4a6e] text-[#7dd3fc]': alert.type === 'info',
-        'bg-[#713f12] text-[#fde68a]': alert.type === 'warning',
-        'bg-[#7f1d1d] text-[#fca5a5]': alert.type === 'error',
-      }"
-    >
-      <span class="material-symbols-outlined text-lg shrink-0">
-        {{ alert.type === 'error' ? 'error' : alert.type === 'warning' ? 'warning' : 'info' }}
-      </span>
-      <span class="flex-1 min-w-0 break-words">{{ alert.message }}</span>
-      <button
-        class="shrink-0 p-1 rounded hover:bg-white/10 transition-colors"
-        title="Dismiss"
-        @click="dismissed = true"
+  <div class="bg-base text-text-primary min-h-screen font-[Inter]">
+    <!-- Authenticated layout -->
+    <div v-if="showAuthenticatedLayout" class="flex h-screen overflow-hidden">
+      <!-- sidebar -->
+      <aside
+        class="w-64 shrink-0 border-r border-border-default bg-surface hidden md:flex flex-col h-screen sticky top-0"
       >
-        <span class="material-symbols-outlined text-lg">close</span>
-      </button>
-    </div>
-  </Transition>
+        <div class="p-6 flex items-center">
+          <RouterLink to="/dashboard" class="flex items-center gap-2">
+            <div
+              class="bg-primary/15 border border-primary/25 size-10 rounded-lg text-primary flex items-center justify-center"
+            >
+              <span class="material-symbols-outlined text-2xl leading-6 block"
+                >package_2</span
+              >
+            </div>
+            <div class="flex flex-col leading-none">
+              <h1 class="text-lg font-black tracking-tight text-text-primary">
+                PackTrack
+              </h1>
+              <p class="text-text-muted text-[11px] font-medium mt-1">
+                Logistics v1.0.0
+              </p>
+            </div>
+          </RouterLink>
+        </div>
 
-  <div :class="{ 'pt-11': alert && alert.active && !dismissed }">
-    <RouterView />
+        <nav class="flex-1 px-4 space-y-1 mt-4">
+          <RouterLink
+            to="/dashboard"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-text-secondary hover:bg-primary/10 hover:text-primary"
+          >
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-sm font-medium">Overview</span>
+          </RouterLink>
+
+          <RouterLink
+            to="/packages"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-text-secondary hover:bg-packages/10 hover:text-packages"
+          >
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span class="text-sm font-medium">Packages</span>
+          </RouterLink>
+
+          <RouterLink
+            to="/warehouses"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-text-secondary hover:bg-warehouses/10 hover:text-warehouses"
+          >
+            <span class="material-symbols-outlined">warehouse</span>
+            <span class="text-sm font-medium">Warehouses</span>
+          </RouterLink>
+
+          <RouterLink
+            v-if="AuthService.isAdmin()"
+            to="/users"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-text-secondary hover:bg-users/10 hover:text-users"
+          >
+            <span class="material-symbols-outlined">group</span>
+            <span class="text-sm font-medium">Users</span>
+          </RouterLink>
+
+          <RouterLink
+            v-if="AuthService.isAdmin()"
+            to="/settings"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-text-secondary hover:bg-primary/10 hover:text-primary"
+          >
+            <span class="material-symbols-outlined">settings</span>
+            <span class="text-sm font-medium">Settings</span>
+          </RouterLink>
+        </nav>
+
+        <div class="p-4 border-t border-border-default">
+          <div class="flex items-center gap-3 p-2 bg-elevated rounded-xl">
+            <div
+              class="size-8 rounded-full bg-primary/30 flex items-center justify-center text-primary"
+            >
+              <span class="material-symbols-outlined text-sm">person</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-bold truncate text-text-primary">
+                {{ AuthService.getCurrentUser()?.name }}
+              </p>
+              <p class="text-[10px] text-text-muted truncate">
+                {{ AuthService.getCurrentUser()?.email }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- main content area -->
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- top header -->
+        <header
+          class="h-16 flex items-center justify-between px-8 border-b border-border-default sticky top-0 bg-base/80 backdrop-blur-md z-10"
+        >
+          <div class="flex items-center gap-4 flex-1">
+            <h2 class="text-lg font-bold tracking-tight text-text-primary">
+              {{ $route.meta.title }}
+            </h2>
+          </div>
+          <div class="flex items-center gap-3">
+            <button
+              class="size-10 flex items-center justify-center rounded-lg bg-elevated text-text-secondary hover:text-primary transition-colors"
+            >
+              <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <button
+              class="size-10 flex items-center justify-center rounded-lg bg-elevated text-text-secondary hover:text-rose-400 transition-colors"
+              @click="handleLogout"
+            >
+              <span class="material-symbols-outlined">logout</span>
+            </button>
+          </div>
+        </header>
+
+        <div
+          v-if="showUserNotification"
+          class="mx-8 mt-4 px-4 py-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 flex items-start gap-2"
+        >
+          <span class="material-symbols-outlined text-sm mt-0.5">campaign</span>
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wide">Notice</p>
+            <p class="text-sm leading-relaxed">{{ userNotificationMessage }}</p>
+          </div>
+        </div>
+
+        <!-- main content -->
+        <main class="flex-1 overflow-y-auto p-8">
+          <section
+            v-if="showMaintenanceScreen"
+            class="h-full min-h-[60vh] flex items-center justify-center"
+          >
+            <div
+              class="max-w-md w-full bg-surface border border-border-default rounded-xl p-8 text-center space-y-3"
+            >
+              <span class="material-symbols-outlined text-4xl text-primary"
+                >construction</span
+              >
+              <h3 class="text-xl font-black text-text-primary">
+                Maintenance Mode Enabled
+              </h3>
+              <p class="text-sm text-text-secondary">
+                Access is temporarily restricted while the platform is being
+                updated. Please try again later.
+              </p>
+            </div>
+          </section>
+          <RouterView v-else />
+        </main>
+      </div>
+    </div>
+
+    <!-- Guest layout (Login) -->
+    <div v-else>
+      <RouterView />
+    </div>
   </div>
 </template>
-
-<style scoped>
-.slide-enter-active,
-.slide-leave-active {
-  transition:
-    transform 0.3s ease,
-    opacity 0.3s ease;
-}
-.slide-enter-from,
-.slide-leave-to {
-  transform: translateY(-100%);
-  opacity: 0;
-}
-</style>

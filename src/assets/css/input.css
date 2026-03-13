@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --color-base: #0d1117;
+  --color-surface: #161b22;
+  --color-elevated: #1c2333;
+  --color-hero: #0d1f3c;
+  --color-primary: #2dd4bf;
+  --color-primary-dark: #14b8a6;
+  --color-cta: #e07b39;
+  --color-cta-hover: #c96a28;
+  --color-link: #38bdf8;
+  --color-packages: #0d9488;
+  --color-warehouses: #2563eb;
+  --color-companies: #d97706;
+  --color-users: #16a34a;
+  --color-text-primary: #e6edf3;
+  --color-text-secondary: #8b949e;
+  --color-text-muted: #6e7681;
+  --color-border-default: #30363d;
+  --color-border-subtle: #21262d;
+  --font-display: "Inter", sans-serif;
+}
+
+@layer components {
+  .select-control {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1rem;
+    padding-right: 2.75rem !important;
+  }
+}

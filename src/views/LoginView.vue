@@ -1,184 +1,200 @@
+<!-- @author David Hdez -->
 <script setup lang="ts">
-/**
- * @author Samuel Rivero
- * @description Login page - email/password authentication. Redirects to dashboard on success.
- */
+// external imports
+import { ref } from "vue";
+import { RouterLink, useRoute, useRouter } from "vue-router";
 
-// framework
-import { ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+// internal imports
+import { AuthService } from "@/services/AuthService";
 
-// stores
-import { useAuthStore } from '@/stores/auth'
+const route = useRoute();
+const router = useRouter();
 
-// components
-import AppFooter from '@/components/AppFooter.vue'
+const email = ref<string>("");
+const password = ref<string>("");
+const error = ref<string>("");
+const submitting = ref<boolean>(false);
 
-const router = useRouter()
-const auth = useAuthStore()
+function handleSubmit(): void {
+  submitting.value = true;
+  error.value = "";
 
-const email = ref('')
-const password = ref('')
-const error = ref('')
-const isLoading = ref(false)
-
-async function submitLogin() {
-  error.value = ''
-  if (!email.value.trim() || !password.value) {
-    error.value = 'Email and password are required.'
-    return
-  }
-  isLoading.value = true
   try {
-    await auth.login({ email: email.value.trim(), password: password.value })
-    const redirect = (router.currentRoute.value.query.redirect as string) || '/dashboard'
-    router.push(redirect)
-  } catch (e: unknown) {
-    const err = e as { status?: number; message?: string }
-    error.value = err?.message ?? 'Invalid credentials. Please try again.'
+    AuthService.login(email.value, password.value);
+    const redirect = (route.query.redirect as string) || "/dashboard";
+    router.push(redirect);
+  } catch (err) {
+    error.value =
+      err instanceof Error ? err.message : "Invalid email or password.";
   } finally {
-    isLoading.value = false
+    submitting.value = false;
   }
 }
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-canvas">
-    <!-- Header -->
-    <header class="flex items-center justify-between px-6 py-6 border-b border-wire lg:px-20">
-      <RouterLink to="/" class="flex items-center gap-2">
-        <div class="p-2 bg-primary/15 rounded-lg text-primary flex items-center justify-center">
-          <span class="material-symbols-outlined" style="font-size: 24px">package_2</span>
-        </div>
-        <h1 class="text-[20px] font-bold tracking-[-0.3px]">PackTrack</h1>
-      </RouterLink>
-      <div class="hidden md:flex items-center gap-4">
-        <span class="text-sm text-soft">Don't have an account?</span>
+  <div class="min-h-screen bg-base text-text-primary">
+    <header class="border-b border-border-default bg-base/80 backdrop-blur-md">
+      <div
+        class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between"
+      >
+        <RouterLink to="/" class="flex items-center gap-2">
+          <div
+            class="size-10 rounded-lg bg-primary/15 border border-primary/30 text-primary flex items-center justify-center"
+          >
+            <span class="material-symbols-outlined text-2xl">package_2</span>
+          </div>
+          <div>
+            <h1 class="text-xl font-black tracking-tight">PackTrack</h1>
+            <p class="text-[11px] text-text-muted">Logistics Platform</p>
+          </div>
+        </RouterLink>
+
         <RouterLink
           to="/signup"
-          class="px-5 py-2 rounded-lg border border-primary text-primary font-semibold text-sm transition-colors duration-200 hover:bg-primary/10"
-          >Sign up</RouterLink
+          class="px-5 py-2 rounded-lg border border-primary/40 text-primary text-sm font-bold hover:bg-primary/10 transition-colors"
         >
+          Create Account
+        </RouterLink>
       </div>
     </header>
 
-    <!-- Main -->
-    <main class="flex-1 flex flex-col lg:flex-row">
-      <!-- Left panel -->
-      <div
-        class="flex flex-col justify-center p-8 lg:w-1/2 lg:px-24 lg:py-16"
-        style="
-          background: linear-gradient(135deg, #0d1f3c 0%, #0a1628 100%);
-          border-right: 1px solid #21262d;
-        "
+    <main class="min-h-[calc(100vh-82px)] grid lg:grid-cols-2">
+      <section
+        class="hidden lg:flex flex-col justify-center px-14 py-12 bg-hero border-r border-border-default"
       >
-        <div class="max-w-[480px]">
-          <h2
-            class="font-black text-body leading-[1.1] mb-6"
-            style="font-size: clamp(32px, 4vw, 60px)"
+        <div class="max-w-xl space-y-8">
+          <span
+            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wide"
           >
-            Welcome <span class="text-primary">Back</span>
+            Welcome back
+          </span>
+
+          <h2 class="text-5xl font-black tracking-tight leading-tight">
+            Sign in and operate your logistics dashboard in real time
           </h2>
-          <p class="text-soft text-lg mb-10 leading-[1.6]">
-            Sign in to access your logistics dashboard. Track packages, manage warehouses, and
-            streamline your supply chain.
+
+          <p class="text-lg text-text-secondary leading-relaxed">
+            Track package flow, monitor warehouse capacity, and coordinate your
+            team from a single secure workspace.
           </p>
-          <div class="flex flex-col gap-6">
-            <div class="flex items-start gap-4">
-              <span class="material-symbols-outlined text-primary shrink-0 mt-0.5"
+
+          <div class="space-y-4">
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-primary mt-0.5"
                 >check_circle</span
               >
-              <div>
-                <h4 class="font-bold text-body mb-0.5">Real-time tracking</h4>
-                <p class="text-sm text-soft">Monitor every movement of your packages.</p>
-              </div>
+              <p class="text-sm text-text-secondary">
+                Operational dashboard with live status indicators.
+              </p>
             </div>
-            <div class="flex items-start gap-4">
-              <span class="material-symbols-outlined text-primary shrink-0 mt-0.5"
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-primary mt-0.5"
                 >check_circle</span
               >
-              <div>
-                <h4 class="font-bold text-body mb-0.5">Multi-warehouse support</h4>
-                <p class="text-sm text-soft">Manage inventory across locations.</p>
-              </div>
+              <p class="text-sm text-text-secondary">
+                Role-based access and shared activity timeline.
+              </p>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-primary mt-0.5"
+                >check_circle</span
+              >
+              <p class="text-sm text-text-secondary">
+                Global notifications and maintenance controls.
+              </p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Right panel -->
-      <div class="flex flex-col justify-center p-8 bg-canvas lg:w-1/2 lg:px-24 lg:py-16">
-        <div class="max-w-[400px] mx-auto w-full">
-          <div class="mb-8">
-            <h2 class="text-[28px] font-bold text-body mb-2">Sign in</h2>
-            <p class="text-soft">Enter your credentials to access your account.</p>
+      <section class="flex items-center justify-center px-6 py-10">
+        <div
+          class="w-full max-w-md bg-surface border border-border-default rounded-2xl p-8 space-y-6"
+        >
+          <div>
+            <h2 class="text-2xl font-black tracking-tight">Sign In</h2>
+            <p class="text-sm text-text-muted mt-1">
+              Access your PackTrack dashboard.
+            </p>
           </div>
 
-          <form class="flex flex-col gap-5" @submit.prevent="submitLogin">
-            <p
-              v-if="error"
-              class="px-3 py-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-sm"
-            >
-              {{ error }}
-            </p>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-soft" for="login-email">Email</label>
-              <div class="relative">
-                <span
-                  class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-faded"
-                  style="font-size: 20px"
-                  >mail</span
-                >
-                <input
-                  id="login-email"
-                  v-model="email"
-                  type="email"
-                  placeholder="alex@packtrack.dev"
-                  class="w-full py-3.5 pl-12 pr-4 bg-panel border border-wire rounded-xl text-body text-base outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-faded focus:border-primary focus:shadow-[0_0_0_3px_rgba(45,212,191,0.12)]"
-                  autocomplete="email"
-                />
-              </div>
+          <form class="space-y-4" @submit.prevent="handleSubmit">
+            <div class="space-y-2">
+              <label
+                for="email"
+                class="text-sm font-semibold text-text-secondary"
+                >Email</label
+              >
+              <input
+                v-model="email"
+                type="email"
+                id="email"
+                required
+                placeholder="user@packtrack.io"
+                class="w-full bg-elevated border border-border-default rounded-xl py-3 px-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+              />
             </div>
 
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-soft" for="login-password">Password</label>
-              <div class="relative">
-                <span
-                  class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-faded"
-                  style="font-size: 20px"
-                  >lock</span
-                >
-                <input
-                  id="login-password"
-                  v-model="password"
-                  type="password"
-                  placeholder="••••••••"
-                  class="w-full py-3.5 pl-12 pr-4 bg-panel border border-wire rounded-xl text-body text-base outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-faded focus:border-primary focus:shadow-[0_0_0_3px_rgba(45,212,191,0.12)]"
-                  autocomplete="current-password"
-                />
-              </div>
+            <div class="space-y-2">
+              <label
+                for="password"
+                class="text-sm font-semibold text-text-secondary"
+                >Password</label
+              >
+              <input
+                v-model="password"
+                type="password"
+                id="password"
+                required
+                placeholder="Enter your password"
+                class="w-full bg-elevated border border-border-default rounded-xl py-3 px-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+
+            <div
+              v-if="error"
+              class="flex items-center gap-2 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl"
+            >
+              <span class="material-symbols-outlined text-rose-400 text-lg"
+                >error</span
+              >
+              <p class="text-sm text-rose-300">{{ error }}</p>
             </div>
 
             <button
               type="submit"
-              class="w-full bg-primary text-canvas font-semibold py-4 px-6 rounded-xl border-none flex items-center justify-center gap-2 text-base cursor-pointer transition-[filter] duration-200 disabled:opacity-70 disabled:cursor-not-allowed hover:not-disabled:brightness-110"
-              :disabled="isLoading"
+              :disabled="submitting"
+              class="w-full bg-primary text-base font-black py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50"
             >
-              <span v-if="isLoading">Signing in...</span>
-              <span v-else>Sign in</span>
-              <span v-if="!isLoading" class="material-symbols-outlined">arrow_forward</span>
+              {{ submitting ? "Signing in..." : "Sign In" }}
             </button>
           </form>
 
-          <div class="mt-8 pt-8 border-t border-wire flex gap-1 text-sm text-soft">
-            <span>Don't have an account?</span>
-            <RouterLink to="/signup" class="font-bold text-primary">Sign up</RouterLink>
+          <div class="border-t border-border-subtle pt-4 space-y-3">
+            <p class="text-xs text-text-muted text-center">Demo credentials</p>
+            <p class="text-xs text-text-secondary text-center">
+              <span class="text-primary font-mono">alex@packtrack.io</span> /
+              <span class="font-mono">admin123</span>
+              <span class="text-text-muted ml-1">(Admin)</span>
+            </p>
+            <p class="text-xs text-text-secondary text-center">
+              <span class="text-primary font-mono">maria@packtrack.io</span> /
+              <span class="font-mono">maria123</span>
+              <span class="text-text-muted ml-1">(User)</span>
+            </p>
           </div>
-        </div>
-      </div>
-    </main>
 
-    <AppFooter />
+          <p class="text-sm text-text-muted text-center">
+            Need an account?
+            <RouterLink
+              to="/signup"
+              class="text-link font-semibold hover:underline"
+              >Sign up</RouterLink
+            >
+          </p>
+        </div>
+      </section>
+    </main>
   </div>
 </template>
