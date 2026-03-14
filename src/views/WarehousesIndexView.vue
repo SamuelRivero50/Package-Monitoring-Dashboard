@@ -2,11 +2,13 @@
 <script setup lang="ts">
 // external imports
 import type { Chart } from "chart.js";
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 // internal imports
 import { WarehouseService } from "@/services/WarehouseService";
 import { ChartUtils } from "@/utils/ChartUtils";
+import LeafletMap from "@/components/LeafletMap.vue";
+import type { MapRoute } from "@/components/LeafletMap.vue";
 
 const warehouses = WarehouseService.getWarehouses();
 const filteredWarehouses = ref(warehouses);
@@ -28,6 +30,36 @@ function applyFilters(): void {
 }
 
 watch([selectedStatus, selectedLocation], () => applyFilters());
+
+// map
+const CITY_COORDS: Record<string, [number, number]> = {
+  "chicago, il": [41.8781, -87.6298],
+  "los angeles, ca": [34.0522, -118.2437],
+  "newark, nj": [40.7357, -74.1724],
+  "atlanta, ga": [33.749, -84.388],
+};
+
+const warehouseMarkers = computed(() =>
+  filteredWarehouses.value
+    .map((wh) => {
+      const coords = CITY_COORDS[wh.location.toLowerCase()];
+      if (!coords) return null;
+      const pct = Math.round((wh.currentLoad / wh.capacity) * 100);
+      return {
+        id: String(wh.id),
+        label: wh.name,
+        lat: coords[0],
+        lng: coords[1],
+        popupHtml: `<b>${wh.name}</b><br>${wh.location}<br>Capacity: ${pct}% — ${wh.status}`,
+      };
+    })
+    .filter((m): m is NonNullable<typeof m> => m !== null),
+);
+
+const warehouseRoutes = computed<MapRoute[]>(() => {
+  const ids = warehouseMarkers.value.map((m) => m.id);
+  return ids.map((id, i) => ({ fromId: id, toId: ids[(i + 1) % ids.length]! }));
+});
 
 // chart
 const canvasRef = ref<HTMLCanvasElement | null>(null);
@@ -83,6 +115,15 @@ onUnmounted(() => {
           {{ loc }}
         </option>
       </select>
+    </div>
+
+    <!-- Map -->
+    <div class="bg-panel border border-wire rounded-2xl p-6">
+      <h2 class="font-bold text-lg text-body mb-1">Warehouse Locations</h2>
+      <p class="text-xs text-faded mb-4">Live route network across all hubs</p>
+      <div class="h-80 rounded-xl overflow-hidden">
+        <LeafletMap :markers="warehouseMarkers" :routes="warehouseRoutes" />
+      </div>
     </div>
 
     <!-- Chart -->
