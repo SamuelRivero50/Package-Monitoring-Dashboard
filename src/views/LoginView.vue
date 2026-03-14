@@ -1,4 +1,4 @@
-<!-- @author David Hdez -->
+<!-- @author David Hdez, Juan Andrés Young  -->
 <script setup lang="ts">
 // external imports
 import { ref } from "vue";
@@ -33,8 +33,8 @@ function handleSubmit(): void {
 </script>
 
 <template>
-  <div class="min-h-screen bg-base text-text-primary">
-    <header class="border-b border-border-default bg-base/80 backdrop-blur-md">
+  <div class="min-h-screen bg-canvas text-body">
+    <header class="border-b border-wire bg-canvas/80 backdrop-blur-md">
       <div
         class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between"
       >
@@ -46,7 +46,7 @@ function handleSubmit(): void {
           </div>
           <div>
             <h1 class="text-xl font-black tracking-tight">PackTrack</h1>
-            <p class="text-[11px] text-text-muted">Logistics Platform</p>
+            <p class="text-[11px] text-faded">Logistics Platform</p>
           </div>
         </RouterLink>
 
@@ -61,7 +61,7 @@ function handleSubmit(): void {
 
     <main class="min-h-[calc(100vh-82px)] grid lg:grid-cols-2">
       <section
-        class="hidden lg:flex flex-col justify-center px-14 py-12 bg-hero border-r border-border-default"
+        class="hidden lg:flex flex-col justify-center px-14 py-12 bg-canvas border-r border-wire"
       >
         <div class="max-w-xl space-y-8">
           <span
@@ -74,7 +74,7 @@ function handleSubmit(): void {
             Sign in and operate your logistics dashboard in real time
           </h2>
 
-          <p class="text-lg text-text-secondary leading-relaxed">
+          <p class="text-lg text-soft leading-relaxed">
             Track package flow, monitor warehouse capacity, and coordinate your
             team from a single secure workspace.
           </p>
@@ -84,7 +84,7 @@ function handleSubmit(): void {
               <span class="material-symbols-outlined text-primary mt-0.5"
                 >check_circle</span
               >
-              <p class="text-sm text-text-secondary">
+              <p class="text-sm text-soft">
                 Operational dashboard with live status indicators.
               </p>
             </div>
@@ -92,7 +92,7 @@ function handleSubmit(): void {
               <span class="material-symbols-outlined text-primary mt-0.5"
                 >check_circle</span
               >
-              <p class="text-sm text-text-secondary">
+              <p class="text-sm text-soft">
                 Role-based access and shared activity timeline.
               </p>
             </div>
@@ -100,7 +100,7 @@ function handleSubmit(): void {
               <span class="material-symbols-outlined text-primary mt-0.5"
                 >check_circle</span
               >
-              <p class="text-sm text-text-secondary">
+              <p class="text-sm text-soft">
                 Global notifications and maintenance controls.
               </p>
             </div>
@@ -110,11 +110,11 @@ function handleSubmit(): void {
 
       <section class="flex items-center justify-center px-6 py-10">
         <div
-          class="w-full max-w-md bg-surface border border-border-default rounded-2xl p-8 space-y-6"
+          class="w-full max-w-md bg-panel border border-wire rounded-2xl p-8 space-y-6"
         >
           <div>
             <h2 class="text-2xl font-black tracking-tight">Sign In</h2>
-            <p class="text-sm text-text-muted mt-1">
+            <p class="text-sm text-faded mt-1">
               Access your PackTrack dashboard.
             </p>
           </div>
@@ -123,7 +123,7 @@ function handleSubmit(): void {
             <div class="space-y-2">
               <label
                 for="email"
-                class="text-sm font-semibold text-text-secondary"
+                class="text-sm font-semibold text-soft"
                 >Email</label
               >
               <input
@@ -132,14 +132,14 @@ function handleSubmit(): void {
                 id="email"
                 required
                 placeholder="user@packtrack.io"
-                class="w-full bg-elevated border border-border-default rounded-xl py-3 px-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+                class="w-full bg-sheet border border-wire rounded-xl py-3 px-4 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
 
             <div class="space-y-2">
               <label
                 for="password"
-                class="text-sm font-semibold text-text-secondary"
+                class="text-sm font-semibold text-soft"
                 >Password</label
               >
               <input
@@ -148,7 +148,7 @@ function handleSubmit(): void {
                 id="password"
                 required
                 placeholder="Enter your password"
-                class="w-full bg-elevated border border-border-default rounded-xl py-3 px-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+                class="w-full bg-sheet border border-wire rounded-xl py-3 px-4 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
 
@@ -171,21 +171,21 @@ function handleSubmit(): void {
             </button>
           </form>
 
-          <div class="border-t border-border-subtle pt-4 space-y-3">
-            <p class="text-xs text-text-muted text-center">Demo credentials</p>
-            <p class="text-xs text-text-secondary text-center">
+          <div class="border-t border-wire-subtle pt-4 space-y-3">
+            <p class="text-xs text-faded text-center">Demo credentials</p>
+            <p class="text-xs text-soft text-center">
               <span class="text-primary font-mono">alex@packtrack.io</span> /
               <span class="font-mono">admin123</span>
-              <span class="text-text-muted ml-1">(Admin)</span>
+              <span class="text-faded ml-1">(Admin)</span>
             </p>
-            <p class="text-xs text-text-secondary text-center">
+            <p class="text-xs text-soft text-center">
               <span class="text-primary font-mono">maria@packtrack.io</span> /
               <span class="font-mono">maria123</span>
-              <span class="text-text-muted ml-1">(User)</span>
+              <span class="text-faded ml-1">(User)</span>
             </p>
           </div>
 
-          <p class="text-sm text-text-muted text-center">
+          <p class="text-sm text-faded text-center">
             Need an account?
             <RouterLink
               to="/signup"

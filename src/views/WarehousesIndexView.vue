@@ -1,11 +1,12 @@
 <!-- @author David Hdez -->
 <script setup lang="ts">
 // external imports
-import { ref, watch } from "vue";
+import type { Chart } from "chart.js";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 
 // internal imports
 import { WarehouseService } from "@/services/WarehouseService";
-import type { CreateWarehouseDTO } from "@/dtos/CreateWarehouseDTO";
+import { ChartUtils } from "@/utils/ChartUtils";
 
 const warehouses = WarehouseService.getWarehouses();
 const filteredWarehouses = ref(warehouses);
@@ -15,15 +16,6 @@ const selectorStatuses = WarehouseService.getUniqueStatuses();
 const selectorLocations = WarehouseService.getUniqueLocations();
 const selectedStatus = ref("");
 const selectedLocation = ref("");
-
-// form state
-const showForm = ref(false);
-const name = ref("");
-const location = ref("");
-const capacity = ref(1000);
-const currentLoad = ref(0);
-const status = ref("Active");
-const successMessage = ref("");
 
 function applyFilters(): void {
   filteredWarehouses.value = warehouses.filter((wh) => {
@@ -37,53 +29,44 @@ function applyFilters(): void {
 
 watch([selectedStatus, selectedLocation], () => applyFilters());
 
-function submitForm(): void {
-  const newWarehouse: CreateWarehouseDTO = {
-    name: name.value,
-    location: location.value,
-    capacity: capacity.value,
-    currentLoad: currentLoad.value,
-    status: status.value,
-  };
+// chart
+const canvasRef = ref<HTMLCanvasElement | null>(null);
+let chartInstance: Chart | null = null;
 
-  WarehouseService.createWarehouse(newWarehouse);
-  successMessage.value = "Warehouse created successfully!";
-  name.value = "";
-  location.value = "";
-  capacity.value = 1000;
-  currentLoad.value = 0;
-  status.value = "Active";
-  showForm.value = false;
-}
+onMounted(() => {
+  if (!canvasRef.value) return;
+  const labels = warehouses.map((wh) => wh.name);
+  const data = warehouses.map((wh) =>
+    Math.round((wh.currentLoad / wh.capacity) * 100),
+  );
+  const colors = data.map((pct) => (pct > 90 ? "#f43f5e" : "#2dd4bf"));
+  chartInstance = ChartUtils.buildBarChart(canvasRef.value, labels, data, colors);
+});
+
+onUnmounted(() => {
+  chartInstance?.destroy();
+  chartInstance = null;
+});
 </script>
 
 <template>
   <section class="space-y-6">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-black tracking-tight text-text-primary">
+        <h1 class="text-3xl font-black tracking-tight text-body">
           Warehouse Hubs
         </h1>
-        <p class="text-text-secondary mt-1">
+        <p class="text-soft mt-1">
           Real-time capacity and performance monitoring.
         </p>
       </div>
-      <button
-        class="h-10 px-5 bg-primary text-base font-bold text-sm rounded-lg flex items-center gap-2 hover:bg-primary-dark transition-all w-fit"
-        @click="showForm = !showForm"
-      >
-        <span class="material-symbols-outlined text-sm">{{
-          showForm ? "close" : "add"
-        }}</span>
-        {{ showForm ? "Cancel" : "Add Warehouse" }}
-      </button>
     </div>
 
     <!-- Filters -->
     <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
       <select
         v-model="selectedStatus"
-        class="select-control bg-surface border border-border-default rounded-xl px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        class="select-control bg-panel border border-wire rounded-xl px-4 py-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
       >
         <option value="">All Statuses</option>
         <option v-for="s in selectorStatuses" :key="s" :value="s">
@@ -93,7 +76,7 @@ function submitForm(): void {
 
       <select
         v-model="selectedLocation"
-        class="select-control bg-surface border border-border-default rounded-xl px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        class="select-control bg-panel border border-wire rounded-xl px-4 py-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
       >
         <option value="">All Locations</option>
         <option v-for="loc in selectorLocations" :key="loc" :value="loc">
@@ -102,95 +85,23 @@ function submitForm(): void {
       </select>
     </div>
 
-    <!-- Create warehouse form -->
-    <form
-      v-if="showForm"
-      class="bg-surface border border-border-default rounded-xl p-6 space-y-4"
-      @submit.prevent="submitForm"
-    >
-      <h3 class="text-lg font-bold text-text-primary">New Warehouse</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label
-            class="block text-sm font-semibold text-text-secondary mb-2"
-            for="whName"
-            >Name</label
-          >
-          <input
-            v-model="name"
-            type="text"
-            id="whName"
-            class="w-full bg-elevated border border-border-default rounded-lg p-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
-            required
-            placeholder="Warehouse name"
-          />
-        </div>
-        <div>
-          <label
-            class="block text-sm font-semibold text-text-secondary mb-2"
-            for="whLocation"
-            >Location</label
-          >
-          <input
-            v-model="location"
-            type="text"
-            id="whLocation"
-            class="w-full bg-elevated border border-border-default rounded-lg p-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
-            required
-            placeholder="City, State"
-          />
-        </div>
-        <div>
-          <label
-            class="block text-sm font-semibold text-text-secondary mb-2"
-            for="whCapacity"
-            >Capacity</label
-          >
-          <input
-            v-model.number="capacity"
-            type="number"
-            min="1"
-            id="whCapacity"
-            class="w-full bg-elevated border border-border-default rounded-lg p-3 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            required
-          />
-        </div>
-        <div>
-          <label
-            class="block text-sm font-semibold text-text-secondary mb-2"
-            for="whStatus"
-            >Status</label
-          >
-          <select
-            v-model="status"
-            id="whStatus"
-            class="select-control w-full bg-elevated border border-border-default rounded-lg p-3 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            <option value="Active">Active</option>
-            <option value="Maintenance">Maintenance</option>
-          </select>
-        </div>
+    <!-- Chart -->
+    <div class="bg-panel border border-wire rounded-2xl p-6">
+      <h2 class="font-bold text-lg text-body mb-1">Capacity Usage</h2>
+      <p class="text-xs text-faded mb-4">Current load as % of capacity per warehouse</p>
+      <div class="h-52">
+        <canvas ref="canvasRef" />
       </div>
-      <button
-        type="submit"
-        class="bg-primary text-base font-bold py-2.5 px-6 rounded-lg text-sm hover:bg-primary-dark transition-all"
-      >
-        Create Warehouse
-      </button>
-    </form>
-
-    <p v-if="successMessage" class="text-users font-medium text-sm">
-      {{ successMessage }}
-    </p>
+    </div>
 
     <!-- Table view -->
     <div
-      class="bg-surface border border-border-default rounded-2xl overflow-hidden"
+      class="bg-panel border border-wire rounded-2xl overflow-hidden"
     >
       <table class="w-full text-left">
-        <thead class="bg-elevated border-b border-border-default">
+        <thead class="bg-sheet border-b border-wire">
           <tr
-            class="text-xs font-bold uppercase tracking-wider text-text-muted"
+            class="text-xs font-bold uppercase tracking-wider text-faded"
           >
             <th class="px-6 py-4">Name</th>
             <th class="px-6 py-4">Location</th>
@@ -200,11 +111,11 @@ function submitForm(): void {
             <th class="px-6 py-4">Status</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-border-subtle">
+        <tbody class="divide-y divide-wire-subtle">
           <tr
             v-for="wh in filteredWarehouses"
             :key="wh.id"
-            class="hover:bg-elevated/50 transition-colors"
+            class="hover:bg-sheet/50 transition-colors"
           >
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
@@ -213,12 +124,12 @@ function submitForm(): void {
                     >warehouse</span
                   >
                 </div>
-                <span class="text-sm font-bold text-text-primary">{{
+                <span class="text-sm font-bold text-body">{{
                   wh.name
                 }}</span>
               </div>
             </td>
-            <td class="px-6 py-4 text-sm text-text-secondary">
+            <td class="px-6 py-4 text-sm text-soft">
               <span class="flex items-center gap-1">
                 <span class="material-symbols-outlined text-xs"
                   >location_on</span
@@ -226,15 +137,15 @@ function submitForm(): void {
                 {{ wh.location }}
               </span>
             </td>
-            <td class="px-6 py-4 text-sm text-text-secondary">
+            <td class="px-6 py-4 text-sm text-soft">
               {{ wh.capacity.toLocaleString() }}
             </td>
-            <td class="px-6 py-4 text-sm text-text-secondary">
+            <td class="px-6 py-4 text-sm text-soft">
               {{ wh.currentLoad.toLocaleString() }}
             </td>
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
-                <div class="w-20 h-2 bg-elevated rounded-full overflow-hidden">
+                <div class="w-20 h-2 bg-sheet rounded-full overflow-hidden">
                   <div
                     class="h-full rounded-full transition-all"
                     :class="
@@ -258,7 +169,7 @@ function submitForm(): void {
                 class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
                 :class="
                   wh.status === 'Active'
-                    ? 'bg-users/10 text-users border border-users/20'
+                    ? 'bg-users-icon/10 text-users-icon border border-users-icon/20'
                     : 'bg-companies/10 text-companies border border-companies/20'
                 "
               >

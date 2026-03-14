@@ -1,11 +1,9 @@
 /** @author David Hdez */
 // external imports
-import "./assets/css/input.css";
-
-import { createApp } from "vue";
-
 import App from "./App.vue";
+import "./assets/css/input.css";
 import router from "./router";
+import { createApp } from "vue";
 
 // internal imports
 import PiniaConfig from "./PiniaConfig";

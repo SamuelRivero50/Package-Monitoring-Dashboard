@@ -1,14 +1,15 @@
 <!-- @author David Hdez -->
 <script setup lang="ts">
 // external imports
+import type { Chart } from "chart.js";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { RouterLink } from "vue-router";
-import type { Chart } from "chart.js";
 
 // internal imports
+import StatusBadge from "@/components/StatusBadge.vue";
 import { PackageService } from "@/services/PackageService";
-import { WarehouseService } from "@/services/WarehouseService";
 import { UserService } from "@/services/UserService";
+import { WarehouseService } from "@/services/WarehouseService";
 import { ChartUtils } from "@/utils/ChartUtils";
 
 const packages = computed(() => PackageService.getPackages());
@@ -89,7 +90,7 @@ onUnmounted(() => {
           },
         ]"
         :key="i"
-        class="bg-surface p-6 rounded-xl border border-border-default"
+        class="bg-panel p-6 rounded-xl border border-wire"
       >
         <div class="flex justify-between items-start mb-4">
           <div
@@ -97,15 +98,15 @@ onUnmounted(() => {
             :class="{
               'bg-packages/15 text-packages': stat.color === 'packages',
               'bg-warehouses/15 text-warehouses': stat.color === 'warehouses',
-              'bg-users/15 text-users': stat.color === 'users',
+              'bg-users-icon/15 text-users-icon': stat.color === 'users',
               'bg-primary/15 text-primary': stat.color === 'primary',
             }"
           >
             <span class="material-symbols-outlined">{{ stat.icon }}</span>
           </div>
         </div>
-        <p class="text-text-secondary text-sm font-medium">{{ stat.label }}</p>
-        <h3 class="text-2xl font-bold mt-1 text-text-primary">
+        <p class="text-soft text-sm font-medium">{{ stat.label }}</p>
+        <h3 class="text-2xl font-bold mt-1 text-body">
           {{ stat.val }}
         </h3>
       </div>
@@ -113,9 +114,9 @@ onUnmounted(() => {
 
     <!-- Chart + Recent Packages -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-surface border border-border-default rounded-xl p-6">
-        <h2 class="font-bold text-lg text-text-primary mb-1">Package Status</h2>
-        <p class="text-xs text-text-muted mb-4">
+      <div class="bg-panel border border-wire rounded-xl p-6">
+        <h2 class="font-bold text-lg text-body mb-1">Package Status</h2>
+        <p class="text-xs text-faded mb-4">
           Distribution by current status
         </p>
         <div class="h-64">
@@ -124,12 +125,12 @@ onUnmounted(() => {
       </div>
 
       <div
-        class="bg-surface rounded-xl border border-border-default overflow-hidden"
+        class="bg-panel rounded-xl border border-wire overflow-hidden"
       >
         <div
-          class="p-6 border-b border-border-default flex justify-between items-center"
+          class="p-6 border-b border-wire flex justify-between items-center"
         >
-          <h2 class="font-bold text-lg text-text-primary">Recent Packages</h2>
+          <h2 class="font-bold text-lg text-body">Recent Packages</h2>
           <RouterLink
             to="/packages"
             class="text-link text-sm font-medium hover:underline"
@@ -137,7 +138,7 @@ onUnmounted(() => {
           >
         </div>
         <table class="w-full text-left text-sm">
-          <thead class="text-text-muted bg-elevated">
+          <thead class="text-faded bg-sheet">
             <tr>
               <th
                 class="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]"
@@ -156,35 +157,19 @@ onUnmounted(() => {
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-border-subtle">
+          <tbody class="divide-y divide-wire-subtle">
             <tr
               v-for="pkg in recentPackages"
               :key="pkg.id"
-              class="hover:bg-elevated/50 transition-colors"
+              class="hover:bg-sheet/50 transition-colors"
             >
               <td class="px-6 py-4 font-mono text-packages">
                 {{ pkg.trackingNumber }}
               </td>
               <td class="px-6 py-4">
-                <span
-                  class="px-2 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide"
-                  :class="{
-                    'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20':
-                      pkg.status === 'Delivered',
-                    'bg-amber-500/10 text-amber-400 border border-amber-500/20':
-                      pkg.status === 'In Transit',
-                    'bg-primary/10 text-primary border border-primary/20':
-                      pkg.status === 'At Warehouse',
-                    'bg-gray-500/10 text-text-muted border border-gray-500/20':
-                      pkg.status === 'Pending',
-                    'bg-rose-500/10 text-rose-400 border border-rose-500/20':
-                      pkg.status === 'Exception',
-                  }"
-                >
-                  {{ pkg.status }}
-                </span>
+                <StatusBadge :status="pkg.status" />
               </td>
-              <td class="px-6 py-4 text-text-secondary">
+              <td class="px-6 py-4 text-soft">
                 {{ getWarehouseName(pkg.warehouseId) }}
               </td>
             </tr>
@@ -195,12 +180,12 @@ onUnmounted(() => {
 
     <!-- Warehouse Overview -->
     <div
-      class="bg-surface border border-border-default rounded-xl p-6 space-y-4"
+      class="bg-panel border border-wire rounded-xl p-6 space-y-4"
     >
       <div class="flex justify-between items-center">
         <div>
-          <h2 class="text-lg font-bold text-text-primary">Warehouses</h2>
-          <p class="text-xs text-text-muted">Capacity overview</p>
+          <h2 class="text-lg font-bold text-body">Warehouses</h2>
+          <p class="text-xs text-faded">Capacity overview</p>
         </div>
         <RouterLink
           to="/warehouses"
@@ -214,11 +199,11 @@ onUnmounted(() => {
           v-for="wh in warehouses"
           :key="wh.id"
           to="/warehouses"
-          class="p-4 bg-elevated rounded-lg border border-border-subtle hover:border-warehouses/40 transition-colors group"
+          class="p-4 bg-sheet rounded-lg border border-wire-subtle hover:border-warehouses/40 transition-colors group"
         >
           <div class="flex items-center justify-between mb-2">
             <h4
-              class="text-sm font-bold text-text-primary group-hover:text-warehouses transition-colors"
+              class="text-sm font-bold text-body group-hover:text-warehouses transition-colors"
             >
               {{ wh.name }}
             </h4>
@@ -226,25 +211,25 @@ onUnmounted(() => {
               class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase"
               :class="
                 wh.status === 'Active'
-                  ? 'bg-users/10 text-users'
+                  ? 'bg-users-icon/10 text-users-icon'
                   : 'bg-companies/10 text-companies'
               "
             >
               {{ wh.status }}
             </span>
           </div>
-          <p class="text-text-muted text-xs flex items-center gap-1">
+          <p class="text-faded text-xs flex items-center gap-1">
             <span class="material-symbols-outlined text-xs">location_on</span
             >{{ wh.location }}
           </p>
           <div class="mt-3">
             <div class="flex justify-between text-[10px] mb-1">
-              <span class="text-text-secondary">Capacity</span>
+              <span class="text-soft">Capacity</span>
               <span class="font-bold text-primary"
                 >{{ Math.round((wh.currentLoad / wh.capacity) * 100) }}%</span
               >
             </div>
-            <div class="h-1.5 w-full bg-base rounded-full overflow-hidden">
+            <div class="h-1.5 w-full bg-canvas rounded-full overflow-hidden">
               <div
                 class="h-full rounded-full transition-all"
                 :class="

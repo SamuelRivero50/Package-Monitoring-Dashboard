@@ -1,8 +1,8 @@
 /** @author David Hdez */
 // internal imports
+import type { CreateUserDTO } from "@/dtos/CreateUserDTO";
 import type { UserInterface } from "@/interfaces/UserInterface";
 import { useUserStore } from "@/stores/userstore";
-import type { CreateUserDTO } from "@/dtos/CreateUserDTO";
 
 export class UserService {
   static getUsers(): UserInterface[] {
@@ -17,4 +17,16 @@ export class UserService {
     const id = useUserStore().users.length + 1;
     useUserStore().users.push({ id, ...user });
   }
+
+  static updateUser(id: number, data: Partial<CreateUserDTO>): void {
+    const user = useUserStore().users.find((u) => u.id === id);
+    if (user) Object.assign(user, data);
+  }
+
+  static deleteUser(id: number): void {
+    const store = useUserStore();
+    const index = store.users.findIndex((u) => u.id === id);
+    if (index !== -1) store.users.splice(index, 1);
+  }
+
 }

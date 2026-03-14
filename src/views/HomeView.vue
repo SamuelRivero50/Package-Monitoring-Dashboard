@@ -1,4 +1,4 @@
-<!-- @author David Hdez -->
+<!-- @author David Hdez, Juan Andrés Young -->
 <script setup lang="ts">
 // external imports
 import { computed } from "vue";
@@ -24,9 +24,9 @@ const secondaryActionLabel = computed(() =>
 </script>
 
 <template>
-  <div class="min-h-screen bg-base text-text-primary">
+  <div class="min-h-screen bg-canvas text-body">
     <header
-      class="sticky top-0 z-40 border-b border-border-default bg-base/80 backdrop-blur-md"
+      class="sticky top-0 z-40 border-b border-wire bg-canvas/80 backdrop-blur-md"
     >
       <div
         class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between"
@@ -43,17 +43,17 @@ const secondaryActionLabel = computed(() =>
         <nav class="hidden md:flex items-center gap-8">
           <RouterLink
             to="/"
-            class="text-sm font-semibold text-text-secondary hover:text-primary transition-colors"
+            class="text-sm font-semibold text-soft hover:text-primary transition-colors"
             >Home</RouterLink
           >
           <RouterLink
             to="/dashboard"
-            class="text-sm font-semibold text-text-secondary hover:text-primary transition-colors"
+            class="text-sm font-semibold text-soft hover:text-primary transition-colors"
             >Dashboard</RouterLink
           >
           <RouterLink
             to="/login"
-            class="text-sm font-semibold text-text-secondary hover:text-primary transition-colors"
+            class="text-sm font-semibold text-soft hover:text-primary transition-colors"
             >Sign In</RouterLink
           >
         </nav>
@@ -69,7 +69,7 @@ const secondaryActionLabel = computed(() =>
 
     <main>
       <section
-        class="relative py-20 lg:py-28 overflow-hidden border-b border-border-default"
+        class="relative py-20 lg:py-28 overflow-hidden border-b border-wire"
       >
         <div
           class="absolute -top-36 -right-20 w-96 h-96 rounded-full bg-primary/10 blur-[80px]"
@@ -94,7 +94,7 @@ const secondaryActionLabel = computed(() =>
               Track every shipment with live warehouse intelligence
             </h2>
 
-            <p class="text-lg text-text-secondary max-w-xl leading-relaxed">
+            <p class="text-lg text-soft max-w-xl leading-relaxed">
               Keep your operations in sync with package monitoring, warehouse
               utilization insights, and role-based workflows in one command
               center.
@@ -109,7 +109,7 @@ const secondaryActionLabel = computed(() =>
               </RouterLink>
               <RouterLink
                 :to="secondaryActionPath"
-                class="px-8 py-4 rounded-xl border border-border-default bg-surface text-text-primary font-black hover:border-primary/50 hover:text-primary transition-colors"
+                class="px-8 py-4 rounded-xl border border-wire bg-panel text-body font-black hover:border-primary/50 hover:text-primary transition-colors"
               >
                 {{ secondaryActionLabel }}
               </RouterLink>
@@ -118,7 +118,7 @@ const secondaryActionLabel = computed(() =>
 
           <div class="relative">
             <div
-              class="rounded-3xl overflow-hidden border border-border-default bg-surface shadow-[0_20px_70px_rgba(0,0,0,0.35)]"
+              class="rounded-3xl overflow-hidden border border-wire bg-panel shadow-[0_20px_70px_rgba(0,0,0,0.35)]"
             >
               <img
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuARpb78izFGAo72ZtI8BC-B6g5wjhtjSSJ1YTdNZf3UN42GBPmDf-8urYObtpI1nDZWlauhK0lgN7xo44Eai0esD5IEBmmblOtEV5S7w9zYqZnQ7Izqq6QjK-SvjpPVPamF1Ku-c0xa18rk7dh6p9iB4YbRuEl9pmYW9-RgxVsLgORS95XRjGjpH-xWvW0eWLvTTdNB5PTVRW9-6POTZkxjP39VipVUNMuJNz93BQgF7k-2WtzNi02b8bgfZmLAt0-gSVrntbNPTQ8v"
@@ -126,7 +126,7 @@ const secondaryActionLabel = computed(() =>
                 class="w-full h-105 object-cover"
               />
               <div
-                class="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-base/75 backdrop-blur-sm border border-border-default"
+                class="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-canvas/75 backdrop-blur-sm border border-wire"
               >
                 <div class="flex items-center justify-between mb-2">
                   <p class="text-sm font-bold">Live Network</p>
@@ -134,7 +134,7 @@ const secondaryActionLabel = computed(() =>
                     >Operational</span
                   >
                 </div>
-                <div class="h-2 rounded-full bg-elevated overflow-hidden">
+                <div class="h-2 rounded-full bg-sheet overflow-hidden">
                   <div class="h-full w-[78%] bg-primary"></div>
                 </div>
               </div>
@@ -143,25 +143,25 @@ const secondaryActionLabel = computed(() =>
         </div>
       </section>
 
-      <section class="py-12 border-b border-border-default bg-surface/35">
+      <section class="py-12 border-b border-wire bg-panel/35">
         <div
           class="max-w-7xl mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-8"
         >
           <div class="text-center">
             <p class="text-4xl font-black text-primary">10K+</p>
-            <p class="text-sm text-text-secondary mt-2">Packages tracked</p>
+            <p class="text-sm text-soft mt-2">Packages tracked</p>
           </div>
           <div class="text-center">
             <p class="text-4xl font-black text-primary">50+</p>
-            <p class="text-sm text-text-secondary mt-2">Warehouse hubs</p>
+            <p class="text-sm text-soft mt-2">Warehouse hubs</p>
           </div>
           <div class="text-center">
             <p class="text-4xl font-black text-primary">200+</p>
-            <p class="text-sm text-text-secondary mt-2">Connected partners</p>
+            <p class="text-sm text-soft mt-2">Connected partners</p>
           </div>
           <div class="text-center">
             <p class="text-4xl font-black text-primary">99.9%</p>
-            <p class="text-sm text-text-secondary mt-2">Platform uptime</p>
+            <p class="text-sm text-soft mt-2">Platform uptime</p>
           </div>
         </div>
       </section>
@@ -181,7 +181,7 @@ const secondaryActionLabel = computed(() =>
 
           <div class="grid md:grid-cols-3 gap-6">
             <article
-              class="bg-surface border border-border-default rounded-2xl p-7 hover:border-primary/40 transition-colors"
+              class="bg-panel border border-wire rounded-2xl p-7 hover:border-primary/40 transition-colors"
             >
               <div
                 class="size-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-5"
@@ -189,14 +189,14 @@ const secondaryActionLabel = computed(() =>
                 <span class="material-symbols-outlined">location_on</span>
               </div>
               <h4 class="text-xl font-black mb-3">Real-time tracking</h4>
-              <p class="text-sm text-text-secondary leading-relaxed">
+              <p class="text-sm text-soft leading-relaxed">
                 Monitor route updates from dispatch to delivery with detailed
                 timeline logs.
               </p>
             </article>
 
             <article
-              class="bg-surface border border-border-default rounded-2xl p-7 hover:border-primary/40 transition-colors"
+              class="bg-panel border border-wire rounded-2xl p-7 hover:border-primary/40 transition-colors"
             >
               <div
                 class="size-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-5"
@@ -204,14 +204,14 @@ const secondaryActionLabel = computed(() =>
                 <span class="material-symbols-outlined">inventory_2</span>
               </div>
               <h4 class="text-xl font-black mb-3">Package command center</h4>
-              <p class="text-sm text-text-secondary leading-relaxed">
+              <p class="text-sm text-soft leading-relaxed">
                 Filter, prioritize, and resolve shipment exceptions with
                 contextual activity history.
               </p>
             </article>
 
             <article
-              class="bg-surface border border-border-default rounded-2xl p-7 hover:border-primary/40 transition-colors"
+              class="bg-panel border border-wire rounded-2xl p-7 hover:border-primary/40 transition-colors"
             >
               <div
                 class="size-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-5"
@@ -219,7 +219,7 @@ const secondaryActionLabel = computed(() =>
                 <span class="material-symbols-outlined">warehouse</span>
               </div>
               <h4 class="text-xl font-black mb-3">Warehouse visibility</h4>
-              <p class="text-sm text-text-secondary leading-relaxed">
+              <p class="text-sm text-soft leading-relaxed">
                 Track capacity utilization and maintenance status across all
                 regional hubs.
               </p>
@@ -228,15 +228,15 @@ const secondaryActionLabel = computed(() =>
         </div>
       </section>
 
-      <section class="py-20 bg-surface border-y border-border-default">
+      <section class="py-20 bg-panel border-y border-wire">
         <div class="max-w-5xl mx-auto px-6">
           <div
-            class="rounded-3xl border border-primary/25 bg-hero p-10 lg:p-14 text-center space-y-6"
+            class="rounded-3xl border border-primary/25 bg-canvas p-10 lg:p-14 text-center space-y-6"
           >
             <h3 class="text-4xl lg:text-5xl font-black tracking-tight">
               Ready to optimize your logistics flow?
             </h3>
-            <p class="text-text-secondary text-lg max-w-3xl mx-auto">
+            <p class="text-soft text-lg max-w-3xl mx-auto">
               Join teams already using PackTrack to coordinate packages and
               warehouses with one operational view.
             </p>
@@ -249,7 +249,7 @@ const secondaryActionLabel = computed(() =>
               </RouterLink>
               <RouterLink
                 to="/login"
-                class="px-8 py-3 rounded-xl border border-border-default text-text-primary font-black hover:border-primary/50 hover:text-primary transition-colors"
+                class="px-8 py-3 rounded-xl border border-wire text-body font-black hover:border-primary/50 hover:text-primary transition-colors"
               >
                 Sign In
               </RouterLink>
@@ -259,14 +259,14 @@ const secondaryActionLabel = computed(() =>
       </section>
     </main>
 
-    <footer class="py-10 border-t border-border-default">
+    <footer class="py-10 border-t border-wire">
       <div
         class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row gap-4 md:gap-6 items-center justify-between"
       >
-        <p class="text-sm text-text-muted">
+        <p class="text-sm text-faded">
           © 2026 PackTrack Systems. All rights reserved.
         </p>
-        <div class="flex gap-5 text-sm text-text-secondary">
+        <div class="flex gap-5 text-sm text-soft">
           <span>Privacy</span>
           <span>Terms</span>
           <span>Support</span>

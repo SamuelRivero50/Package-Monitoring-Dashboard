@@ -1,4 +1,4 @@
-<!-- @author David Hdez -->
+<!-- @author David Hdez, Juan Andrés Young  -->
 <script setup lang="ts">
 // external imports
 import { computed } from "vue";
@@ -25,13 +25,6 @@ const showUserNotification = computed(
     SettingsService.isUserNotificationEnabled() &&
     userNotificationMessage.value.length > 0,
 );
-const showMaintenanceScreen = computed(
-  () =>
-    showAuthenticatedLayout.value &&
-    currentUser.value?.role === "User" &&
-    SettingsService.isMaintenanceModeEnabled(),
-);
-
 function handleLogout(): void {
   AuthService.logout();
   router.push({ name: "login" });
@@ -39,12 +32,12 @@ function handleLogout(): void {
 </script>
 
 <template>
-  <div class="bg-base text-text-primary min-h-screen font-[Inter]">
+  <div class="bg-canvas text-body min-h-screen font-[Inter]">
     <!-- Authenticated layout -->
     <div v-if="showAuthenticatedLayout" class="flex h-screen overflow-hidden">
       <!-- sidebar -->
       <aside
-        class="w-64 shrink-0 border-r border-border-default bg-surface hidden md:flex flex-col h-screen sticky top-0"
+        class="w-64 shrink-0 border-r border-wire bg-panel hidden md:flex flex-col h-screen sticky top-0"
       >
         <div class="p-6 flex items-center">
           <RouterLink to="/dashboard" class="flex items-center gap-2">
@@ -56,10 +49,10 @@ function handleLogout(): void {
               >
             </div>
             <div class="flex flex-col leading-none">
-              <h1 class="text-lg font-black tracking-tight text-text-primary">
+              <h1 class="text-lg font-black tracking-tight text-body">
                 PackTrack
               </h1>
-              <p class="text-text-muted text-[11px] font-medium mt-1">
+              <p class="text-faded text-[11px] font-medium mt-1">
                 Logistics v1.0.0
               </p>
             </div>
@@ -69,7 +62,7 @@ function handleLogout(): void {
         <nav class="flex-1 px-4 space-y-1 mt-4">
           <RouterLink
             to="/dashboard"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-text-secondary hover:bg-primary/10 hover:text-primary"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-soft hover:bg-primary/10 hover:text-primary"
           >
             <span class="material-symbols-outlined">dashboard</span>
             <span class="text-sm font-medium">Overview</span>
@@ -77,7 +70,7 @@ function handleLogout(): void {
 
           <RouterLink
             to="/packages"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-text-secondary hover:bg-packages/10 hover:text-packages"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-soft hover:bg-packages/10 hover:text-packages"
           >
             <span class="material-symbols-outlined">inventory_2</span>
             <span class="text-sm font-medium">Packages</span>
@@ -85,7 +78,7 @@ function handleLogout(): void {
 
           <RouterLink
             to="/warehouses"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-text-secondary hover:bg-warehouses/10 hover:text-warehouses"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-soft hover:bg-warehouses/10 hover:text-warehouses"
           >
             <span class="material-symbols-outlined">warehouse</span>
             <span class="text-sm font-medium">Warehouses</span>
@@ -94,7 +87,7 @@ function handleLogout(): void {
           <RouterLink
             v-if="AuthService.isAdmin()"
             to="/users"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-text-secondary hover:bg-users/10 hover:text-users"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-soft hover:bg-users-icon/10 hover:text-users-icon"
           >
             <span class="material-symbols-outlined">group</span>
             <span class="text-sm font-medium">Users</span>
@@ -103,25 +96,25 @@ function handleLogout(): void {
           <RouterLink
             v-if="AuthService.isAdmin()"
             to="/settings"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-text-secondary hover:bg-primary/10 hover:text-primary"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-soft hover:bg-primary/10 hover:text-primary"
           >
             <span class="material-symbols-outlined">settings</span>
             <span class="text-sm font-medium">Settings</span>
           </RouterLink>
         </nav>
 
-        <div class="p-4 border-t border-border-default">
-          <div class="flex items-center gap-3 p-2 bg-elevated rounded-xl">
+        <div class="p-4 border-t border-wire">
+          <div class="flex items-center gap-3 p-2 bg-sheet rounded-xl">
             <div
               class="size-8 rounded-full bg-primary/30 flex items-center justify-center text-primary"
             >
               <span class="material-symbols-outlined text-sm">person</span>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-xs font-bold truncate text-text-primary">
+              <p class="text-xs font-bold truncate text-body">
                 {{ AuthService.getCurrentUser()?.name }}
               </p>
-              <p class="text-[10px] text-text-muted truncate">
+              <p class="text-[10px] text-faded truncate">
                 {{ AuthService.getCurrentUser()?.email }}
               </p>
             </div>
@@ -133,21 +126,16 @@ function handleLogout(): void {
       <div class="flex-1 flex flex-col overflow-hidden">
         <!-- top header -->
         <header
-          class="h-16 flex items-center justify-between px-8 border-b border-border-default sticky top-0 bg-base/80 backdrop-blur-md z-10"
+          class="h-16 flex items-center justify-between px-8 border-b border-wire sticky top-0 bg-canvas/80 backdrop-blur-md z-10"
         >
           <div class="flex items-center gap-4 flex-1">
-            <h2 class="text-lg font-bold tracking-tight text-text-primary">
+            <h2 class="text-lg font-bold tracking-tight text-body">
               {{ $route.meta.title }}
             </h2>
           </div>
           <div class="flex items-center gap-3">
             <button
-              class="size-10 flex items-center justify-center rounded-lg bg-elevated text-text-secondary hover:text-primary transition-colors"
-            >
-              <span class="material-symbols-outlined">notifications</span>
-            </button>
-            <button
-              class="size-10 flex items-center justify-center rounded-lg bg-elevated text-text-secondary hover:text-rose-400 transition-colors"
+              class="size-10 flex items-center justify-center rounded-lg bg-sheet text-soft hover:text-rose-400 transition-colors"
               @click="handleLogout"
             >
               <span class="material-symbols-outlined">logout</span>
@@ -168,26 +156,7 @@ function handleLogout(): void {
 
         <!-- main content -->
         <main class="flex-1 overflow-y-auto p-8">
-          <section
-            v-if="showMaintenanceScreen"
-            class="h-full min-h-[60vh] flex items-center justify-center"
-          >
-            <div
-              class="max-w-md w-full bg-surface border border-border-default rounded-xl p-8 text-center space-y-3"
-            >
-              <span class="material-symbols-outlined text-4xl text-primary"
-                >construction</span
-              >
-              <h3 class="text-xl font-black text-text-primary">
-                Maintenance Mode Enabled
-              </h3>
-              <p class="text-sm text-text-secondary">
-                Access is temporarily restricted while the platform is being
-                updated. Please try again later.
-              </p>
-            </div>
-          </section>
-          <RouterView v-else />
+          <RouterView />
         </main>
       </div>
     </div>

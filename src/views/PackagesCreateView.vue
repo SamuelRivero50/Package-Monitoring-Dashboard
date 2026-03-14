@@ -4,9 +4,9 @@
 import { ref } from "vue";
 
 // internal imports
+import type { CreatePackageDTO } from "@/dtos/CreatePackageDTO";
 import { PackageService } from "@/services/PackageService";
 import { WarehouseService } from "@/services/WarehouseService";
-import type { CreatePackageDTO } from "@/dtos/CreatePackageDTO";
 
 const warehouses = WarehouseService.getWarehouses();
 
@@ -41,17 +41,17 @@ function submitForm(): void {
 
 <template>
   <section class="max-w-2xl mx-auto py-4">
-    <h2 class="text-2xl font-black text-text-primary mb-8">
+    <h2 class="text-2xl font-black text-body mb-8">
       Register New Package
     </h2>
 
     <form
-      class="bg-surface border border-border-default rounded-xl p-8 space-y-6"
+      class="bg-panel border border-wire rounded-xl p-8 space-y-6"
       @submit.prevent="submitForm"
     >
       <div>
         <label
-          class="block text-sm font-semibold text-text-secondary mb-2"
+          class="block text-sm font-semibold text-soft mb-2"
           for="trackingNumber"
           >Tracking Number</label
         >
@@ -59,7 +59,7 @@ function submitForm(): void {
           v-model="trackingNumber"
           type="text"
           id="trackingNumber"
-          class="w-full bg-elevated border border-border-default rounded-lg p-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+          class="w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
           required
           placeholder="TRK-XXXX-XX"
         />
@@ -67,7 +67,7 @@ function submitForm(): void {
 
       <div>
         <label
-          class="block text-sm font-semibold text-text-secondary mb-2"
+          class="block text-sm font-semibold text-soft mb-2"
           for="description"
           >Description</label
         >
@@ -75,7 +75,7 @@ function submitForm(): void {
           v-model="description"
           type="text"
           id="description"
-          class="w-full bg-elevated border border-border-default rounded-lg p-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+          class="w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
           required
           placeholder="Package contents"
         />
@@ -83,7 +83,7 @@ function submitForm(): void {
 
       <div>
         <label
-          class="block text-sm font-semibold text-text-secondary mb-2"
+          class="block text-sm font-semibold text-soft mb-2"
           for="carrier"
           >Carrier</label
         >
@@ -91,7 +91,7 @@ function submitForm(): void {
           v-model="carrier"
           type="text"
           id="carrier"
-          class="w-full bg-elevated border border-border-default rounded-lg p-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+          class="w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
           required
           placeholder="FedEx, DHL, UPS..."
         />
@@ -99,14 +99,14 @@ function submitForm(): void {
 
       <div>
         <label
-          class="block text-sm font-semibold text-text-secondary mb-2"
+          class="block text-sm font-semibold text-soft mb-2"
           for="warehouseId"
           >Warehouse</label
         >
         <select
           v-model="warehouseId"
           id="warehouseId"
-          class="select-control w-full bg-elevated border border-border-default rounded-lg p-3 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          class="select-control w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
         >
           <option
             v-for="warehouse in warehouses"
@@ -120,7 +120,7 @@ function submitForm(): void {
 
       <div>
         <label
-          class="block text-sm font-semibold text-text-secondary mb-2"
+          class="block text-sm font-semibold text-soft mb-2"
           for="weight"
           >Weight (kg)</label
         >
@@ -130,7 +130,7 @@ function submitForm(): void {
           min="0"
           step="0.1"
           id="weight"
-          class="w-full bg-elevated border border-border-default rounded-lg p-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+          class="w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
           required
           placeholder="0.0"
         />
@@ -138,14 +138,14 @@ function submitForm(): void {
 
       <div>
         <label
-          class="block text-sm font-semibold text-text-secondary mb-2"
+          class="block text-sm font-semibold text-soft mb-2"
           for="status"
           >Status</label
         >
         <select
           v-model="status"
           id="status"
-          class="select-control w-full bg-elevated border border-border-default rounded-lg p-3 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          class="select-control w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
         >
           <option value="Pending">Pending</option>
           <option value="In Transit">In Transit</option>

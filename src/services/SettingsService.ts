@@ -8,14 +8,6 @@ export class SettingsService {
     return useSettingsStore().settings;
   }
 
-  static isMaintenanceModeEnabled(): boolean {
-    return useSettingsStore().settings.maintenanceModeEnabled;
-  }
-
-  static setMaintenanceMode(enabled: boolean): void {
-    useSettingsStore().settings.maintenanceModeEnabled = enabled;
-  }
-
   static isUserNotificationEnabled(): boolean {
     return useSettingsStore().settings.userNotificationEnabled;
   }

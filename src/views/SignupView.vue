@@ -39,8 +39,8 @@ function handleSubmit(): void {
 </script>
 
 <template>
-  <div class="min-h-screen bg-base text-text-primary">
-    <header class="border-b border-border-default bg-base/70 backdrop-blur-md">
+  <div class="min-h-screen bg-canvas text-body">
+    <header class="border-b border-wire bg-canvas/70 backdrop-blur-md">
       <div
         class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between"
       >
@@ -52,7 +52,7 @@ function handleSubmit(): void {
           </div>
           <div>
             <h1 class="text-xl font-black tracking-tight">PackTrack</h1>
-            <p class="text-[11px] text-text-muted">Logistics Platform</p>
+            <p class="text-[11px] text-faded">Logistics Platform</p>
           </div>
         </RouterLink>
         <RouterLink
@@ -66,7 +66,7 @@ function handleSubmit(): void {
 
     <main class="min-h-[calc(100vh-82px)] grid lg:grid-cols-2">
       <section
-        class="hidden lg:flex flex-col justify-center px-14 py-12 bg-linear-to-br from-base via-surface to-hero border-r border-border-default"
+        class="hidden lg:flex flex-col justify-center px-14 py-12 bg-linear-to-br from-canvas via-panel to-canvas border-r border-wire"
       >
         <div class="max-w-xl space-y-8">
           <span
@@ -77,7 +77,7 @@ function handleSubmit(): void {
           <h2 class="text-5xl font-black tracking-tight leading-tight">
             Build a smarter logistics flow from day one
           </h2>
-          <p class="text-text-secondary text-lg leading-relaxed">
+          <p class="text-soft text-lg leading-relaxed">
             Set up your company workspace, manage package visibility, and
             coordinate warehouses with a unified dashboard.
           </p>
@@ -87,7 +87,7 @@ function handleSubmit(): void {
               <span class="material-symbols-outlined text-primary mt-0.5"
                 >check_circle</span
               >
-              <p class="text-sm text-text-secondary">
+              <p class="text-sm text-soft">
                 Live shipment updates and timeline logs.
               </p>
             </div>
@@ -95,7 +95,7 @@ function handleSubmit(): void {
               <span class="material-symbols-outlined text-primary mt-0.5"
                 >check_circle</span
               >
-              <p class="text-sm text-text-secondary">
+              <p class="text-sm text-soft">
                 Warehouse capacity monitoring in one place.
               </p>
             </div>
@@ -103,7 +103,7 @@ function handleSubmit(): void {
               <span class="material-symbols-outlined text-primary mt-0.5"
                 >check_circle</span
               >
-              <p class="text-sm text-text-secondary">
+              <p class="text-sm text-soft">
                 Role-based access for admin and operational users.
               </p>
             </div>
@@ -113,11 +113,11 @@ function handleSubmit(): void {
 
       <section class="flex items-center justify-center px-6 py-10">
         <div
-          class="w-full max-w-md bg-surface border border-border-default rounded-2xl p-8 space-y-6"
+          class="w-full max-w-md bg-panel border border-wire rounded-2xl p-8 space-y-6"
         >
           <div>
             <h3 class="text-2xl font-black tracking-tight">Create account</h3>
-            <p class="text-sm text-text-muted mt-1">
+            <p class="text-sm text-faded mt-1">
               Start with a User account and access your dashboard.
             </p>
           </div>
@@ -126,7 +126,7 @@ function handleSubmit(): void {
             <div class="space-y-2">
               <label
                 for="name"
-                class="text-sm font-semibold text-text-secondary"
+                class="text-sm font-semibold text-soft"
                 >Full Name</label
               >
               <input
@@ -134,7 +134,7 @@ function handleSubmit(): void {
                 v-model="name"
                 type="text"
                 required
-                class="w-full bg-elevated border border-border-default rounded-xl py-3 px-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+                class="w-full bg-sheet border border-wire rounded-xl py-3 px-4 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="John Doe"
               />
             </div>
@@ -142,7 +142,7 @@ function handleSubmit(): void {
             <div class="space-y-2">
               <label
                 for="email"
-                class="text-sm font-semibold text-text-secondary"
+                class="text-sm font-semibold text-soft"
                 >Email</label
               >
               <input
@@ -150,7 +150,7 @@ function handleSubmit(): void {
                 v-model="email"
                 type="email"
                 required
-                class="w-full bg-elevated border border-border-default rounded-xl py-3 px-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+                class="w-full bg-sheet border border-wire rounded-xl py-3 px-4 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="john@company.com"
               />
             </div>
@@ -159,7 +159,7 @@ function handleSubmit(): void {
               <div class="space-y-2">
                 <label
                   for="password"
-                  class="text-sm font-semibold text-text-secondary"
+                  class="text-sm font-semibold text-soft"
                   >Password</label
                 >
                 <input
@@ -167,14 +167,14 @@ function handleSubmit(): void {
                   v-model="password"
                   type="password"
                   required
-                  class="w-full bg-elevated border border-border-default rounded-xl py-3 px-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+                  class="w-full bg-sheet border border-wire rounded-xl py-3 px-4 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
                   placeholder="••••••••"
                 />
               </div>
               <div class="space-y-2">
                 <label
                   for="confirmPassword"
-                  class="text-sm font-semibold text-text-secondary"
+                  class="text-sm font-semibold text-soft"
                   >Confirm</label
                 >
                 <input
@@ -182,7 +182,7 @@ function handleSubmit(): void {
                   v-model="confirmPassword"
                   type="password"
                   required
-                  class="w-full bg-elevated border border-border-default rounded-xl py-3 px-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+                  class="w-full bg-sheet border border-wire rounded-xl py-3 px-4 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
                   placeholder="••••••••"
                 />
               </div>
@@ -205,7 +205,7 @@ function handleSubmit(): void {
             </button>
           </form>
 
-          <p class="text-sm text-text-muted text-center">
+          <p class="text-sm text-faded text-center">
             Already have an account?
             <RouterLink
               to="/login"

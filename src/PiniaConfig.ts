@@ -8,8 +8,8 @@ import type { SystemSettingInterface } from "@/interfaces/SystemSettingInterface
 import { packageSeeder } from "@/seeders/packageseeder";
 import { settingsSeeder } from "@/seeders/settingsseeder";
 import { trackingEventSeeder } from "@/seeders/trackingeventseeder";
-import { warehouseSeeder } from "@/seeders/warehouseseeder";
 import { userSeeder } from "@/seeders/userseeder";
+import { warehouseSeeder } from "@/seeders/warehouseseeder";
 
 export default class PiniaConfig {
   public static init() {

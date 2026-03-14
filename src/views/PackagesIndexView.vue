@@ -1,18 +1,21 @@
-<!-- @author David Hdez -->
+<!-- @author David Hdez, Juan Andrés Young -->
 <script setup lang="ts">
 // external imports
-import { ref, watch } from "vue";
+import type { Chart } from "chart.js";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 
 // internal imports
+import StatusBadge from "@/components/StatusBadge.vue";
 import type { TrackingEventInterface } from "@/interfaces/TrackingEventInterface";
 import { PackageService } from "@/services/PackageService";
 import { TrackingEventService } from "@/services/TrackingEventService";
 import { WarehouseService } from "@/services/WarehouseService";
-import { formatWeight, formatDateTime } from "@/utils/formatters";
+import { ChartUtils } from "@/utils/ChartUtils";
+import { formatDateTime, formatWeight } from "@/utils/formatters";
 
-const packages = PackageService.getPackages();
-const filteredPackages = ref(packages);
+const packages = computed(() => PackageService.getPackages());
+const filteredPackages = ref(packages.value);
 
 // selectors
 const selectorStatuses = PackageService.getUniqueStatuses();
@@ -20,14 +23,11 @@ const selectorWarehouses = WarehouseService.getWarehouses();
 const selectedStatus = ref("");
 const selectedWarehouseId = ref<number | null>(null);
 
-// expanded logs tracking
+// expanded history tracking
 const expandedPackageId = ref<number | null>(null);
 
-// log form
-const logForm = ref({ location: "", description: "" });
-
 function applyFilters(): void {
-  filteredPackages.value = packages.filter((pkg) => {
+  filteredPackages.value = packages.value.filter((pkg) => {
     const matchStatus =
       !selectedStatus.value || pkg.status === selectedStatus.value;
     const matchWarehouse =
@@ -35,6 +35,11 @@ function applyFilters(): void {
       pkg.warehouseId === selectedWarehouseId.value;
     return matchStatus && matchWarehouse;
   });
+}
+
+function deletePackage(id: number): void {
+  PackageService.deletePackage(id);
+  applyFilters();
 }
 
 watch([selectedStatus, selectedWarehouseId], () => applyFilters());
@@ -45,12 +50,11 @@ function getWarehouseName(warehouseId: number): string {
   );
 }
 
-function toggleLogs(packageId: number): void {
+function toggleHistory(packageId: number): void {
   if (expandedPackageId.value === packageId) {
     expandedPackageId.value = null;
   } else {
     expandedPackageId.value = packageId;
-    logForm.value = { location: "", description: "" };
   }
 }
 
@@ -58,25 +62,44 @@ function getEventsForPackage(packageId: number): TrackingEventInterface[] {
   return TrackingEventService.getTrackingEventsByPackageId(packageId);
 }
 
-function submitLog(packageId: number): void {
-  if (!logForm.value.description.trim()) return;
-  TrackingEventService.createTrackingEvent({
-    packageId,
-    location: logForm.value.location.trim(),
-    description: logForm.value.description.trim(),
-  });
-  logForm.value = { location: "", description: "" };
-}
+// chart
+const statusColors: Record<string, string> = {
+  Delivered: "#10b981",
+  "In Transit": "#f59e0b",
+  "At Warehouse": "#2dd4bf",
+  Pending: "#6b7280",
+  Exception: "#f43f5e",
+};
+
+const canvasRef = ref<HTMLCanvasElement | null>(null);
+let chartInstance: Chart | null = null;
+
+onMounted(() => {
+  if (!canvasRef.value) return;
+  const counts: Record<string, number> = {};
+  for (const pkg of packages.value) {
+    counts[pkg.status] = (counts[pkg.status] ?? 0) + 1;
+  }
+  const labels = Object.keys(counts);
+  const data = Object.values(counts);
+  const colors = labels.map((l) => statusColors[l] ?? "#8b949e");
+  chartInstance = ChartUtils.buildBarChart(canvasRef.value, labels, data, colors);
+});
+
+onUnmounted(() => {
+  chartInstance?.destroy();
+  chartInstance = null;
+});
 </script>
 
 <template>
   <section class="space-y-6">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-black tracking-tight text-text-primary">
+        <h1 class="text-3xl font-black tracking-tight text-body">
           Package Tracking
         </h1>
-        <p class="text-text-secondary mt-1">
+        <p class="text-soft mt-1">
           Monitor and manage all your shipments.
         </p>
       </div>
@@ -97,7 +120,7 @@ function submitLog(packageId: number): void {
           :class="
             selectedStatus === ''
               ? 'bg-primary text-base'
-              : 'bg-surface border border-border-default text-text-secondary'
+              : 'bg-panel border border-wire text-soft'
           "
           @click="selectedStatus = ''"
         >
@@ -110,7 +133,7 @@ function submitLog(packageId: number): void {
           :class="
             selectedStatus === status
               ? 'bg-primary text-base'
-              : 'bg-surface border border-border-default text-text-secondary'
+              : 'bg-panel border border-wire text-soft'
           "
           @click="selectedStatus = status"
         >
@@ -121,7 +144,7 @@ function submitLog(packageId: number): void {
       <!-- Warehouse dropdown selector -->
       <select
         v-model="selectedWarehouseId"
-        class="select-control bg-surface border border-border-default rounded-xl px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        class="select-control bg-panel border border-wire rounded-xl px-4 py-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
       >
         <option :value="null">All Warehouses</option>
         <option
@@ -134,14 +157,23 @@ function submitLog(packageId: number): void {
       </select>
     </div>
 
+    <!-- Chart -->
+    <div class="bg-panel border border-wire rounded-2xl p-6">
+      <h2 class="font-bold text-lg text-body mb-1">Packages by Status</h2>
+      <p class="text-xs text-faded mb-4">Count of packages per status</p>
+      <div class="h-52">
+        <canvas ref="canvasRef" />
+      </div>
+    </div>
+
     <!-- Table -->
     <div
-      class="bg-surface border border-border-default rounded-2xl overflow-hidden"
+      class="bg-panel border border-wire rounded-2xl overflow-hidden"
     >
       <table class="w-full text-left">
-        <thead class="bg-elevated border-b border-border-default">
+        <thead class="bg-sheet border-b border-wire">
           <tr
-            class="text-xs font-bold uppercase tracking-wider text-text-muted"
+            class="text-xs font-bold uppercase tracking-wider text-faded"
           >
             <th class="px-6 py-4">Tracking #</th>
             <th class="px-6 py-4">Description</th>
@@ -151,9 +183,9 @@ function submitLog(packageId: number): void {
             <th class="px-6 py-4">Logs</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-border-subtle">
+        <tbody class="divide-y divide-wire-subtle">
           <template v-for="pkg in filteredPackages" :key="pkg.id">
-            <tr class="hover:bg-elevated/50 transition-colors">
+            <tr class="hover:bg-sheet/50 transition-colors">
               <td class="px-6 py-4 font-mono text-sm text-packages">
                 <RouterLink
                   :to="`/packages/${pkg.id}`"
@@ -161,65 +193,55 @@ function submitLog(packageId: number): void {
                   >{{ pkg.trackingNumber }}</RouterLink
                 >
               </td>
-              <td class="px-6 py-4 text-sm font-medium text-text-primary">
+              <td class="px-6 py-4 text-sm font-medium text-body">
                 {{ pkg.description }}
               </td>
-              <td class="px-6 py-4 text-sm text-text-secondary">
+              <td class="px-6 py-4 text-sm text-soft">
                 {{ getWarehouseName(pkg.warehouseId) }}
               </td>
-              <td class="px-6 py-4 text-sm text-text-secondary">
+              <td class="px-6 py-4 text-sm text-soft">
                 {{ formatWeight(pkg.weight) }}
               </td>
               <td class="px-6 py-4">
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold"
-                  :class="{
-                    'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20':
-                      pkg.status === 'Delivered',
-                    'bg-amber-500/10 text-amber-400 border border-amber-500/20':
-                      pkg.status === 'In Transit',
-                    'bg-primary/10 text-primary border border-primary/20':
-                      pkg.status === 'At Warehouse',
-                    'bg-gray-500/10 text-text-muted border border-gray-500/20':
-                      pkg.status === 'Pending',
-                    'bg-rose-500/10 text-rose-400 border border-rose-500/20':
-                      pkg.status === 'Exception',
-                  }"
-                >
-                  {{ pkg.status }}
-                </span>
+                <StatusBadge :status="pkg.status" />
               </td>
               <td class="px-6 py-4">
-                <button
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                  :class="
-                    expandedPackageId === pkg.id
-                      ? 'bg-primary text-base'
-                      : 'bg-packages/10 text-packages border border-packages/20 hover:bg-packages/20'
-                  "
-                  @click="toggleLogs(pkg.id)"
-                >
-                  <span class="material-symbols-outlined text-sm">{{
-                    expandedPackageId === pkg.id ? "expand_less" : "edit_note"
-                  }}</span>
-                  {{ expandedPackageId === pkg.id ? "Close" : "Edit Logs" }}
-                </button>
+                <div class="flex items-center gap-2">
+                  <button
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all"
+                    :class="
+                      expandedPackageId === pkg.id
+                        ? 'bg-primary text-base'
+                        : 'bg-packages/10 text-packages border border-packages/20 hover:bg-packages/20'
+                    "
+                    @click="toggleHistory(pkg.id)"
+                    title="View history"
+                  >
+                    <span class="material-symbols-outlined text-sm">history</span>
+                  </button>
+                  <button
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
+                    @click="deletePackage(pkg.id)"
+                    title="Delete package"
+                  >
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                  </button>
+                </div>
               </td>
             </tr>
 
-            <!-- Expanded logs panel -->
+            <!-- Expanded history panel -->
             <tr v-if="expandedPackageId === pkg.id">
               <td colspan="6" class="px-6 py-0">
-                <div class="py-4 space-y-4 border-t border-primary/20">
-                  <!-- Event list -->
+                <div class="py-4 space-y-3 border-t border-primary/20">
                   <div class="flex items-center gap-2 mb-2">
                     <span class="material-symbols-outlined text-primary text-lg"
                       >history</span
                     >
-                    <h4 class="text-sm font-bold text-text-primary">
+                    <h4 class="text-sm font-bold text-body">
                       Tracking Log for {{ pkg.trackingNumber }}
                     </h4>
-                    <span class="text-xs text-text-muted"
+                    <span class="text-xs text-faded"
                       >({{ getEventsForPackage(pkg.id).length }} events)</span
                     >
                   </div>
@@ -231,17 +253,17 @@ function submitLog(packageId: number): void {
                     <div
                       v-for="event in getEventsForPackage(pkg.id)"
                       :key="event.id"
-                      class="flex items-start gap-3 p-3 bg-elevated rounded-lg border border-border-subtle"
+                      class="flex items-start gap-3 p-3 bg-sheet rounded-lg border border-wire-subtle"
                     >
                       <div
                         class="mt-1 size-2 rounded-full bg-primary shrink-0"
                       ></div>
                       <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-text-primary">
+                        <p class="text-sm font-medium text-body">
                           {{ event.description }}
                         </p>
                         <div
-                          class="flex items-center gap-3 mt-1 text-xs text-text-muted"
+                          class="flex items-center gap-3 mt-1 text-xs text-faded"
                         >
                           <span class="flex items-center gap-1">
                             <span class="material-symbols-outlined text-xs"
@@ -256,45 +278,13 @@ function submitLog(packageId: number): void {
                       </div>
                     </div>
                   </div>
-                  <p v-else class="text-text-muted text-sm">
+                  <p v-else class="text-faded text-sm">
                     No tracking events yet.
                   </p>
-
-                  <!-- Add event form -->
-                  <form
-                    class="flex flex-col md:flex-row gap-3 pt-3 border-t border-border-subtle"
-                    @submit.prevent="submitLog(pkg.id)"
-                  >
-                    <input
-                      v-model="logForm.location"
-                      type="text"
-                      class="flex-1 bg-base border border-border-default rounded-lg py-2 px-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
-                      placeholder="Location (City, State)"
-                      required
-                    />
-                    <input
-                      v-model="logForm.description"
-                      type="text"
-                      class="flex-2 bg-base border border-border-default rounded-lg py-2 px-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
-                      placeholder="What happened with the package?"
-                      required
-                    />
-                    <button
-                      type="submit"
-                      :disabled="!logForm.description.trim()"
-                      class="bg-primary text-base font-bold py-2 px-4 rounded-lg text-sm hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all whitespace-nowrap"
-                    >
-                      <span class="flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-sm"
-                          >add_circle</span
-                        >
-                        Add Event
-                      </span>
-                    </button>
-                  </form>
                 </div>
               </td>
             </tr>
+
           </template>
         </tbody>
       </table>

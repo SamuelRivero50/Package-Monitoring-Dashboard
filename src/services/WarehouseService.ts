@@ -1,8 +1,8 @@
 /** @author David Hdez */
 // internal imports
+import type { CreateWarehouseDTO } from "@/dtos/CreateWarehouseDTO";
 import type { WarehouseInterface } from "@/interfaces/WarehouseInterface";
 import { useWarehouseStore } from "@/stores/warehousestore";
-import type { CreateWarehouseDTO } from "@/dtos/CreateWarehouseDTO";
 
 export class WarehouseService {
   static getWarehouses(): WarehouseInterface[] {

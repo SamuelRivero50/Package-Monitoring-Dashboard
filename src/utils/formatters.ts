@@ -3,15 +3,6 @@ export function formatWeight(weight: number): string {
   return `${weight.toFixed(1)} kg`;
 }
 
-export function formatDate(iso?: string | Date): string {
-  if (!iso) return "";
-  const date = typeof iso === "string" ? new Date(iso) : iso;
-  return date.toLocaleDateString("es-CO", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
 
 export function formatDateTime(iso?: string | Date): string {
   if (!iso) return "";

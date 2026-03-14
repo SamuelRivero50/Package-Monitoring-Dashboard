@@ -1,9 +1,9 @@
 /** @author David Hdez */
 // internal imports
-import type { PackageInterface } from "@/interfaces/PackageInterface";
-import { usePackageStore } from "@/stores/packagestore";
-import { WarehouseService } from "@/services/WarehouseService";
 import type { CreatePackageDTO } from "@/dtos/CreatePackageDTO";
+import type { PackageInterface } from "@/interfaces/PackageInterface";
+import { WarehouseService } from "@/services/WarehouseService";
+import { usePackageStore } from "@/stores/packagestore";
 
 export class PackageService {
   static getPackages(): PackageInterface[] {
@@ -38,11 +38,6 @@ export class PackageService {
     return Array.from(uniqueStatuses);
   }
 
-  static getUniqueCarriers(): string[] {
-    const packages = this.getPackages();
-    return Array.from(new Set(packages.map((pkg) => pkg.carrier)));
-  }
-
   static getPackageById(id: number): PackageInterface | undefined {
     return usePackageStore().packages.find((pkg) => pkg.id === id);
   }
@@ -62,4 +57,16 @@ export class PackageService {
       warehouseId: assignedWarehouseId,
     });
   }
+
+  static updatePackage(id: number, data: Partial<CreatePackageDTO>): void {
+    const pkg = usePackageStore().packages.find((p) => p.id === id);
+    if (pkg) Object.assign(pkg, data);
+  }
+
+  static deletePackage(id: number): void {
+    const store = usePackageStore();
+    const index = store.packages.findIndex((p) => p.id === id);
+    if (index !== -1) store.packages.splice(index, 1);
+  }
+
 }

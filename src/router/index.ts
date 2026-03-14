@@ -4,19 +4,16 @@ import { createRouter, createWebHistory } from "vue-router";
 
 // internal imports
 import { AuthService } from "@/services/AuthService";
-
-import HomeView from "@/views/HomeView.vue";
 import DashboardView from "@/views/DashboardView.vue";
+import HomeView from "@/views/HomeView.vue";
 import LoginView from "@/views/LoginView.vue";
-import SignUpView from "@/views/SignUpView.vue";
-
+import PackagesCreateView from "@/views/PackagesCreateView.vue";
 import PackagesIndexView from "@/views/PackagesIndexView.vue";
 import PackagesShowView from "@/views/PackagesShowView.vue";
-import PackagesCreateView from "@/views/PackagesCreateView.vue";
-
-import WarehousesIndexView from "@/views/WarehousesIndexView.vue";
-import UsersIndexView from "@/views/UsersIndexView.vue";
 import SettingsView from "@/views/SettingsView.vue";
+import SignUpView from "@/views/SignupView.vue";
+import UsersIndexView from "@/views/UsersIndexView.vue";
+import WarehousesIndexView from "@/views/WarehousesIndexView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
