@@ -1,9 +1,4 @@
 /** @author David Hdez */
-export function formatWeight(weight: number): string {
-  return `${weight.toFixed(1)} kg`;
-}
-
-
 export function formatDateTime(iso?: string | Date): string {
   if (!iso) return "";
   const date = typeof iso === "string" ? new Date(iso) : iso;
