@@ -196,8 +196,8 @@ onUnmounted(() => {
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <RouterLink
-          v-for="wh in warehouses"
-          :key="wh.id"
+          v-for="warehouse in warehouses"
+          :key="warehouse.id"
           to="/warehouses"
           class="p-4 bg-sheet rounded-lg border border-wire-subtle hover:border-warehouses/40 transition-colors group"
         >
@@ -205,30 +205,30 @@ onUnmounted(() => {
             <h4
               class="text-sm font-bold text-body group-hover:text-warehouses transition-colors"
             >
-              {{ wh.name }}
+              {{ warehouse.name }}
             </h4>
           </div>
           <p class="text-faded text-xs flex items-center gap-1">
             <span class="material-symbols-outlined text-xs">location_on</span
-            >{{ wh.location }}
+            >{{ warehouse.location }}
           </p>
           <div class="mt-3">
             <div class="flex justify-between text-[10px] mb-1">
               <span class="text-soft">Capacity</span>
               <span class="font-bold text-primary"
-                >{{ Math.round((wh.currentLoad / wh.capacity) * 100) }}%</span
+                >{{ Math.round((warehouse.currentLoad / warehouse.capacity) * 100) }}%</span
               >
             </div>
             <div class="h-1.5 w-full bg-canvas rounded-full overflow-hidden">
               <div
                 class="h-full rounded-full transition-all"
                 :class="
-                  wh.currentLoad / wh.capacity > 0.9
+                  warehouse.currentLoad / warehouse.capacity > 0.9
                     ? 'bg-red-500'
                     : 'bg-primary'
                 "
                 :style="{
-                  width: Math.round((wh.currentLoad / wh.capacity) * 100) + '%',
+                  width: Math.round((warehouse.currentLoad / warehouse.capacity) * 100) + '%',
                 }"
               ></div>
             </div>

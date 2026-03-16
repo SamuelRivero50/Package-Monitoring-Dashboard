@@ -18,8 +18,8 @@ const selectorLocations = WarehouseService.getUniqueLocations();
 const selectedLocation = ref("");
 
 function applyFilters(): void {
-  filteredWarehouses.value = warehouses.filter((wh) => {
-    return !selectedLocation.value || wh.location === selectedLocation.value;
+  filteredWarehouses.value = warehouses.filter((warehouse) => {
+    return !selectedLocation.value || warehouse.location === selectedLocation.value;
   });
 }
 
@@ -35,24 +35,24 @@ const CITY_COORDS: Record<string, [number, number]> = {
 
 const warehouseMarkers = computed(() =>
   filteredWarehouses.value
-    .map((wh) => {
-      const coords = CITY_COORDS[wh.location.toLowerCase()];
+    .map((warehouse) => {
+      const coords = CITY_COORDS[warehouse.location.toLowerCase()];
       if (!coords) return null;
-      const pct = Math.round((wh.currentLoad / wh.capacity) * 100);
+      const capacityPercentage = Math.round((warehouse.currentLoad / warehouse.capacity) * 100);
       return {
-        id: String(wh.id),
-        label: wh.name,
+        id: String(warehouse.id),
+        label: warehouse.name,
         lat: coords[0],
         lng: coords[1],
-        popupHtml: `<b>${wh.name}</b><br>${wh.location}<br>Capacity: ${pct}%`,
+        popupHtml: `<b>${warehouse.name}</b><br>${warehouse.location}<br>Capacity: ${capacityPercentage}%`,
       };
     })
     .filter((m): m is NonNullable<typeof m> => m !== null),
 );
 
 const warehouseRoutes = computed<MapRoute[]>(() => {
-  const ids = warehouseMarkers.value.map((m) => m.id);
-  return ids.map((id, i) => ({ fromId: id, toId: ids[(i + 1) % ids.length]! }));
+  const warehouseIds = warehouseMarkers.value.map((m) => m.id);
+  return warehouseIds.map((id, i) => ({ fromId: id, toId: warehouseIds[(i + 1) % warehouseIds.length]! }));
 });
 
 // chart
@@ -61,11 +61,11 @@ let chartInstance: Chart | null = null;
 
 onMounted(() => {
   if (!canvasRef.value) return;
-  const labels = warehouses.map((wh) => wh.name);
-  const data = warehouses.map((wh) =>
-    Math.round((wh.currentLoad / wh.capacity) * 100),
+  const labels = warehouses.map((warehouse) => warehouse.name);
+  const data = warehouses.map((warehouse) =>
+    Math.round((warehouse.currentLoad / warehouse.capacity) * 100),
   );
-  const colors = data.map((pct) => (pct > 90 ? "#f43f5e" : "#2dd4bf"));
+  const colors = data.map((percentage) => (percentage > 90 ? "#f43f5e" : "#2dd4bf"));
   chartInstance = ChartUtils.buildBarChart(canvasRef.value, labels, data, colors);
 });
 
@@ -138,19 +138,19 @@ onUnmounted(() => {
         </thead>
         <tbody class="divide-y divide-wire-subtle">
           <tr
-            v-for="wh in filteredWarehouses"
-            :key="wh.id"
+            v-for="warehouse in filteredWarehouses"
+            :key="warehouse.id"
             class="hover:bg-sheet/50 transition-colors"
           >
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
                 <img
-                  :src="wh.imageUrl"
-                  :alt="wh.name"
+                  :src="warehouse.imageUrl"
+                  :alt="warehouse.name"
                   class="size-10 rounded-lg object-cover bg-warehouses/15"
                 />
                 <span class="text-sm font-bold text-body">{{
-                  wh.name
+                  warehouse.name
                 }}</span>
               </div>
             </td>
@@ -159,17 +159,17 @@ onUnmounted(() => {
                 <span class="material-symbols-outlined text-xs"
                   >location_on</span
                 >
-                {{ wh.location }}
+                {{ warehouse.location }}
               </span>
             </td>
             <td class="px-6 py-4 text-sm text-soft">
-              {{ wh.managerName }}
+              {{ warehouse.managerName }}
             </td>
             <td class="px-6 py-4 text-sm text-soft">
-              {{ wh.capacity.toLocaleString() }}
+              {{ warehouse.capacity.toLocaleString() }}
             </td>
             <td class="px-6 py-4 text-sm text-soft">
-              {{ wh.currentLoad.toLocaleString() }}
+              {{ warehouse.currentLoad.toLocaleString() }}
             </td>
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
@@ -177,18 +177,18 @@ onUnmounted(() => {
                   <div
                     class="h-full rounded-full transition-all"
                     :class="
-                      wh.currentLoad / wh.capacity > 0.9
+                      warehouse.currentLoad / warehouse.capacity > 0.9
                         ? 'bg-red-500'
                         : 'bg-primary'
                     "
                     :style="{
                       width:
-                        Math.round((wh.currentLoad / wh.capacity) * 100) + '%',
+                        Math.round((warehouse.currentLoad / warehouse.capacity) * 100) + '%',
                     }"
                   ></div>
                 </div>
                 <span class="text-xs font-bold text-primary"
-                  >{{ Math.round((wh.currentLoad / wh.capacity) * 100) }}%</span
+                  >{{ Math.round((warehouse.currentLoad / warehouse.capacity) * 100) }}%</span
                 >
               </div>
             </td>

@@ -66,23 +66,23 @@ const TEAL_ICON = L.divIcon({
 // ─── Bezier helpers ────────────────────────────────────────────────────────
 
 function bezierPt(t: number, p0: Pt, ctrl: Pt, p2: Pt): Pt {
-  const mt = 1 - t
+  const inverseT = 1 - t
   return {
-    x: mt * mt * p0.x + 2 * mt * t * ctrl.x + t * t * p2.x,
-    y: mt * mt * p0.y + 2 * mt * t * ctrl.y + t * t * p2.y,
+    x: inverseT * inverseT * p0.x + 2 * inverseT * t * ctrl.x + t * t * p2.x,
+    y: inverseT * inverseT * p0.y + 2 * inverseT * t * ctrl.y + t * t * p2.y,
   }
 }
 
 /** Control point that makes the arc bow gracefully between two screen points. */
 function arcCtrl(p0: Pt, p2: Pt): Pt {
-  const mx = (p0.x + p2.x) / 2
-  const my = (p0.y + p2.y) / 2
-  const dx = p2.x - p0.x
-  const dy = p2.y - p0.y
-  const len = Math.sqrt(dx * dx + dy * dy) || 1
-  const lift = Math.min(len * 0.4, 140)
+  const midpointX = (p0.x + p2.x) / 2
+  const midpointY = (p0.y + p2.y) / 2
+  const deltaX = p2.x - p0.x
+  const deltaY = p2.y - p0.y
+  const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY) || 1
+  const lift = Math.min(distance * 0.4, 140)
   // Perpendicular that consistently bows the arc upward on screen
-  return { x: mx + (dy / len) * lift, y: my - (dx / len) * lift }
+  return { x: midpointX + (deltaY / distance) * lift, y: midpointY - (deltaX / distance) * lift }
 }
 
 // ─── Particle system ───────────────────────────────────────────────────────
@@ -119,11 +119,11 @@ function drawFrame(): void {
 
   const canvas = canvasRef.value
   if (!canvas || !map) return
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return
+  const canvasContext = canvas.getContext('2d')
+  if (!canvasContext) return
 
   const routes = props.routes ?? []
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  canvasContext.clearRect(0, 0, canvas.width, canvas.height)
   if (routes.length === 0) return
 
   const coordMap = new Map(props.markers.map((m) => [m.id, L.latLng(m.lat, m.lng)]))
@@ -140,15 +140,15 @@ function drawFrame(): void {
   })
 
   // 1. Ghost arc baselines
-  for (const arc of arcs) {
-    if (!arc) continue
-    ctx.beginPath()
-    ctx.moveTo(arc.p0.x, arc.p0.y)
-    ctx.quadraticCurveTo(arc.ctrl.x, arc.ctrl.y, arc.p2.x, arc.p2.y)
-    ctx.strokeStyle = 'rgba(45, 212, 191, 0.10)'
-    ctx.lineWidth = 1.5
-    ctx.setLineDash([])
-    ctx.stroke()
+  for (const routeArc of arcs) {
+    if (!routeArc) continue
+    canvasContext.beginPath()
+    canvasContext.moveTo(routeArc.p0.x, routeArc.p0.y)
+    canvasContext.quadraticCurveTo(routeArc.ctrl.x, routeArc.ctrl.y, routeArc.p2.x, routeArc.p2.y)
+    canvasContext.strokeStyle = 'rgba(45, 212, 191, 0.10)'
+    canvasContext.lineWidth = 1.5
+    canvasContext.setLineDash([])
+    canvasContext.stroke()
   }
 
   // 2. Comet particles
@@ -156,8 +156,8 @@ function drawFrame(): void {
   const TRAIL_LEN = 0.13
 
   for (const p of particles) {
-    const arc = arcs[p.routeIndex]
-    if (!arc) continue
+    const routeArc = arcs[p.routeIndex]
+    if (!routeArc) continue
 
     // Advance position
     p.t = (p.t + p.speed) % 1
@@ -167,30 +167,30 @@ function drawFrame(): void {
       const ti = p.t - TRAIL_LEN * (1 - i / TRAIL_STEPS)
       const tw = ((ti % 1) + 1) % 1
       const ratio = i / TRAIL_STEPS
-      const pt = bezierPt(tw, arc.p0, arc.ctrl, arc.p2)
+      const bezierPoint = bezierPt(tw, routeArc.p0, routeArc.ctrl, routeArc.p2)
 
       const r = 1 + ratio * 4
       const alpha = ratio * ratio * 0.8
-      const grd = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, r * 2.2)
-      grd.addColorStop(0, `rgba(45, 212, 191, ${alpha})`)
-      grd.addColorStop(1, 'rgba(45, 212, 191, 0)')
-      ctx.beginPath()
-      ctx.arc(pt.x, pt.y, r * 2.2, 0, Math.PI * 2)
-      ctx.fillStyle = grd
-      ctx.fill()
+      const radialGradient = canvasContext.createRadialGradient(bezierPoint.x, bezierPoint.y, 0, bezierPoint.x, bezierPoint.y, r * 2.2)
+      radialGradient.addColorStop(0, `rgba(45, 212, 191, ${alpha})`)
+      radialGradient.addColorStop(1, 'rgba(45, 212, 191, 0)')
+      canvasContext.beginPath()
+      canvasContext.arc(bezierPoint.x, bezierPoint.y, r * 2.2, 0, Math.PI * 2)
+      canvasContext.fillStyle = radialGradient
+      canvasContext.fill()
     }
 
     // Comet head — bright glowing nucleus
-    const head = bezierPt(p.t, arc.p0, arc.ctrl, arc.p2)
-    const hGrd = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 9)
-    hGrd.addColorStop(0, 'rgba(255, 255, 255, 1.00)')
-    hGrd.addColorStop(0.2, 'rgba(200, 255, 248, 0.95)')
-    hGrd.addColorStop(0.55, 'rgba(45,  212, 191, 0.70)')
-    hGrd.addColorStop(1, 'rgba(45,  212, 191, 0.00)')
-    ctx.beginPath()
-    ctx.arc(head.x, head.y, 9, 0, Math.PI * 2)
-    ctx.fillStyle = hGrd
-    ctx.fill()
+    const head = bezierPt(p.t, routeArc.p0, routeArc.ctrl, routeArc.p2)
+    const headGradient = canvasContext.createRadialGradient(head.x, head.y, 0, head.x, head.y, 9)
+    headGradient.addColorStop(0, 'rgba(255, 255, 255, 1.00)')
+    headGradient.addColorStop(0.2, 'rgba(200, 255, 248, 0.95)')
+    headGradient.addColorStop(0.55, 'rgba(45,  212, 191, 0.70)')
+    headGradient.addColorStop(1, 'rgba(45,  212, 191, 0.00)')
+    canvasContext.beginPath()
+    canvasContext.arc(head.x, head.y, 9, 0, Math.PI * 2)
+    canvasContext.fillStyle = headGradient
+    canvasContext.fill()
   }
 }
 
