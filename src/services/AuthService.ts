@@ -49,7 +49,7 @@ export class AuthService {
       email: normalizedEmail,
       password: trimmedPassword,
       role: "User",
-      avatarUrl: `https://i.pravatar.cc/150?u=${normalizedEmail}`,
+      avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(trimmedName)}&background=6366f1&color=fff&size=150`,
     };
 
     useUserStore().users.push(newUser);

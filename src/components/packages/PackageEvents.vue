@@ -4,9 +4,9 @@
 import { computed, ref } from "vue";
 
 // internal imports
-import type { CreateTrackingEventDTO } from "@/dtos/tracking/CreateTrackingEventDTO";
-import type { TrackingEventInterface } from "@/interfaces/TrackingEventInterface";
-import { TrackingEventService } from "@/services/TrackingEventService";
+import type { CreatePackageLogDTO } from "@/dtos/packagelogs/CreatePackageLogDTO";
+import type { PackageLogInterface } from "@/interfaces/PackageLogInterface";
+import { PackageLogService } from "@/services/PackageLogService";
 import { WarehouseService } from "@/services/WarehouseService";
 import { formatDateTime } from "@/utils/formatters";
 
@@ -15,7 +15,7 @@ const props = defineProps<{
 }>();
 
 const events = computed(() =>
-  TrackingEventService.getTrackingEventsByPackageId(props.packageId),
+  PackageLogService.getPackageLogsByPackageId(props.packageId),
 );
 
 const warehouses = computed(() => WarehouseService.getWarehouses());
@@ -52,7 +52,7 @@ function getWarehouseName(warehouseId: number): string {
   return WarehouseService.getWarehouseById(warehouseId)?.name ?? "Unknown Warehouse";
 }
 
-function getRouteLabel(event: TrackingEventInterface): string {
+function getRouteLabel(event: PackageLogInterface): string {
   return `${getWarehouseName(event.fromWarehouseId)} -> ${getWarehouseName(event.toWarehouseId)}`;
 }
 
@@ -70,7 +70,7 @@ function addTrackingEvent(): void {
     return;
   }
 
-  const eventPayload: CreateTrackingEventDTO = {
+  const eventPayload: CreatePackageLogDTO = {
     packageId: props.packageId,
     fromWarehouseId: fromWarehouseId.value,
     toWarehouseId: toWarehouseId.value,
@@ -82,7 +82,7 @@ function addTrackingEvent(): void {
   errorMessage.value = "";
 
   try {
-    TrackingEventService.createTrackingEvent(eventPayload);
+    PackageLogService.createPackageLog(eventPayload);
     resetCreateForm();
   } catch (error: unknown) {
     errorMessage.value =
@@ -90,7 +90,7 @@ function addTrackingEvent(): void {
   }
 }
 
-function startEdit(event: TrackingEventInterface): void {
+function startEdit(event: PackageLogInterface): void {
   editingEventId.value = event.id;
   editFromWarehouseId.value = event.fromWarehouseId;
   editToWarehouseId.value = event.toWarehouseId;
@@ -113,7 +113,7 @@ function saveEdit(eventId: number): void {
   }
 
   try {
-    TrackingEventService.updateTrackingEvent(eventId, {
+    PackageLogService.updatePackageLog(eventId, {
       fromWarehouseId: editFromWarehouseId.value,
       toWarehouseId: editToWarehouseId.value,
       previousStatus: editPreviousStatus.value,

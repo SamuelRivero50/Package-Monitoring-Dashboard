@@ -31,7 +31,7 @@ function submitForm(): void {
     email: email.value,
     password: password.value,
     role: role.value,
-    avatarUrl: avatarUrl.value || `https://i.pravatar.cc/150?u=${email.value}`,
+    avatarUrl: avatarUrl.value || `https://ui-avatars.com/api/?name=${encodeURIComponent(name.value)}&background=6366f1&color=fff&size=150`,
   };
 
   UserService.createUser(newUser);
@@ -59,7 +59,7 @@ function saveEdit(userId: number): void {
     name: editName.value,
     email: editEmail.value,
     role: editRole.value,
-    avatarUrl: editAvatarUrl.value || `https://i.pravatar.cc/150?u=${editEmail.value}`,
+    avatarUrl: editAvatarUrl.value || `https://ui-avatars.com/api/?name=${encodeURIComponent(editName.value)}&background=6366f1&color=fff&size=150`,
   });
   editingUserId.value = null;
 }
@@ -234,11 +234,11 @@ function deleteUser(userId: number): void {
             <tr class="hover:bg-sheet/50 transition-colors">
               <td class="px-6 py-4">
                 <div class="flex items-center gap-3">
-                  <div
-                    class="size-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm"
-                  >
-                    {{ user.name.charAt(0) }}
-                  </div>
+                  <img
+                    :src="user.avatarUrl"
+                    :alt="user.name"
+                    class="size-10 rounded-full object-cover bg-primary/20"
+                  />
                   <div>
                     <p class="text-sm font-bold text-body">
                       {{ user.name }}

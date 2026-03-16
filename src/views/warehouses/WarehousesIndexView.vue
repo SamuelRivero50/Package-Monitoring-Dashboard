@@ -144,11 +144,11 @@ onUnmounted(() => {
           >
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
-                <div class="p-2 bg-warehouses/15 rounded-lg text-warehouses">
-                  <span class="material-symbols-outlined text-sm"
-                    >warehouse</span
-                  >
-                </div>
+                <img
+                  :src="wh.imageUrl"
+                  :alt="wh.name"
+                  class="size-10 rounded-lg object-cover bg-warehouses/15"
+                />
                 <span class="text-sm font-bold text-body">{{
                   wh.name
                 }}</span>

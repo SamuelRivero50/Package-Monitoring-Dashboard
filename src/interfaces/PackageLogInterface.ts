@@ -1,5 +1,5 @@
 /** @author David Hdez */
-export interface TrackingEventInterface {
+export interface PackageLogInterface {
   id: number;
   timestamp: Date;
   previousStatus?: string;

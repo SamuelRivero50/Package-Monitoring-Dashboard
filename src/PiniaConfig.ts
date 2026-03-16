@@ -5,9 +5,9 @@ import { watch } from "vue";
 
 // internal imports
 import type { SystemSettingInterface } from "@/interfaces/SystemSettingInterface";
+import { packageLogSeeder } from "@/seeders/packagelogseeder";
 import { packageSeeder } from "@/seeders/packageseeder";
 import { settingsSeeder } from "@/seeders/settingsseeder";
-import { trackingEventSeeder } from "@/seeders/trackingeventseeder";
 import { userSeeder } from "@/seeders/userseeder";
 import { warehouseSeeder } from "@/seeders/warehouseseeder";
 
@@ -42,8 +42,8 @@ export default class PiniaConfig {
         package: {
           packages: packageSeeder,
         },
-        trackingevent: {
-          trackingEvents: trackingEventSeeder,
+        packagelog: {
+          packageLogs: packageLogSeeder,
         },
         warehouse: {
           warehouses: warehouseSeeder,

@@ -1,8 +1,8 @@
 /** @author David Hdez */
 // internal imports
-import type { TrackingEventInterface } from "@/interfaces/TrackingEventInterface";
+import type { PackageLogInterface } from "@/interfaces/PackageLogInterface";
 
-export const trackingEventSeeder: TrackingEventInterface[] = [
+export const packageLogSeeder: PackageLogInterface[] = [
   {
     id: 1,
     packageId: 1,
