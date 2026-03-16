@@ -5,10 +5,10 @@ import { computed, ref } from "vue";
 
 // internal imports
 import type { CreatePackageLogDTO } from "@/dtos/packagelogs/CreatePackageLogDTO";
+import { formatDateTime } from "@/utils/formatters";
 import type { PackageLogInterface } from "@/interfaces/PackageLogInterface";
 import { PackageLogService } from "@/services/PackageLogService";
 import { WarehouseService } from "@/services/WarehouseService";
-import { formatDateTime } from "@/utils/formatters";
 
 const props = defineProps<{
   packageId: number;

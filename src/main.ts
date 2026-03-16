@@ -1,12 +1,12 @@
 /** @author David Hdez */
 // external imports
-import App from "./App.vue";
-import "./assets/css/input.css";
-import router from "./router";
 import { createApp } from "vue";
 
 // internal imports
+import App from "./App.vue";
+import "./assets/css/input.css";
 import PiniaConfig from "./PiniaConfig";
+import router from "./router";
 
 const app = createApp(App);
 

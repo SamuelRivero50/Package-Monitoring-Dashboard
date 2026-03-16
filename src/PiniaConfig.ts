@@ -4,10 +4,10 @@ import { createPinia, type StateTree } from "pinia";
 import { watch } from "vue";
 
 // internal imports
-import type { SystemSettingInterface } from "@/interfaces/SystemSettingInterface";
 import { packageLogSeeder } from "@/seeders/packagelogseeder";
 import { packageSeeder } from "@/seeders/packageseeder";
 import { settingsSeeder } from "@/seeders/settingsseeder";
+import type { SystemSettingInterface } from "@/interfaces/SystemSettingInterface";
 import { userSeeder } from "@/seeders/userseeder";
 import { warehouseSeeder } from "@/seeders/warehouseseeder";
 

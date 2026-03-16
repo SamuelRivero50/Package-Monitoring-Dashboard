@@ -6,11 +6,11 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 
 // internal imports
+import { ChartUtils } from "@/utils/ChartUtils";
 import StatusBadge from "@/components/shared/StatusBadge.vue";
 import { PackageService } from "@/services/PackageService";
 import { UserService } from "@/services/UserService";
 import { WarehouseService } from "@/services/WarehouseService";
-import { ChartUtils } from "@/utils/ChartUtils";
 
 const packages = computed(() => PackageService.getPackages());
 const warehouses = computed(() => WarehouseService.getWarehouses());

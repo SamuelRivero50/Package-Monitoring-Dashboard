@@ -5,10 +5,10 @@ import type { Chart } from "chart.js";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 // internal imports
-import { WarehouseService } from "@/services/WarehouseService";
 import { ChartUtils } from "@/utils/ChartUtils";
 import LeafletMap from "@/components/warehouses/LeafletMap.vue";
 import type { MapRoute } from "@/components/warehouses/LeafletMap.vue";
+import { WarehouseService } from "@/services/WarehouseService";
 
 const warehouses = WarehouseService.getWarehouses();
 const filteredWarehouses = ref(warehouses);

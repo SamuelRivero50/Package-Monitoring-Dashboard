@@ -4,12 +4,10 @@
  * @description Reusable Leaflet map with canvas-based comet arcs animating along curved Bezier routes.
  */
 
-// framework
-import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
-
-// third-party
+// external imports
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
 
 interface MapMarker {
   id: string

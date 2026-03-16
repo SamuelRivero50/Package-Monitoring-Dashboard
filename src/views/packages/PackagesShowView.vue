@@ -6,8 +6,8 @@ import { useRoute, useRouter } from "vue-router";
 
 // internal imports
 import PackageEvents from "@/components/packages/PackageEvents.vue";
-import StatusBadge from "@/components/shared/StatusBadge.vue";
 import { PackageService } from "@/services/PackageService";
+import StatusBadge from "@/components/shared/StatusBadge.vue";
 import { WarehouseService } from "@/services/WarehouseService";
 
 const route = useRoute();
