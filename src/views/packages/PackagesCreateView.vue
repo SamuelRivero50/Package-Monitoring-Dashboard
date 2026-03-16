@@ -6,6 +6,7 @@ import { useRoute, useRouter } from "vue-router";
 
 // internal imports
 import type { CreatePackageDTO } from "@/dtos/packages/CreatePackageDTO";
+import { AuthService } from "@/services/AuthService";
 import { PackageService } from "@/services/PackageService";
 import { WarehouseService } from "@/services/WarehouseService";
 
@@ -38,6 +39,7 @@ function closeCreateView(): void {
 
 function submitForm(): void {
   const newPackage: CreatePackageDTO = {
+    userId: AuthService.getCurrentUser()?.id ?? 1,
     description: description.value,
     status: status.value,
     price: price.value,

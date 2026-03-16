@@ -1,4 +1,4 @@
-/** @author David Hdez */
+/** @author David Hdez, Juan Andrés Young */
 // internal imports
 import type { PackageLogInterface } from "@/interfaces/PackageLogInterface";
 

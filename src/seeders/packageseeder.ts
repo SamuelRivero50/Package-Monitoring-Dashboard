@@ -1,10 +1,11 @@
-/** @author David Hdez */
+/** @author David Hdez, Juan Andrés Young */
 // internal imports
 import type { PackageInterface } from "@/interfaces/PackageInterface";
 
 export const packageSeeder: PackageInterface[] = [
   {
     id: 1,
+    userId: 1,
     description: "Industrial Pump Spare Parts",
     status: "In Transit",
     warehouseId: 1,
@@ -14,6 +15,7 @@ export const packageSeeder: PackageInterface[] = [
   },
   {
     id: 2,
+    userId: 2,
     description: "Solar Panel Modules (x20)",
     status: "At Warehouse",
     warehouseId: 2,
@@ -23,6 +25,7 @@ export const packageSeeder: PackageInterface[] = [
   },
   {
     id: 3,
+    userId: 3,
     description: "Server Rack Components",
     status: "Delivered",
     warehouseId: 3,
@@ -32,6 +35,7 @@ export const packageSeeder: PackageInterface[] = [
   },
   {
     id: 4,
+    userId: 4,
     description: "Medical Supply Box",
     status: "Pending",
     warehouseId: 4,
@@ -41,6 +45,7 @@ export const packageSeeder: PackageInterface[] = [
   },
   {
     id: 5,
+    userId: 5,
     description: "Fiber Optic Panels",
     status: "Exception",
     warehouseId: 2,

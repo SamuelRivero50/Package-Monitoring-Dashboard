@@ -6,8 +6,9 @@ import { useRoute, useRouter } from "vue-router";
 
 // internal imports
 import PackageEvents from "@/components/packages/PackageEvents.vue";
-import { PackageService } from "@/services/PackageService";
 import StatusBadge from "@/components/shared/StatusBadge.vue";
+import { PackageService } from "@/services/PackageService";
+import { UserService } from "@/services/UserService";
 import { WarehouseService } from "@/services/WarehouseService";
 
 const route = useRoute();
@@ -17,6 +18,7 @@ const packageId = Number(route.params.id);
 
 const pkg = PackageService.getPackageById(packageId);
 const warehouse = pkg ? WarehouseService.getWarehouseById(pkg.warehouseId) : undefined;
+const owner = pkg ? UserService.getUserById(pkg.userId) : undefined;
 const warehouses = WarehouseService.getWarehouses();
 
 const editMode = ref(false);
@@ -138,6 +140,12 @@ function deletePackage(): void {
         Package Information
       </h3>
       <div class="space-y-3">
+        <div class="flex justify-between border-b border-wire-subtle pb-3">
+          <span class="text-soft">Owner</span>
+          <span class="font-medium text-body">{{
+            owner?.name ?? "Unknown User"
+          }}</span>
+        </div>
         <div class="flex justify-between border-b border-wire-subtle pb-3">
           <span class="text-soft">Description</span>
           <span class="font-medium text-body">{{

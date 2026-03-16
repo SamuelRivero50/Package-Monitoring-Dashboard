@@ -6,15 +6,22 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 
 // internal imports
-import { ChartUtils } from "@/utils/ChartUtils";
 import PackageEvents from "@/components/packages/PackageEvents.vue";
-import { PackageService } from "@/services/PackageService";
 import StatusBadge from "@/components/shared/StatusBadge.vue";
+import { AuthService } from "@/services/AuthService";
+import { PackageService } from "@/services/PackageService";
+import { UserService } from "@/services/UserService";
 import { WarehouseService } from "@/services/WarehouseService";
+import { ChartUtils } from "@/utils/ChartUtils";
 
 const route = useRoute();
+const currentUser = AuthService.getCurrentUser();
 
-const packages = computed(() => PackageService.getPackages());
+const packages = computed(() => {
+  const all = PackageService.getPackages();
+  if (AuthService.isAdmin()) return all;
+  return all.filter((pkg) => pkg.userId === currentUser?.id);
+});
 const filteredPackages = ref(packages.value);
 
 // selectors
@@ -48,6 +55,10 @@ function getWarehouseName(warehouseId: number): string {
   return (
     WarehouseService.getWarehouseById(warehouseId)?.name ?? "Unknown Warehouse"
   );
+}
+
+function getUserName(userId: number): string {
+  return UserService.getUserById(userId)?.name ?? "Unknown User";
 }
 
 function toggleHistory(packageId: number): void {
@@ -173,6 +184,7 @@ onUnmounted(() => {
           >
             <th class="px-6 py-4">ID</th>
             <th class="px-6 py-4">Description</th>
+            <th class="px-6 py-4">Owner</th>
             <th class="px-6 py-4">Warehouse</th>
             <th class="px-6 py-4">Status</th>
             <th class="px-6 py-4">Logs</th>
@@ -190,6 +202,9 @@ onUnmounted(() => {
               </td>
               <td class="px-6 py-4 text-sm font-medium text-body">
                 {{ pkg.description }}
+              </td>
+              <td class="px-6 py-4 text-sm text-soft">
+                {{ getUserName(pkg.userId) }}
               </td>
               <td class="px-6 py-4 text-sm text-soft">
                 {{ getWarehouseName(pkg.warehouseId) }}
