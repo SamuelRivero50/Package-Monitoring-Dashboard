@@ -2,4 +2,4 @@
 // internal imports
 import type { PackageInterface } from "@/interfaces/PackageInterface";
 
-export type CreatePackageDTO = Omit<PackageInterface, "id">;
+export type CreatePackageDTO = Omit<PackageInterface, "id" | "createdAt" | "updatedAt">;

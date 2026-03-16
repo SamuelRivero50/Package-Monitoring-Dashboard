@@ -11,7 +11,6 @@ import StatusBadge from "@/components/shared/StatusBadge.vue";
 import { PackageService } from "@/services/PackageService";
 import { WarehouseService } from "@/services/WarehouseService";
 import { ChartUtils } from "@/utils/ChartUtils";
-import { formatWeight } from "@/utils/formatters";
 
 const route = useRoute();
 
@@ -172,10 +171,9 @@ onUnmounted(() => {
           <tr
             class="text-xs font-bold uppercase tracking-wider text-faded"
           >
-            <th class="px-6 py-4">Tracking #</th>
+            <th class="px-6 py-4">ID</th>
             <th class="px-6 py-4">Description</th>
             <th class="px-6 py-4">Warehouse</th>
-            <th class="px-6 py-4">Weight</th>
             <th class="px-6 py-4">Status</th>
             <th class="px-6 py-4">Logs</th>
           </tr>
@@ -187,7 +185,7 @@ onUnmounted(() => {
                 <RouterLink
                   :to="`/packages/${pkg.id}`"
                   class="hover:underline"
-                  >{{ pkg.trackingNumber }}</RouterLink
+                  >#{{ pkg.id }}</RouterLink
                 >
               </td>
               <td class="px-6 py-4 text-sm font-medium text-body">
@@ -195,9 +193,6 @@ onUnmounted(() => {
               </td>
               <td class="px-6 py-4 text-sm text-soft">
                 {{ getWarehouseName(pkg.warehouseId) }}
-              </td>
-              <td class="px-6 py-4 text-sm text-soft">
-                {{ formatWeight(pkg.weight) }}
               </td>
               <td class="px-6 py-4">
                 <StatusBadge :status="pkg.status" />
@@ -229,7 +224,7 @@ onUnmounted(() => {
 
             <!-- Expanded history panel -->
             <tr v-if="expandedPackageId === pkg.id">
-              <td colspan="6" class="px-6 py-0">
+              <td colspan="5" class="px-6 py-0">
                 <div class="py-4 border-t border-primary/20">
                   <PackageEvents :package-id="pkg.id" />
                 </div>

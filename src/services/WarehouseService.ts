@@ -9,11 +9,6 @@ export class WarehouseService {
     return useWarehouseStore().warehouses;
   }
 
-  static getUniqueStatuses(): string[] {
-    const warehouses = this.getWarehouses();
-    return Array.from(new Set(warehouses.map((w) => w.status)));
-  }
-
   static getUniqueLocations(): string[] {
     const warehouses = this.getWarehouses();
     return Array.from(new Set(warehouses.map((w) => w.location)));

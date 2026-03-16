@@ -15,6 +15,7 @@ const name = ref("");
 const email = ref("");
 const password = ref("");
 const role = ref("User");
+const avatarUrl = ref("");
 const successMessage = ref("");
 
 // edit state
@@ -22,7 +23,7 @@ const editingUserId = ref<number | null>(null);
 const editName = ref("");
 const editEmail = ref("");
 const editRole = ref("");
-const editStatus = ref("");
+const editAvatarUrl = ref("");
 
 function submitForm(): void {
   const newUser: CreateUserDTO = {
@@ -30,7 +31,7 @@ function submitForm(): void {
     email: email.value,
     password: password.value,
     role: role.value,
-    status: "Active",
+    avatarUrl: avatarUrl.value || `https://i.pravatar.cc/150?u=${email.value}`,
   };
 
   UserService.createUser(newUser);
@@ -39,6 +40,7 @@ function submitForm(): void {
   email.value = "";
   password.value = "";
   role.value = "User";
+  avatarUrl.value = "";
   showForm.value = false;
 }
 
@@ -48,7 +50,7 @@ function startEdit(userId: number): void {
   editName.value = user.name;
   editEmail.value = user.email;
   editRole.value = user.role;
-  editStatus.value = user.status;
+  editAvatarUrl.value = user.avatarUrl;
   editingUserId.value = userId;
 }
 
@@ -57,7 +59,7 @@ function saveEdit(userId: number): void {
     name: editName.value,
     email: editEmail.value,
     role: editRole.value,
-    status: editStatus.value,
+    avatarUrl: editAvatarUrl.value || `https://i.pravatar.cc/150?u=${editEmail.value}`,
   });
   editingUserId.value = null;
 }
@@ -115,19 +117,6 @@ function deleteUser(userId: number): void {
           </div>
           <div class="p-2 bg-primary/20 rounded-lg text-primary">
             <span class="material-symbols-outlined">shield_person</span>
-          </div>
-        </div>
-      </div>
-      <div class="p-6 rounded-xl border border-wire bg-panel">
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-soft text-sm">Active</p>
-            <h3 class="text-3xl font-bold mt-1 text-body">
-              {{ users.filter((u) => u.status === "Active").length }}
-            </h3>
-          </div>
-          <div class="p-2 bg-users-icon/20 rounded-lg text-users-icon">
-            <span class="material-symbols-outlined">verified_user</span>
           </div>
         </div>
       </div>
@@ -201,6 +190,20 @@ function deleteUser(userId: number): void {
             <option value="User">User</option>
           </select>
         </div>
+        <div class="md:col-span-2">
+          <label
+            class="block text-sm font-semibold text-soft mb-2"
+            for="userAvatarUrl"
+            >Avatar URL (optional)</label
+          >
+          <input
+            v-model="avatarUrl"
+            type="url"
+            id="userAvatarUrl"
+            class="w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="https://i.pravatar.cc/150?u=email (auto-generated if blank)"
+          />
+        </div>
       </div>
       <button
         type="submit"
@@ -223,7 +226,6 @@ function deleteUser(userId: number): void {
           <tr>
             <th class="px-6 py-4">User</th>
             <th class="px-6 py-4">Role</th>
-            <th class="px-6 py-4">Status</th>
             <th class="px-6 py-4">Actions</th>
           </tr>
         </thead>
@@ -247,18 +249,6 @@ function deleteUser(userId: number): void {
               </td>
               <td class="px-6 py-4 text-xs font-bold text-primary">
                 {{ user.role }}
-              </td>
-              <td class="px-6 py-4">
-                <span
-                  class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase"
-                  :class="
-                    user.status === 'Active'
-                      ? 'bg-users-icon/10 text-users-icon border border-users-icon/20'
-                      : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                  "
-                >
-                  {{ user.status }}
-                </span>
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
@@ -312,15 +302,14 @@ function deleteUser(userId: number): void {
                         <option value="User">User</option>
                       </select>
                     </div>
-                    <div>
-                      <label class="block text-xs font-semibold text-soft mb-1">Status</label>
-                      <select
-                        v-model="editStatus"
-                        class="select-control w-full bg-sheet border border-wire rounded-lg p-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
-                      >
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                      </select>
+                    <div class="md:col-span-2">
+                      <label class="block text-xs font-semibold text-soft mb-1">Avatar URL</label>
+                      <input
+                        v-model="editAvatarUrl"
+                        type="url"
+                        class="w-full bg-sheet border border-wire rounded-lg p-2.5 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
+                        placeholder="https://i.pravatar.cc/150?u=email"
+                      />
                     </div>
                   </div>
                   <div class="flex gap-3">

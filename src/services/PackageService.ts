@@ -53,16 +53,19 @@ export class PackageService {
       : fallbackWarehouseId;
 
     const id = usePackageStore().packages.length + 1;
+    const now = new Date();
     usePackageStore().packages.push({
       id,
       ...pkg,
       warehouseId: assignedWarehouseId,
+      createdAt: now,
+      updatedAt: now,
     });
   }
 
   static updatePackage(id: number, data: Partial<CreatePackageDTO>): void {
     const pkg = usePackageStore().packages.find((p) => p.id === id);
-    if (pkg) Object.assign(pkg, data);
+    if (pkg) Object.assign(pkg, data, { updatedAt: new Date() });
   }
 
   static deletePackage(id: number): void {

@@ -9,7 +9,8 @@ export const warehouseSeeder: WarehouseInterface[] = [
     location: "Chicago, IL",
     capacity: 5000,
     currentLoad: 4250,
-    status: "Active",
+    managerName: "Robert Chen",
+    imageUrl: "https://picsum.photos/seed/1/400/200",
   },
   {
     id: 2,
@@ -17,7 +18,8 @@ export const warehouseSeeder: WarehouseInterface[] = [
     location: "Los Angeles, CA",
     capacity: 3500,
     currentLoad: 2170,
-    status: "Active",
+    managerName: "Sandra Lee",
+    imageUrl: "https://picsum.photos/seed/2/400/200",
   },
   {
     id: 3,
@@ -25,7 +27,8 @@ export const warehouseSeeder: WarehouseInterface[] = [
     location: "Newark, NJ",
     capacity: 4200,
     currentLoad: 3948,
-    status: "Active",
+    managerName: "Marcus Williams",
+    imageUrl: "https://picsum.photos/seed/3/400/200",
   },
   {
     id: 4,
@@ -33,6 +36,7 @@ export const warehouseSeeder: WarehouseInterface[] = [
     location: "Atlanta, GA",
     capacity: 2800,
     currentLoad: 1176,
-    status: "Maintenance",
+    managerName: "Diana Torres",
+    imageUrl: "https://picsum.photos/seed/4/400/200",
   },
 ];

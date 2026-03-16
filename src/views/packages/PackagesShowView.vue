@@ -9,7 +9,6 @@ import PackageEvents from "@/components/packages/PackageEvents.vue";
 import StatusBadge from "@/components/shared/StatusBadge.vue";
 import { PackageService } from "@/services/PackageService";
 import { WarehouseService } from "@/services/WarehouseService";
-import { formatWeight } from "@/utils/formatters";
 
 const route = useRoute();
 const router = useRouter();
@@ -23,14 +22,12 @@ const warehouses = WarehouseService.getWarehouses();
 const editMode = ref(false);
 const editStatus = ref(pkg?.status ?? "");
 const editDescription = ref(pkg?.description ?? "");
-const editWeight = ref(pkg?.weight ?? 0);
 const editWarehouseId = ref(pkg?.warehouseId ?? 0);
 
 // Reset edit fields from persisted package state to avoid stale form values.
 function startEdit(): void {
   editStatus.value = pkg?.status ?? "";
   editDescription.value = pkg?.description ?? "";
-  editWeight.value = pkg?.weight ?? 0;
   editWarehouseId.value = pkg?.warehouseId ?? 0;
   editMode.value = true;
 }
@@ -40,7 +37,6 @@ function saveEdit(): void {
   PackageService.updatePackage(packageId, {
     status: editStatus.value,
     description: editDescription.value,
-    weight: editWeight.value,
     warehouseId: editWarehouseId.value,
   });
   editMode.value = false;
@@ -61,9 +57,6 @@ function deletePackage(): void {
         class="flex flex-col md:flex-row md:items-center justify-between gap-6"
       >
         <div>
-          <p class="text-packages font-mono text-sm mb-2">
-            {{ pkg.trackingNumber }}
-          </p>
           <h2 class="text-2xl font-black text-body">
             {{ pkg.description }}
           </h2>
@@ -114,16 +107,6 @@ function deletePackage(): void {
           />
         </div>
         <div>
-          <label class="block text-sm font-semibold text-soft mb-2">Weight (kg)</label>
-          <input
-            v-model.number="editWeight"
-            type="number"
-            min="0"
-            step="0.1"
-            class="w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
-        <div>
           <label class="block text-sm font-semibold text-soft mb-2">Warehouse</label>
           <select
             v-model.number="editWarehouseId"
@@ -156,12 +139,6 @@ function deletePackage(): void {
       </h3>
       <div class="space-y-3">
         <div class="flex justify-between border-b border-wire-subtle pb-3">
-          <span class="text-soft">Tracking Number</span>
-          <span class="font-mono font-medium text-packages">{{
-            pkg.trackingNumber
-          }}</span>
-        </div>
-        <div class="flex justify-between border-b border-wire-subtle pb-3">
           <span class="text-soft">Description</span>
           <span class="font-medium text-body">{{
             pkg.description
@@ -171,12 +148,6 @@ function deletePackage(): void {
           <span class="text-soft">Warehouse</span>
           <span class="font-medium text-body">{{
             warehouse?.name ?? "Unknown Warehouse"
-          }}</span>
-        </div>
-        <div class="flex justify-between border-b border-wire-subtle pb-3">
-          <span class="text-soft">Weight</span>
-          <span class="font-medium text-body">{{
-            formatWeight(pkg.weight)
           }}</span>
         </div>
         <div class="flex justify-between">

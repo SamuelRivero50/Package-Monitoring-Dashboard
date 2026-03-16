@@ -9,7 +9,7 @@ export const userSeeder: UserInterface[] = [
     email: "alex@packtrack.io",
     password: "admin123",
     role: "Admin",
-    status: "Active",
+    avatarUrl: "https://i.pravatar.cc/150?u=alex@packtrack.io",
   },
   {
     id: 2,
@@ -17,7 +17,7 @@ export const userSeeder: UserInterface[] = [
     email: "maria@packtrack.io",
     password: "maria123",
     role: "User",
-    status: "Active",
+    avatarUrl: "https://i.pravatar.cc/150?u=maria@packtrack.io",
   },
   {
     id: 3,
@@ -25,7 +25,7 @@ export const userSeeder: UserInterface[] = [
     email: "john@packtrack.io",
     password: "john123",
     role: "User",
-    status: "Active",
+    avatarUrl: "https://i.pravatar.cc/150?u=john@packtrack.io",
   },
   {
     id: 4,
@@ -33,6 +33,6 @@ export const userSeeder: UserInterface[] = [
     email: "elena@packtrack.io",
     password: "elena123",
     role: "User",
-    status: "Inactive",
+    avatarUrl: "https://i.pravatar.cc/150?u=elena@packtrack.io",
   },
 ];

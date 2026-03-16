@@ -5,5 +5,6 @@ export interface WarehouseInterface {
   location: string;
   capacity: number;
   currentLoad: number;
-  status: string;
+  managerName: string;
+  imageUrl: string;
 }

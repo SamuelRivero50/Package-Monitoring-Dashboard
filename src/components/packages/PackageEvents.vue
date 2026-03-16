@@ -29,9 +29,15 @@ const defaultToWarehouseId = computed<number>(
 
 const fromWarehouseId = ref<number>(defaultFromWarehouseId.value);
 const toWarehouseId = ref<number>(defaultToWarehouseId.value);
+const newPreviousStatus = ref<string>("");
+const newNewStatus = ref<string>("");
+const newDescription = ref<string>("");
 const editingEventId = ref<number | null>(null);
 const editFromWarehouseId = ref<number>(defaultFromWarehouseId.value);
 const editToWarehouseId = ref<number>(defaultToWarehouseId.value);
+const editPreviousStatus = ref<string>("");
+const editNewStatus = ref<string>("");
+const editDescription = ref<string>("");
 const errorMessage = ref<string>("");
 
 // Keep create/edit actions disabled when route constraints are not met.
@@ -53,6 +59,9 @@ function getRouteLabel(event: TrackingEventInterface): string {
 function resetCreateForm(): void {
   fromWarehouseId.value = defaultFromWarehouseId.value;
   toWarehouseId.value = defaultToWarehouseId.value;
+  newPreviousStatus.value = "";
+  newNewStatus.value = "";
+  newDescription.value = "";
 }
 
 function addTrackingEvent(): void {
@@ -65,6 +74,9 @@ function addTrackingEvent(): void {
     packageId: props.packageId,
     fromWarehouseId: fromWarehouseId.value,
     toWarehouseId: toWarehouseId.value,
+    previousStatus: newPreviousStatus.value,
+    newStatus: newNewStatus.value,
+    description: newDescription.value,
   };
 
   errorMessage.value = "";
@@ -82,6 +94,9 @@ function startEdit(event: TrackingEventInterface): void {
   editingEventId.value = event.id;
   editFromWarehouseId.value = event.fromWarehouseId;
   editToWarehouseId.value = event.toWarehouseId;
+  editPreviousStatus.value = event.previousStatus ?? "";
+  editNewStatus.value = event.newStatus ?? "";
+  editDescription.value = event.description ?? "";
   errorMessage.value = "";
 }
 
@@ -101,6 +116,9 @@ function saveEdit(eventId: number): void {
     TrackingEventService.updateTrackingEvent(eventId, {
       fromWarehouseId: editFromWarehouseId.value,
       toWarehouseId: editToWarehouseId.value,
+      previousStatus: editPreviousStatus.value,
+      newStatus: editNewStatus.value,
+      description: editDescription.value,
     });
     editingEventId.value = null;
   } catch (error: unknown) {
@@ -141,6 +159,37 @@ function saveEdit(eventId: number): void {
             </option>
           </select>
         </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-soft mb-2">Previous Status</label>
+          <input
+            v-model="newPreviousStatus"
+            type="text"
+            class="w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="e.g. Pending"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-soft mb-2">New Status</label>
+          <input
+            v-model="newNewStatus"
+            type="text"
+            class="w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="e.g. In Transit"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-soft mb-2">Description</label>
+        <input
+          v-model="newDescription"
+          type="text"
+          class="w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
+          placeholder="Event details..."
+        />
       </div>
 
       <button
@@ -217,6 +266,36 @@ function saveEdit(eventId: number): void {
                   </option>
                 </select>
               </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-soft mb-2">Previous Status</label>
+                <input
+                  v-model="editPreviousStatus"
+                  type="text"
+                  class="w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="e.g. Pending"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-soft mb-2">New Status</label>
+                <input
+                  v-model="editNewStatus"
+                  type="text"
+                  class="w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="e.g. In Transit"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-soft mb-2">Description</label>
+              <input
+                v-model="editDescription"
+                type="text"
+                class="w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Event details..."
+              />
             </div>
 
             <div class="flex gap-2">
@@ -238,12 +317,21 @@ function saveEdit(eventId: number): void {
             </div>
           </div>
 
-          <div class="flex items-center gap-4 text-xs text-faded">
-            <span class="flex items-center gap-1">
-              <span class="material-symbols-outlined text-xs">swap_horiz</span>
-              Warehouse transfer
-            </span>
-            <span v-if="event.createdAt">{{ formatDateTime(event.createdAt) }}</span>
+          <div class="space-y-1.5 mt-1">
+            <div v-if="event.previousStatus || event.newStatus" class="flex items-center gap-2 text-xs">
+              <span class="text-faded">Status:</span>
+              <span v-if="event.previousStatus" class="text-soft">{{ event.previousStatus }}</span>
+              <span v-if="event.previousStatus && event.newStatus" class="material-symbols-outlined text-xs text-faded">arrow_forward</span>
+              <span v-if="event.newStatus" class="text-primary font-semibold">{{ event.newStatus }}</span>
+            </div>
+            <p v-if="event.description" class="text-xs text-soft">{{ event.description }}</p>
+            <div class="flex items-center gap-4 text-xs text-faded">
+              <span class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs">swap_horiz</span>
+                Warehouse transfer
+              </span>
+              <span v-if="event.timestamp">{{ formatDateTime(event.timestamp) }}</span>
+            </div>
           </div>
         </div>
       </div>

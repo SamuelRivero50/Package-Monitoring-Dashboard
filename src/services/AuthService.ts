@@ -49,7 +49,7 @@ export class AuthService {
       email: normalizedEmail,
       password: trimmedPassword,
       role: "User",
-      status: "Active",
+      avatarUrl: `https://i.pravatar.cc/150?u=${normalizedEmail}`,
     };
 
     useUserStore().users.push(newUser);

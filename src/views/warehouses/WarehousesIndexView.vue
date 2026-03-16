@@ -14,22 +14,16 @@ const warehouses = WarehouseService.getWarehouses();
 const filteredWarehouses = ref(warehouses);
 
 // selectors
-const selectorStatuses = WarehouseService.getUniqueStatuses();
 const selectorLocations = WarehouseService.getUniqueLocations();
-const selectedStatus = ref("");
 const selectedLocation = ref("");
 
 function applyFilters(): void {
   filteredWarehouses.value = warehouses.filter((wh) => {
-    const matchStatus =
-      !selectedStatus.value || wh.status === selectedStatus.value;
-    const matchLocation =
-      !selectedLocation.value || wh.location === selectedLocation.value;
-    return matchStatus && matchLocation;
+    return !selectedLocation.value || wh.location === selectedLocation.value;
   });
 }
 
-watch([selectedStatus, selectedLocation], () => applyFilters());
+watch([selectedLocation], () => applyFilters());
 
 // map
 const CITY_COORDS: Record<string, [number, number]> = {
@@ -50,7 +44,7 @@ const warehouseMarkers = computed(() =>
         label: wh.name,
         lat: coords[0],
         lng: coords[1],
-        popupHtml: `<b>${wh.name}</b><br>${wh.location}<br>Capacity: ${pct}% — ${wh.status}`,
+        popupHtml: `<b>${wh.name}</b><br>${wh.location}<br>Capacity: ${pct}%`,
       };
     })
     .filter((m): m is NonNullable<typeof m> => m !== null),
@@ -97,16 +91,6 @@ onUnmounted(() => {
     <!-- Filters -->
     <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
       <select
-        v-model="selectedStatus"
-        class="select-control bg-panel border border-wire rounded-xl px-4 py-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
-      >
-        <option value="">All Statuses</option>
-        <option v-for="s in selectorStatuses" :key="s" :value="s">
-          {{ s }}
-        </option>
-      </select>
-
-      <select
         v-model="selectedLocation"
         class="select-control bg-panel border border-wire rounded-xl px-4 py-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
       >
@@ -146,10 +130,10 @@ onUnmounted(() => {
           >
             <th class="px-6 py-4">Name</th>
             <th class="px-6 py-4">Location</th>
+            <th class="px-6 py-4">Manager</th>
             <th class="px-6 py-4">Capacity</th>
             <th class="px-6 py-4">Load</th>
             <th class="px-6 py-4">Usage</th>
-            <th class="px-6 py-4">Status</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-wire-subtle">
@@ -179,6 +163,9 @@ onUnmounted(() => {
               </span>
             </td>
             <td class="px-6 py-4 text-sm text-soft">
+              {{ wh.managerName }}
+            </td>
+            <td class="px-6 py-4 text-sm text-soft">
               {{ wh.capacity.toLocaleString() }}
             </td>
             <td class="px-6 py-4 text-sm text-soft">
@@ -204,18 +191,6 @@ onUnmounted(() => {
                   >{{ Math.round((wh.currentLoad / wh.capacity) * 100) }}%</span
                 >
               </div>
-            </td>
-            <td class="px-6 py-4">
-              <span
-                class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
-                :class="
-                  wh.status === 'Active'
-                    ? 'bg-users-icon/10 text-users-icon border border-users-icon/20'
-                    : 'bg-companies/10 text-companies border border-companies/20'
-                "
-              >
-                {{ wh.status }}
-              </span>
             </td>
           </tr>
         </tbody>

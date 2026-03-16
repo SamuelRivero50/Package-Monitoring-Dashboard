@@ -1,7 +1,10 @@
 /** @author David Hdez */
 export interface TrackingEventInterface {
   id: number;
-  createdAt: Date;
+  timestamp: Date;
+  previousStatus?: string;
+  newStatus?: string;
+  description?: string;
 
   // relations
   packageId: number;

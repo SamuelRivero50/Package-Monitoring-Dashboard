@@ -14,10 +14,9 @@ const router = useRouter();
 
 const warehouses = WarehouseService.getWarehouses();
 
-const trackingNumber = ref("");
 const description = ref("");
 const status = ref("Pending");
-const weight = ref(0);
+const price = ref(0);
 const warehouseId = ref<number>(warehouses[0]?.id ?? 1);
 const successMessage = ref("");
 
@@ -39,19 +38,17 @@ function closeCreateView(): void {
 
 function submitForm(): void {
   const newPackage: CreatePackageDTO = {
-    trackingNumber: trackingNumber.value,
     description: description.value,
     status: status.value,
-    weight: weight.value,
+    price: price.value,
     warehouseId: warehouseId.value,
   };
 
   PackageService.createPackage(newPackage);
   successMessage.value = "Package created successfully!";
-  trackingNumber.value = "";
   description.value = "";
   status.value = "Pending";
-  weight.value = 0;
+  price.value = 0;
   warehouseId.value = warehouses[0]?.id ?? 1;
 }
 </script>
@@ -76,22 +73,6 @@ function submitForm(): void {
       class="bg-panel border border-wire rounded-xl p-8 space-y-6"
       @submit.prevent="submitForm"
     >
-      <div>
-        <label
-          class="block text-sm font-semibold text-soft mb-2"
-          for="trackingNumber"
-          >Tracking Number</label
-        >
-        <input
-          v-model="trackingNumber"
-          type="text"
-          id="trackingNumber"
-          class="w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
-          required
-          placeholder="TRK-XXXX-XX"
-        />
-      </div>
-
       <div>
         <label
           class="block text-sm font-semibold text-soft mb-2"
@@ -133,18 +114,18 @@ function submitForm(): void {
       <div>
         <label
           class="block text-sm font-semibold text-soft mb-2"
-          for="weight"
-          >Weight (kg)</label
+          for="price"
+          >Price (USD)</label
         >
         <input
-          v-model.number="weight"
+          v-model.number="price"
           type="number"
           min="0"
-          step="0.1"
-          id="weight"
+          step="0.01"
+          id="price"
           class="w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
           required
-          placeholder="0.0"
+          placeholder="0.00"
         />
       </div>
 

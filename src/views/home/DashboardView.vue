@@ -164,7 +164,7 @@ onUnmounted(() => {
               class="hover:bg-sheet/50 transition-colors"
             >
               <td class="px-6 py-4 font-mono text-packages">
-                {{ pkg.trackingNumber }}
+                #{{ pkg.id }}
               </td>
               <td class="px-6 py-4">
                 <StatusBadge :status="pkg.status" />
@@ -207,16 +207,6 @@ onUnmounted(() => {
             >
               {{ wh.name }}
             </h4>
-            <span
-              class="px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase"
-              :class="
-                wh.status === 'Active'
-                  ? 'bg-users-icon/10 text-users-icon'
-                  : 'bg-companies/10 text-companies'
-              "
-            >
-              {{ wh.status }}
-            </span>
           </div>
           <p class="text-faded text-xs flex items-center gap-1">
             <span class="material-symbols-outlined text-xs">location_on</span

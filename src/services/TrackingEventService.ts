@@ -24,8 +24,29 @@ export class TrackingEventService {
         eventRecord.toWarehouseId = defaultToWarehouseId;
       }
 
+      // Migrate legacy createdAt field to timestamp.
+      if (eventRecord.createdAt !== undefined && eventRecord.timestamp === undefined) {
+        eventRecord.timestamp = eventRecord.createdAt;
+        delete eventRecord.createdAt;
+      }
+
+      if (eventRecord.timestamp === undefined) {
+        eventRecord.timestamp = new Date();
+      }
+
+      if (eventRecord.previousStatus === undefined) {
+        eventRecord.previousStatus = "";
+      }
+
+      if (eventRecord.newStatus === undefined) {
+        eventRecord.newStatus = "";
+      }
+
+      if (eventRecord.description === undefined) {
+        eventRecord.description = "";
+      }
+
       delete eventRecord.location;
-      delete eventRecord.description;
     });
   }
 
@@ -50,7 +71,7 @@ export class TrackingEventService {
     useTrackingEventStore().trackingEvents.push({
       id,
       ...event,
-      createdAt: new Date(),
+      timestamp: new Date(),
     });
   }
 
