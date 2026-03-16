@@ -4,16 +4,16 @@ import { createRouter, createWebHistory } from "vue-router";
 
 // internal imports
 import { AuthService } from "@/services/AuthService";
-import DashboardView from "@/views/DashboardView.vue";
-import HomeView from "@/views/HomeView.vue";
-import LoginView from "@/views/LoginView.vue";
-import PackagesCreateView from "@/views/PackagesCreateView.vue";
-import PackagesIndexView from "@/views/PackagesIndexView.vue";
-import PackagesShowView from "@/views/PackagesShowView.vue";
-import SettingsView from "@/views/SettingsView.vue";
-import SignUpView from "@/views/SignupView.vue";
-import UsersIndexView from "@/views/UsersIndexView.vue";
-import WarehousesIndexView from "@/views/WarehousesIndexView.vue";
+import DashboardView from "@/views/home/DashboardView.vue";
+import HomeView from "@/views/home/HomeView.vue";
+import LoginView from "@/views/auth/LoginView.vue";
+import PackagesCreateView from "@/views/packages/PackagesCreateView.vue";
+import PackagesIndexView from "@/views/packages/PackagesIndexView.vue";
+import PackagesShowView from "@/views/packages/PackagesShowView.vue";
+import SettingsView from "@/views/settings/SettingsView.vue";
+import SignUpView from "@/views/auth/SignupView.vue";
+import UsersIndexView from "@/views/users/UsersIndexView.vue";
+import WarehousesIndexView from "@/views/warehouses/WarehousesIndexView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

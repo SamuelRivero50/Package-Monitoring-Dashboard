@@ -5,6 +5,5 @@ export interface PackageInterface {
   description: string;
   status: string;
   weight: number;
-  carrier: string;
   warehouseId: number;
 }

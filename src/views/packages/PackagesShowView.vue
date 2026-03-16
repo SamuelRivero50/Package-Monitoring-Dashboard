@@ -5,14 +5,15 @@ import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 // internal imports
-import PackageEvents from "@/components/PackageEvents.vue";
-import StatusBadge from "@/components/StatusBadge.vue";
+import PackageEvents from "@/components/packages/PackageEvents.vue";
+import StatusBadge from "@/components/shared/StatusBadge.vue";
 import { PackageService } from "@/services/PackageService";
 import { WarehouseService } from "@/services/WarehouseService";
 import { formatWeight } from "@/utils/formatters";
 
 const route = useRoute();
 const router = useRouter();
+// Normalize route param once to keep strongly typed service calls.
 const packageId = Number(route.params.id);
 
 const pkg = PackageService.getPackageById(packageId);
@@ -22,30 +23,30 @@ const warehouses = WarehouseService.getWarehouses();
 const editMode = ref(false);
 const editStatus = ref(pkg?.status ?? "");
 const editDescription = ref(pkg?.description ?? "");
-const editCarrier = ref(pkg?.carrier ?? "");
 const editWeight = ref(pkg?.weight ?? 0);
 const editWarehouseId = ref(pkg?.warehouseId ?? 0);
 
+// Reset edit fields from persisted package state to avoid stale form values.
 function startEdit(): void {
   editStatus.value = pkg?.status ?? "";
   editDescription.value = pkg?.description ?? "";
-  editCarrier.value = pkg?.carrier ?? "";
   editWeight.value = pkg?.weight ?? 0;
   editWarehouseId.value = pkg?.warehouseId ?? 0;
   editMode.value = true;
 }
 
+// Delegate mutations to the service to keep business rules out of the view.
 function saveEdit(): void {
   PackageService.updatePackage(packageId, {
     status: editStatus.value,
     description: editDescription.value,
-    carrier: editCarrier.value,
     weight: editWeight.value,
     warehouseId: editWarehouseId.value,
   });
   editMode.value = false;
 }
 
+// Navigate back to the list after deletion to avoid stale detail routes.
 function deletePackage(): void {
   PackageService.deletePackage(packageId);
   router.push("/packages");
@@ -113,14 +114,6 @@ function deletePackage(): void {
           />
         </div>
         <div>
-          <label class="block text-sm font-semibold text-soft mb-2">Carrier</label>
-          <input
-            v-model="editCarrier"
-            type="text"
-            class="w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
-        <div>
           <label class="block text-sm font-semibold text-soft mb-2">Weight (kg)</label>
           <input
             v-model.number="editWeight"
@@ -142,7 +135,7 @@ function deletePackage(): void {
       </div>
       <div class="flex gap-3">
         <button
-          class="bg-primary text-base font-bold py-2.5 px-6 rounded-lg text-sm hover:bg-primary-dark transition-all"
+          class="bg-primary font-bold py-2.5 px-6 rounded-lg text-sm hover:bg-primary-dark transition-all"
           @click="saveEdit"
         >
           Save
@@ -173,10 +166,6 @@ function deletePackage(): void {
           <span class="font-medium text-body">{{
             pkg.description
           }}</span>
-        </div>
-        <div class="flex justify-between border-b border-wire-subtle pb-3">
-          <span class="text-soft">Carrier</span>
-          <span class="font-medium text-body">{{ pkg.carrier }}</span>
         </div>
         <div class="flex justify-between border-b border-wire-subtle pb-3">
           <span class="text-soft">Warehouse</span>

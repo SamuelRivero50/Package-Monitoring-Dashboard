@@ -1,6 +1,6 @@
 /** @author David Hdez */
 // internal imports
-import type { CreateUserDTO } from "@/dtos/CreateUserDTO";
+import type { CreateUserDTO } from "@/dtos/users/CreateUserDTO";
 import type { UserInterface } from "@/interfaces/UserInterface";
 import { useUserStore } from "@/stores/userstore";
 

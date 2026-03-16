@@ -1,6 +1,6 @@
 /** @author David Hdez */
 // internal imports
-import type { CreateWarehouseDTO } from "@/dtos/CreateWarehouseDTO";
+import type { CreateWarehouseDTO } from "@/dtos/warehouses/CreateWarehouseDTO";
 import type { WarehouseInterface } from "@/interfaces/WarehouseInterface";
 import { useWarehouseStore } from "@/stores/warehousestore";
 

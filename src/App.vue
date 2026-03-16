@@ -25,6 +25,20 @@ const showUserNotification = computed(
     SettingsService.isUserNotificationEnabled() &&
     userNotificationMessage.value.length > 0,
 );
+
+function isRouteGroupActive(groupName: string): boolean {
+  const currentRouteName = route.name;
+
+  if (typeof currentRouteName !== "string") {
+    return false;
+  }
+
+  return (
+    currentRouteName === groupName ||
+    currentRouteName.startsWith(`${groupName}.`)
+  );
+}
+
 function handleLogout(): void {
   AuthService.logout();
   router.push({ name: "login" });
@@ -62,7 +76,12 @@ function handleLogout(): void {
         <nav class="flex-1 px-4 space-y-1 mt-4">
           <RouterLink
             to="/dashboard"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-soft hover:bg-primary/10 hover:text-primary"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors"
+            :class="
+              isRouteGroupActive('dashboard')
+                ? 'bg-primary/15 text-primary border-primary/30'
+                : 'text-soft border-transparent hover:bg-primary/10 hover:text-primary'
+            "
           >
             <span class="material-symbols-outlined">dashboard</span>
             <span class="text-sm font-medium">Overview</span>
@@ -70,7 +89,12 @@ function handleLogout(): void {
 
           <RouterLink
             to="/packages"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-soft hover:bg-packages/10 hover:text-packages"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors"
+            :class="
+              isRouteGroupActive('packages')
+                ? 'bg-packages/15 text-packages border-packages/30'
+                : 'text-soft border-transparent hover:bg-packages/10 hover:text-packages'
+            "
           >
             <span class="material-symbols-outlined">inventory_2</span>
             <span class="text-sm font-medium">Packages</span>
@@ -78,7 +102,12 @@ function handleLogout(): void {
 
           <RouterLink
             to="/warehouses"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-soft hover:bg-warehouses/10 hover:text-warehouses"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors"
+            :class="
+              isRouteGroupActive('warehouses')
+                ? 'bg-warehouses/15 text-warehouses border-warehouses/30'
+                : 'text-soft border-transparent hover:bg-warehouses/10 hover:text-warehouses'
+            "
           >
             <span class="material-symbols-outlined">warehouse</span>
             <span class="text-sm font-medium">Warehouses</span>
@@ -87,7 +116,12 @@ function handleLogout(): void {
           <RouterLink
             v-if="AuthService.isAdmin()"
             to="/users"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-soft hover:bg-users-icon/10 hover:text-users-icon"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors"
+            :class="
+              isRouteGroupActive('users')
+                ? 'bg-users-icon/15 text-users-icon border-users-icon/30'
+                : 'text-soft border-transparent hover:bg-users-icon/10 hover:text-users-icon'
+            "
           >
             <span class="material-symbols-outlined">group</span>
             <span class="text-sm font-medium">Users</span>
@@ -96,7 +130,12 @@ function handleLogout(): void {
           <RouterLink
             v-if="AuthService.isAdmin()"
             to="/settings"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-soft hover:bg-primary/10 hover:text-primary"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors"
+            :class="
+              isRouteGroupActive('settings')
+                ? 'bg-primary/15 text-primary border-primary/30'
+                : 'text-soft border-transparent hover:bg-primary/10 hover:text-primary'
+            "
           >
             <span class="material-symbols-outlined">settings</span>
             <span class="text-sm font-medium">Settings</span>

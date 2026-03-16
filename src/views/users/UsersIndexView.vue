@@ -4,7 +4,7 @@
 import { ref } from "vue";
 
 // internal imports
-import type { CreateUserDTO } from "@/dtos/CreateUserDTO";
+import type { CreateUserDTO } from "@/dtos/users/CreateUserDTO";
 import { UserService } from "@/services/UserService";
 
 const users = UserService.getUsers();

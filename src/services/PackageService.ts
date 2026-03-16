@@ -1,6 +1,6 @@
 /** @author David Hdez */
 // internal imports
-import type { CreatePackageDTO } from "@/dtos/CreatePackageDTO";
+import type { CreatePackageDTO } from "@/dtos/packages/CreatePackageDTO";
 import type { PackageInterface } from "@/interfaces/PackageInterface";
 import { WarehouseService } from "@/services/WarehouseService";
 import { usePackageStore } from "@/stores/packagestore";
@@ -11,6 +11,7 @@ export class PackageService {
     return usePackageStore().packages;
   }
 
+  // Auto-repair invalid warehouse references to preserve referential integrity.
   static ensureWarehouseAssignments(): void {
     const packageStore = usePackageStore();
     const warehouses = WarehouseService.getWarehouses();
@@ -46,6 +47,7 @@ export class PackageService {
     const warehouses = WarehouseService.getWarehouses();
     const warehouseIds = warehouses.map((warehouse) => warehouse.id);
     const fallbackWarehouseId = warehouseIds[0] ?? 1;
+    // Use a valid fallback when incoming warehouseId is missing or invalid.
     const assignedWarehouseId = warehouseIds.includes(pkg.warehouseId)
       ? pkg.warehouseId
       : fallbackWarehouseId;

@@ -2,11 +2,15 @@
 <script setup lang="ts">
 // external imports
 import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 // internal imports
-import type { CreatePackageDTO } from "@/dtos/CreatePackageDTO";
+import type { CreatePackageDTO } from "@/dtos/packages/CreatePackageDTO";
 import { PackageService } from "@/services/PackageService";
 import { WarehouseService } from "@/services/WarehouseService";
+
+const route = useRoute();
+const router = useRouter();
 
 const warehouses = WarehouseService.getWarehouses();
 
@@ -14,9 +18,24 @@ const trackingNumber = ref("");
 const description = ref("");
 const status = ref("Pending");
 const weight = ref(0);
-const carrier = ref("");
 const warehouseId = ref<number>(warehouses[0]?.id ?? 1);
 const successMessage = ref("");
+
+function closeCreateView(): void {
+  const fromQuery = route.query.from;
+
+  if (typeof fromQuery === "string" && fromQuery.startsWith("/")) {
+    router.push(fromQuery);
+    return;
+  }
+
+  if (window.history.length > 1) {
+    router.back();
+    return;
+  }
+
+  router.push({ name: "packages" });
+}
 
 function submitForm(): void {
   const newPackage: CreatePackageDTO = {
@@ -24,7 +43,6 @@ function submitForm(): void {
     description: description.value,
     status: status.value,
     weight: weight.value,
-    carrier: carrier.value,
     warehouseId: warehouseId.value,
   };
 
@@ -34,16 +52,25 @@ function submitForm(): void {
   description.value = "";
   status.value = "Pending";
   weight.value = 0;
-  carrier.value = "";
   warehouseId.value = warehouses[0]?.id ?? 1;
 }
 </script>
 
 <template>
   <section class="max-w-2xl mx-auto py-4">
-    <h2 class="text-2xl font-black text-body mb-8">
-      Register New Package
-    </h2>
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-black text-body">
+        Register New Package
+      </h2>
+      <button
+        type="button"
+        class="size-10 rounded-lg bg-panel border border-wire text-soft hover:text-primary hover:border-primary/40 transition-colors flex items-center justify-center"
+        title="Close and go back"
+        @click="closeCreateView"
+      >
+        <span class="material-symbols-outlined text-base">close</span>
+      </button>
+    </div>
 
     <form
       class="bg-panel border border-wire rounded-xl p-8 space-y-6"
@@ -81,21 +108,6 @@ function submitForm(): void {
         />
       </div>
 
-      <div>
-        <label
-          class="block text-sm font-semibold text-soft mb-2"
-          for="carrier"
-          >Carrier</label
-        >
-        <input
-          v-model="carrier"
-          type="text"
-          id="carrier"
-          class="w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
-          required
-          placeholder="FedEx, DHL, UPS..."
-        />
-      </div>
 
       <div>
         <label

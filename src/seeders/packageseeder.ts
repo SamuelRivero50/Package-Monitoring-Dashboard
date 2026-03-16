@@ -9,7 +9,6 @@ export const packageSeeder: PackageInterface[] = [
     description: "Industrial Pump Spare Parts",
     status: "In Transit",
     weight: 12.5,
-    carrier: "FedEx",
     warehouseId: 1,
   },
   {
@@ -18,7 +17,6 @@ export const packageSeeder: PackageInterface[] = [
     description: "Solar Panel Modules (x20)",
     status: "At Warehouse",
     weight: 45.0,
-    carrier: "DHL",
     warehouseId: 2,
   },
   {
@@ -27,7 +25,6 @@ export const packageSeeder: PackageInterface[] = [
     description: "Server Rack Components",
     status: "Delivered",
     weight: 8.2,
-    carrier: "UPS",
     warehouseId: 3,
   },
   {
@@ -36,7 +33,6 @@ export const packageSeeder: PackageInterface[] = [
     description: "Medical Supply Box",
     status: "Pending",
     weight: 3.1,
-    carrier: "FedEx",
     warehouseId: 4,
   },
   {
@@ -45,7 +41,6 @@ export const packageSeeder: PackageInterface[] = [
     description: "Fiber Optic Panels",
     status: "Exception",
     weight: 22.0,
-    carrier: "Amazon",
     warehouseId: 2,
   },
 ];

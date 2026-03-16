@@ -3,16 +3,17 @@
 // external imports
 import type { Chart } from "chart.js";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 
 // internal imports
-import StatusBadge from "@/components/StatusBadge.vue";
-import type { TrackingEventInterface } from "@/interfaces/TrackingEventInterface";
+import PackageEvents from "@/components/packages/PackageEvents.vue";
+import StatusBadge from "@/components/shared/StatusBadge.vue";
 import { PackageService } from "@/services/PackageService";
-import { TrackingEventService } from "@/services/TrackingEventService";
 import { WarehouseService } from "@/services/WarehouseService";
 import { ChartUtils } from "@/utils/ChartUtils";
-import { formatDateTime, formatWeight } from "@/utils/formatters";
+import { formatWeight } from "@/utils/formatters";
+
+const route = useRoute();
 
 const packages = computed(() => PackageService.getPackages());
 const filteredPackages = ref(packages.value);
@@ -58,10 +59,6 @@ function toggleHistory(packageId: number): void {
   }
 }
 
-function getEventsForPackage(packageId: number): TrackingEventInterface[] {
-  return TrackingEventService.getTrackingEventsByPackageId(packageId);
-}
-
 // chart
 const statusColors: Record<string, string> = {
   Delivered: "#10b981",
@@ -104,7 +101,7 @@ onUnmounted(() => {
         </p>
       </div>
       <RouterLink
-        to="/packages/create"
+        :to="{ name: 'packages.create', query: { from: route.fullPath } }"
         class="h-10 px-5 bg-primary text-base font-bold text-sm rounded-lg flex items-center gap-2 hover:bg-primary-dark transition-all w-fit"
       >
         <span class="material-symbols-outlined text-sm">add</span>
@@ -233,54 +230,8 @@ onUnmounted(() => {
             <!-- Expanded history panel -->
             <tr v-if="expandedPackageId === pkg.id">
               <td colspan="6" class="px-6 py-0">
-                <div class="py-4 space-y-3 border-t border-primary/20">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="material-symbols-outlined text-primary text-lg"
-                      >history</span
-                    >
-                    <h4 class="text-sm font-bold text-body">
-                      Tracking Log for {{ pkg.trackingNumber }}
-                    </h4>
-                    <span class="text-xs text-faded"
-                      >({{ getEventsForPackage(pkg.id).length }} events)</span
-                    >
-                  </div>
-
-                  <div
-                    v-if="getEventsForPackage(pkg.id).length > 0"
-                    class="space-y-2 max-h-48 overflow-y-auto pr-2"
-                  >
-                    <div
-                      v-for="event in getEventsForPackage(pkg.id)"
-                      :key="event.id"
-                      class="flex items-start gap-3 p-3 bg-sheet rounded-lg border border-wire-subtle"
-                    >
-                      <div
-                        class="mt-1 size-2 rounded-full bg-primary shrink-0"
-                      ></div>
-                      <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-body">
-                          {{ event.description }}
-                        </p>
-                        <div
-                          class="flex items-center gap-3 mt-1 text-xs text-faded"
-                        >
-                          <span class="flex items-center gap-1">
-                            <span class="material-symbols-outlined text-xs"
-                              >location_on</span
-                            >
-                            {{ event.location }}
-                          </span>
-                          <span v-if="event.createdAt">{{
-                            formatDateTime(event.createdAt)
-                          }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <p v-else class="text-faded text-sm">
-                    No tracking events yet.
-                  </p>
+                <div class="py-4 border-t border-primary/20">
+                  <PackageEvents :package-id="pkg.id" />
                 </div>
               </td>
             </tr>
