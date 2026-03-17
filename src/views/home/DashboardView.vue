@@ -6,7 +6,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 
 // internal imports
-import { ChartUtils } from "@/utils/ChartUtils";
+import { buildPieChart } from "@/utils/ChartUtils";
 import StatusBadge from "@/components/shared/StatusBadge.vue";
 import { PackageService } from "@/services/PackageService";
 import { UserService } from "@/services/UserService";
@@ -44,7 +44,7 @@ onMounted(() => {
   const labels = Object.keys(counts);
   const data = Object.values(counts);
   const colors = labels.map((label) => statusColors[label] ?? "#8b949e");
-  chartInstance = ChartUtils.buildPieChart(
+  chartInstance = buildPieChart(
     canvasRef.value,
     labels,
     data,

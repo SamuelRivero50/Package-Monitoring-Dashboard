@@ -12,7 +12,7 @@ import { AuthService } from "@/services/AuthService";
 import { PackageService } from "@/services/PackageService";
 import { UserService } from "@/services/UserService";
 import { WarehouseService } from "@/services/WarehouseService";
-import { ChartUtils } from "@/utils/ChartUtils";
+import { buildBarChart } from "@/utils/ChartUtils";
 
 const route = useRoute();
 const currentUser = AuthService.getCurrentUser();
@@ -90,7 +90,7 @@ onMounted(() => {
   const labels = Object.keys(counts);
   const data = Object.values(counts);
   const colors = labels.map((l) => statusColors[l] ?? "#8b949e");
-  chartInstance = ChartUtils.buildBarChart(canvasRef.value, labels, data, colors);
+  chartInstance = buildBarChart(canvasRef.value, labels, data, colors);
 });
 
 onUnmounted(() => {

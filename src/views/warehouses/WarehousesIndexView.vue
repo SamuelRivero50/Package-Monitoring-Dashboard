@@ -5,7 +5,7 @@ import type { Chart } from "chart.js";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 // internal imports
-import { ChartUtils } from "@/utils/ChartUtils";
+import { buildBarChart } from "@/utils/ChartUtils";
 import LeafletMap from "@/components/warehouses/LeafletMap.vue";
 import type { MapRoute } from "@/components/warehouses/LeafletMap.vue";
 import { WarehouseService } from "@/services/WarehouseService";
@@ -66,7 +66,7 @@ onMounted(() => {
     Math.round((warehouse.currentLoad / warehouse.capacity) * 100),
   );
   const colors = data.map((percentage) => (percentage > 90 ? "#f43f5e" : "#2dd4bf"));
-  chartInstance = ChartUtils.buildBarChart(canvasRef.value, labels, data, colors);
+  chartInstance = buildBarChart(canvasRef.value, labels, data, colors);
 });
 
 onUnmounted(() => {

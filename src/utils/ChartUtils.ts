@@ -12,31 +12,30 @@ import {
   Tooltip,
 } from "chart.js";
 
-export class ChartUtils {
-  private static initialized = false;
+let initialized = false;
 
-  private static ensureInitialized(): void {
-    if (ChartUtils.initialized) return;
-    Chart.register(
-      ArcElement,
-      PieController,
-      BarController,
-      BarElement,
-      CategoryScale,
-      LinearScale,
-      Legend,
-      Tooltip,
-    );
-    ChartUtils.initialized = true;
-  }
+function ensureInitialized(): void {
+  if (initialized) return;
+  Chart.register(
+    ArcElement,
+    PieController,
+    BarController,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Legend,
+    Tooltip,
+  );
+  initialized = true;
+}
 
-  static buildPieChart(
-    canvas: HTMLCanvasElement,
-    labels: string[],
-    data: number[],
-    colors: string[],
-  ): Chart {
-    ChartUtils.ensureInitialized();
+export function buildPieChart(
+  canvas: HTMLCanvasElement,
+  labels: string[],
+  data: number[],
+  colors: string[],
+): Chart {
+  ensureInitialized();
 
     return new Chart(canvas, {
       type: "pie",
@@ -70,13 +69,13 @@ export class ChartUtils {
     });
   }
 
-  static buildBarChart(
-    canvas: HTMLCanvasElement,
-    labels: string[],
-    data: number[],
-    colors: string[],
-  ): Chart {
-    ChartUtils.ensureInitialized();
+  export function buildBarChart(
+  canvas: HTMLCanvasElement,
+  labels: string[],
+  data: number[],
+  colors: string[],
+): Chart {
+  ensureInitialized();
 
     return new Chart(canvas, {
       type: "bar",
@@ -113,4 +112,4 @@ export class ChartUtils {
       },
     });
   }
-}
+
