@@ -5,7 +5,7 @@ import type { Chart } from "chart.js";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 // internal imports
-import { buildBarChart } from "@/utils/ChartUtils";
+import { buildBarChart } from "@/utils/chartUtils";
 import LeafletMap from "@/components/warehouses/LeafletMap.vue";
 import type { MapRoute } from "@/components/warehouses/LeafletMap.vue";
 import { WarehouseService } from "@/services/WarehouseService";

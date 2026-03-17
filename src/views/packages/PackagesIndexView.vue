@@ -12,7 +12,7 @@ import { AuthService } from "@/services/AuthService";
 import { PackageService } from "@/services/PackageService";
 import { UserService } from "@/services/UserService";
 import { WarehouseService } from "@/services/WarehouseService";
-import { buildBarChart } from "@/utils/ChartUtils";
+import { buildBarChart } from "@/utils/chartUtils";
 
 const route = useRoute();
 const currentUser = AuthService.getCurrentUser();

@@ -6,7 +6,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 
 // internal imports
-import { buildPieChart } from "@/utils/ChartUtils";
+import { buildPieChart } from "@/utils/chartUtils";
 import StatusBadge from "@/components/shared/StatusBadge.vue";
 import { PackageService } from "@/services/PackageService";
 import { UserService } from "@/services/UserService";
