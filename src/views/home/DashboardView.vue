@@ -1,4 +1,4 @@
-<!-- @author David Hdez -->
+<!-- @author David Hdez, Samuel Rivero -->
 <script setup lang="ts">
 // external imports
 import type { Chart } from "chart.js";
