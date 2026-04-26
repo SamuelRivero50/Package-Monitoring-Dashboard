@@ -1,30 +1,43 @@
-<!-- @author David Hdez -->
+<!-- @author David Hdez, Juan Andrés Young -->
 <script setup lang="ts">
-// external imports
-import { ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+// External imports
+import axios from 'axios';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-// internal imports
-import type { CreatePackageDTO } from "@/dtos/packages/CreatePackageDTO";
-import { AuthService } from "@/services/AuthService";
-import { PackageService } from "@/services/PackageService";
-import { WarehouseService } from "@/services/WarehouseService";
+// Internal imports
+import type { CreatePackageDTO } from '@/dtos/packages/CreatePackageDTO';
+import { PackageService } from '@/services/PackageService';
+import type { PackageStatus } from '@/interfaces/PackageInterface';
+import type { WarehouseInterface } from '@/interfaces/WarehouseInterface';
+import { WarehouseService } from '@/services/WarehouseService';
+import { useAuthStore } from '@/stores/authstore';
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 
-const warehouses = WarehouseService.getWarehouses();
+const STATUS_OPTIONS: PackageStatus[] = [
+  'Pending',
+  'In Transit',
+  'At Warehouse',
+  'Delivered',
+  'Exception',
+];
 
-const description = ref("");
-const status = ref("Pending");
-const price = ref(0);
-const warehouseId = ref<number>(warehouses[0]?.id ?? 1);
-const successMessage = ref("");
+const warehouses = ref<WarehouseInterface[]>([]);
+const description = ref<string>('');
+const status = ref<PackageStatus>('Pending');
+const price = ref<number>(0);
+const warehouseId = ref<string>('');
+const successMessage = ref<string>('');
+const errorMessage = ref<string>('');
+const submitting = ref<boolean>(false);
 
 function closeCreateView(): void {
   const fromQuery = route.query.from;
 
-  if (typeof fromQuery === "string" && fromQuery.startsWith("/")) {
+  if (typeof fromQuery === 'string' && fromQuery.startsWith('/')) {
     router.push(fromQuery);
     return;
   }
@@ -34,33 +47,67 @@ function closeCreateView(): void {
     return;
   }
 
-  router.push({ name: "packages" });
+  router.push({ name: 'packages' });
 }
 
-function submitForm(): void {
-  const newPackage: CreatePackageDTO = {
-    userId: AuthService.getCurrentUser()?.id ?? 1,
+async function submitForm(): Promise<void> {
+  errorMessage.value = '';
+  successMessage.value = '';
+
+  const userId = authStore.currentUser?.id;
+  if (!userId) {
+    errorMessage.value = 'You must be signed in to create a package.';
+    return;
+  }
+
+  if (!warehouseId.value) {
+    errorMessage.value = 'Please select a warehouse.';
+    return;
+  }
+
+  const payload: CreatePackageDTO = {
     description: description.value,
     status: status.value,
     price: price.value,
+    userId,
     warehouseId: warehouseId.value,
   };
 
-  PackageService.createPackage(newPackage);
-  successMessage.value = "Package created successfully!";
-  description.value = "";
-  status.value = "Pending";
-  price.value = 0;
-  warehouseId.value = warehouses[0]?.id ?? 1;
+  submitting.value = true;
+  try {
+    await PackageService.createPackage(payload);
+    successMessage.value = 'Package created successfully!';
+    description.value = '';
+    status.value = 'Pending';
+    price.value = 0;
+    warehouseId.value = warehouses.value[0]?.id ?? '';
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err) && err.response) {
+      const data = err.response.data as { message?: string | string[] };
+      const message = Array.isArray(data.message)
+        ? data.message.join(' ')
+        : data.message;
+      errorMessage.value = message ?? 'Unable to create package.';
+    } else if (err instanceof Error) {
+      errorMessage.value = err.message;
+    } else {
+      errorMessage.value = 'Unable to create package.';
+    }
+  } finally {
+    submitting.value = false;
+  }
 }
+
+onMounted(async () => {
+  warehouses.value = await WarehouseService.getWarehouses();
+  warehouseId.value = warehouses.value[0]?.id ?? '';
+});
 </script>
 
 <template>
   <section class="max-w-2xl mx-auto py-4">
     <div class="flex items-center justify-between mb-8">
-      <h2 class="text-2xl font-black text-body">
-        Register New Package
-      </h2>
+      <h2 class="text-2xl font-black text-body">Register New Package</h2>
       <button
         type="button"
         class="size-10 rounded-lg bg-panel border border-wire text-soft hover:text-primary hover:border-primary/40 transition-colors flex items-center justify-center"
@@ -90,7 +137,6 @@ function submitForm(): void {
           placeholder="Package contents"
         />
       </div>
-
 
       <div>
         <label
@@ -142,25 +188,27 @@ function submitForm(): void {
           id="status"
           class="select-control w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
         >
-          <option value="Pending">Pending</option>
-          <option value="In Transit">In Transit</option>
-          <option value="At Warehouse">At Warehouse</option>
-          <option value="Delivered">Delivered</option>
-          <option value="Exception">Exception</option>
+          <option v-for="opt in STATUS_OPTIONS" :key="opt" :value="opt">
+            {{ opt }}
+          </option>
         </select>
       </div>
 
       <div class="pt-4">
         <button
           type="submit"
-          class="w-full bg-primary text-base font-black py-3 rounded-xl hover:bg-primary-dark transition-all"
+          :disabled="submitting"
+          class="w-full bg-primary text-base font-black py-3 rounded-xl hover:bg-primary-dark transition-all disabled:opacity-60"
         >
-          Create Package
+          {{ submitting ? 'Creating...' : 'Create Package' }}
         </button>
       </div>
 
       <p v-if="successMessage" class="text-emerald-400 mt-4 font-medium">
         {{ successMessage }}
+      </p>
+      <p v-if="errorMessage" class="text-rose-400 mt-4 font-medium">
+        {{ errorMessage }}
       </p>
     </form>
   </section>

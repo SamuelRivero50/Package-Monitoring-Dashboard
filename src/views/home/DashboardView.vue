@@ -1,55 +1,69 @@
-<!-- @author David Hdez, Samuel Rivero -->
+<!-- @author David Hdez, Samuel Rivero, Juan Andrés Young -->
 <script setup lang="ts">
-// external imports
-import type { Chart } from "chart.js";
-import { computed, onMounted, onUnmounted, ref } from "vue";
-import { RouterLink } from "vue-router";
+// External imports
+import type { Chart } from 'chart.js';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { RouterLink } from 'vue-router';
 
-// internal imports
-import { buildPieChart } from "@/utils/chartUtils";
-import StatusBadge from "@/components/shared/StatusBadge.vue";
-import { PackageService } from "@/services/PackageService";
-import { UserService } from "@/services/UserService";
-import { WarehouseService } from "@/services/WarehouseService";
+// Internal imports
+import StatusBadge from '@/components/shared/StatusBadge.vue';
+import { PackageService } from '@/services/PackageService';
+import type { PackageInterface } from '@/interfaces/PackageInterface';
+import type { WarehouseInterface } from '@/interfaces/WarehouseInterface';
+import { WarehouseService } from '@/services/WarehouseService';
+import { buildPieChart } from '@/utils/chartUtils';
+import { useAuthStore } from '@/stores/authstore';
 
-const packages = computed(() => PackageService.getPackages());
-const warehouses = computed(() => WarehouseService.getWarehouses());
+const authStore = useAuthStore();
+const packages = ref<PackageInterface[]>([]);
+const warehouses = ref<WarehouseInterface[]>([]);
+const isLoading = ref<boolean>(true);
+
 const recentPackages = computed(() =>
-  [...packages.value].sort((a, b) => b.id - a.id).slice(0, 5),
+  [...packages.value]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 5),
 );
 
 const statusColors: Record<string, string> = {
-  Delivered: "#10b981",
-  "In Transit": "#f59e0b",
-  "At Warehouse": "#2dd4bf",
-  Pending: "#6b7280",
-  Exception: "#f43f5e",
+  Delivered: '#10b981',
+  'In Transit': '#f59e0b',
+  'At Warehouse': '#2dd4bf',
+  Pending: '#6b7280',
+  Exception: '#f43f5e',
 };
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let chartInstance: Chart | null = null;
 
-function getWarehouseName(warehouseId: number): string {
-  return (
-    WarehouseService.getWarehouseById(warehouseId)?.name ?? "Unknown Warehouse"
-  );
-}
-
-onMounted(() => {
+function renderChart(): void {
   if (!canvasRef.value) return;
+  chartInstance?.destroy();
   const counts: Record<string, number> = {};
   for (const pkg of packages.value) {
     counts[pkg.status] = (counts[pkg.status] ?? 0) + 1;
   }
   const labels = Object.keys(counts);
   const data = Object.values(counts);
-  const colors = labels.map((label) => statusColors[label] ?? "#8b949e");
-  chartInstance = buildPieChart(
-    canvasRef.value,
-    labels,
-    data,
-    colors,
-  );
+  const colors = labels.map((label) => statusColors[label] ?? '#8b949e');
+  chartInstance = buildPieChart(canvasRef.value, labels, data, colors);
+}
+
+onMounted(async () => {
+  try {
+    const [pkgs, whs] = await Promise.all([
+      PackageService.getPackages(),
+      WarehouseService.getWarehouses(),
+    ]);
+    packages.value = pkgs;
+    warehouses.value = whs;
+    renderChart();
+  } finally {
+    isLoading.value = false;
+  }
 });
 
 onUnmounted(() => {
@@ -59,7 +73,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="space-y-8">
+  <section v-if="!isLoading" class="space-y-8">
     <!-- Stats -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <div
@@ -77,16 +91,16 @@ onUnmounted(() => {
             color: 'warehouses',
           },
           {
-            icon: 'group',
-            label: 'Users',
-            val: UserService.getUsers().length,
-            color: 'users',
-          },
-          {
             icon: 'check_circle',
             label: 'Delivered',
             val: packages.filter((pkg) => pkg.status === 'Delivered').length,
             color: 'primary',
+          },
+          {
+            icon: 'local_shipping',
+            label: 'In Transit',
+            val: packages.filter((pkg) => pkg.status === 'In Transit').length,
+            color: 'warehouses',
           },
         ]"
         :key="i"
@@ -98,7 +112,6 @@ onUnmounted(() => {
             :class="{
               'bg-packages/15 text-packages': stat.color === 'packages',
               'bg-warehouses/15 text-warehouses': stat.color === 'warehouses',
-              'bg-users-icon/15 text-users-icon': stat.color === 'users',
               'bg-primary/15 text-primary': stat.color === 'primary',
             }"
           >
@@ -106,9 +119,7 @@ onUnmounted(() => {
           </div>
         </div>
         <p class="text-soft text-sm font-medium">{{ stat.label }}</p>
-        <h3 class="text-2xl font-bold mt-1 text-body">
-          {{ stat.val }}
-        </h3>
+        <h3 class="text-2xl font-bold mt-1 text-body">{{ stat.val }}</h3>
       </div>
     </div>
 
@@ -116,17 +127,13 @@ onUnmounted(() => {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="bg-panel border border-wire rounded-xl p-6">
         <h2 class="font-bold text-lg text-body mb-1">Package Status</h2>
-        <p class="text-xs text-faded mb-4">
-          Distribution by current status
-        </p>
+        <p class="text-xs text-faded mb-4">Distribution by current status</p>
         <div class="h-64">
           <canvas ref="canvasRef" />
         </div>
       </div>
 
-      <div
-        class="bg-panel rounded-xl border border-wire overflow-hidden"
-      >
+      <div class="bg-panel rounded-xl border border-wire overflow-hidden">
         <div
           class="p-6 border-b border-wire flex justify-between items-center"
         >
@@ -140,19 +147,13 @@ onUnmounted(() => {
         <table class="w-full text-left text-sm">
           <thead class="text-faded bg-sheet">
             <tr>
-              <th
-                class="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]"
-              >
+              <th class="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">
                 Tracking #
               </th>
-              <th
-                class="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]"
-              >
+              <th class="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">
                 Status
               </th>
-              <th
-                class="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]"
-              >
+              <th class="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">
                 Warehouse
               </th>
             </tr>
@@ -164,13 +165,18 @@ onUnmounted(() => {
               class="hover:bg-sheet/50 transition-colors"
             >
               <td class="px-6 py-4 font-mono text-packages">
-                #{{ pkg.id }}
+                #{{ pkg.id.slice(0, 8) }}
               </td>
               <td class="px-6 py-4">
                 <StatusBadge :status="pkg.status" />
               </td>
               <td class="px-6 py-4 text-soft">
-                {{ getWarehouseName(pkg.warehouseId) }}
+                {{ pkg.warehouse?.name ?? 'Unknown Warehouse' }}
+              </td>
+            </tr>
+            <tr v-if="recentPackages.length === 0">
+              <td colspan="3" class="px-6 py-6 text-center text-faded">
+                No packages yet.
               </td>
             </tr>
           </tbody>
@@ -179,9 +185,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Warehouse Overview -->
-    <div
-      class="bg-panel border border-wire rounded-xl p-6 space-y-4"
-    >
+    <div class="bg-panel border border-wire rounded-xl p-6 space-y-4">
       <div class="flex justify-between items-center">
         <div>
           <h2 class="text-lg font-bold text-body">Warehouses</h2>
@@ -209,8 +213,8 @@ onUnmounted(() => {
             </h4>
           </div>
           <p class="text-faded text-xs flex items-center gap-1">
-            <span class="material-symbols-outlined text-xs">location_on</span
-            >{{ warehouse.location }}
+            <span class="material-symbols-outlined text-xs">location_on</span>
+            {{ warehouse.location }}
           </p>
           <div class="mt-3">
             <div class="flex justify-between text-[10px] mb-1">
@@ -228,13 +232,30 @@ onUnmounted(() => {
                     : 'bg-primary'
                 "
                 :style="{
-                  width: Math.round((warehouse.currentLoad / warehouse.capacity) * 100) + '%',
+                  width:
+                    Math.round((warehouse.currentLoad / warehouse.capacity) * 100) + '%',
                 }"
               ></div>
             </div>
           </div>
         </RouterLink>
+        <p
+          v-if="warehouses.length === 0"
+          class="md:col-span-2 lg:col-span-4 text-center text-faded text-sm py-4"
+        >
+          No warehouses registered yet.
+          <RouterLink
+            v-if="authStore.isAdmin"
+            to="/warehouses"
+            class="text-link hover:underline ml-1"
+            >Create one</RouterLink
+          >
+        </p>
       </div>
     </div>
+  </section>
+
+  <section v-else class="flex items-center justify-center py-20">
+    <p class="text-soft">Loading dashboard...</p>
   </section>
 </template>
