@@ -1,37 +1,57 @@
-<!-- @author David Hdez -->
+<!-- @author David Hdez, Juan Andrés Young -->
 <script setup lang="ts">
-// external imports
-import { ref } from "vue";
-import { RouterLink, useRouter } from "vue-router";
+// External imports
+import axios from 'axios';
+import { ref } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
 
-// internal imports
-import { AuthService } from "@/services/AuthService";
+// Internal imports
+import { useAuthStore } from '@/stores/authstore';
 
 const router = useRouter();
+const authStore = useAuthStore();
 
-const name = ref<string>("");
-const email = ref<string>("");
-const password = ref<string>("");
-const confirmPassword = ref<string>("");
-const error = ref<string>("");
+const name = ref<string>('');
+const email = ref<string>('');
+const password = ref<string>('');
+const confirmPassword = ref<string>('');
+const error = ref<string>('');
 const submitting = ref<boolean>(false);
 
-function handleSubmit(): void {
-  error.value = "";
+async function handleSubmit(): Promise<void> {
+  error.value = '';
 
   if (password.value !== confirmPassword.value) {
-    error.value = "Passwords do not match.";
+    error.value = 'Passwords do not match.';
+    return;
+  }
+
+  if (password.value.length < 8) {
+    error.value = 'Password must be at least 8 characters.';
     return;
   }
 
   submitting.value = true;
 
   try {
-    AuthService.register(name.value, email.value, password.value);
-    router.push("/dashboard");
+    await authStore.register({
+      name: name.value,
+      email: email.value,
+      password: password.value,
+    });
+    await router.push('/dashboard');
   } catch (err: unknown) {
-    error.value =
-      err instanceof Error ? err.message : "Unable to create account.";
+    if (axios.isAxiosError(err) && err.response) {
+      const data = err.response.data as { message?: string | string[] };
+      const message = Array.isArray(data.message)
+        ? data.message.join(' ')
+        : data.message;
+      error.value = message ?? 'Unable to create account.';
+    } else if (err instanceof Error) {
+      error.value = err.message;
+    } else {
+      error.value = 'Unable to create account.';
+    }
   } finally {
     submitting.value = false;
   }
@@ -81,33 +101,6 @@ function handleSubmit(): void {
             Set up your company workspace, manage package visibility, and
             coordinate warehouses with a unified dashboard.
           </p>
-
-          <div class="space-y-4 pt-2">
-            <div class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary mt-0.5"
-                >check_circle</span
-              >
-              <p class="text-sm text-soft">
-                Live shipment updates and timeline logs.
-              </p>
-            </div>
-            <div class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary mt-0.5"
-                >check_circle</span
-              >
-              <p class="text-sm text-soft">
-                Warehouse capacity monitoring in one place.
-              </p>
-            </div>
-            <div class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary mt-0.5"
-                >check_circle</span
-              >
-              <p class="text-sm text-soft">
-                Role-based access for admin and operational users.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -124,11 +117,7 @@ function handleSubmit(): void {
 
           <form class="space-y-4" @submit.prevent="handleSubmit">
             <div class="space-y-2">
-              <label
-                for="name"
-                class="text-sm font-semibold text-soft"
-                >Full Name</label
-              >
+              <label for="name" class="text-sm font-semibold text-soft">Full Name</label>
               <input
                 id="name"
                 v-model="name"
@@ -140,11 +129,7 @@ function handleSubmit(): void {
             </div>
 
             <div class="space-y-2">
-              <label
-                for="email"
-                class="text-sm font-semibold text-soft"
-                >Email</label
-              >
+              <label for="email" class="text-sm font-semibold text-soft">Email</label>
               <input
                 id="email"
                 v-model="email"
@@ -157,26 +142,19 @@ function handleSubmit(): void {
 
             <div class="grid sm:grid-cols-2 gap-4">
               <div class="space-y-2">
-                <label
-                  for="password"
-                  class="text-sm font-semibold text-soft"
-                  >Password</label
-                >
+                <label for="password" class="text-sm font-semibold text-soft">Password</label>
                 <input
                   id="password"
                   v-model="password"
                   type="password"
                   required
+                  minlength="8"
                   class="w-full bg-sheet border border-wire rounded-xl py-3 px-4 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
                   placeholder="••••••••"
                 />
               </div>
               <div class="space-y-2">
-                <label
-                  for="confirmPassword"
-                  class="text-sm font-semibold text-soft"
-                  >Confirm</label
-                >
+                <label for="confirmPassword" class="text-sm font-semibold text-soft">Confirm</label>
                 <input
                   id="confirmPassword"
                   v-model="confirmPassword"
@@ -201,7 +179,7 @@ function handleSubmit(): void {
               :disabled="submitting"
               class="w-full py-3 rounded-xl bg-primary text-base font-black hover:bg-primary-dark transition-colors disabled:opacity-60"
             >
-              {{ submitting ? "Creating Account..." : "Create Account" }}
+              {{ submitting ? 'Creating Account...' : 'Create Account' }}
             </button>
           </form>
 

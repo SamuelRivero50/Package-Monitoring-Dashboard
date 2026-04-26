@@ -1,25 +1,25 @@
 <!-- @author David Hdez, Juan Andrés Young -->
 <script setup lang="ts">
-// external imports
-import { computed } from "vue";
-import { RouterLink } from "vue-router";
+// External imports
+import { computed } from 'vue';
+import { RouterLink } from 'vue-router';
 
-// internal imports
-import { AuthService } from "@/services/AuthService";
+// Internal imports
+import { useAuthStore } from '@/stores/authstore';
 
-const isAuthenticated = computed(() => AuthService.isAuthenticated());
+const authStore = useAuthStore();
 
 const primaryActionLabel = computed(() =>
-  isAuthenticated.value ? "Open Dashboard" : "Get Started",
+  authStore.isAuthenticated ? 'Open Dashboard' : 'Get Started',
 );
 const primaryActionPath = computed(() =>
-  isAuthenticated.value ? "/dashboard" : "/signup",
+  authStore.isAuthenticated ? '/dashboard' : '/signup',
 );
 const secondaryActionPath = computed(() =>
-  isAuthenticated.value ? "/packages" : "/login",
+  authStore.isAuthenticated ? '/packages' : '/login',
 );
 const secondaryActionLabel = computed(() =>
-  isAuthenticated.value ? "Track Packages" : "Sign In",
+  authStore.isAuthenticated ? 'Track Packages' : 'Sign In',
 );
 </script>
 
@@ -112,146 +112,6 @@ const secondaryActionLabel = computed(() =>
                 class="px-8 py-4 rounded-xl border border-wire bg-panel text-body font-black hover:border-primary/50 hover:text-primary transition-colors"
               >
                 {{ secondaryActionLabel }}
-              </RouterLink>
-            </div>
-          </div>
-
-          <div class="relative">
-            <div
-              class="rounded-3xl overflow-hidden border border-wire bg-panel shadow-[0_20px_70px_rgba(0,0,0,0.35)]"
-            >
-              <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuARpb78izFGAo72ZtI8BC-B6g5wjhtjSSJ1YTdNZf3UN42GBPmDf-8urYObtpI1nDZWlauhK0lgN7xo44Eai0esD5IEBmmblOtEV5S7w9zYqZnQ7Izqq6QjK-SvjpPVPamF1Ku-c0xa18rk7dh6p9iB4YbRuEl9pmYW9-RgxVsLgORS95XRjGjpH-xWvW0eWLvTTdNB5PTVRW9-6POTZkxjP39VipVUNMuJNz93BQgF7k-2WtzNi02b8bgfZmLAt0-gSVrntbNPTQ8v"
-                alt="PackTrack logistics operations"
-                class="w-full h-105 object-cover"
-              />
-              <div
-                class="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-canvas/75 backdrop-blur-sm border border-wire"
-              >
-                <div class="flex items-center justify-between mb-2">
-                  <p class="text-sm font-bold">Live Network</p>
-                  <span class="text-[11px] text-primary font-black uppercase"
-                    >Operational</span
-                  >
-                </div>
-                <div class="h-2 rounded-full bg-sheet overflow-hidden">
-                  <div class="h-full w-[78%] bg-primary"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="py-12 border-b border-wire bg-panel/35">
-        <div
-          class="max-w-7xl mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-8"
-        >
-          <div class="text-center">
-            <p class="text-4xl font-black text-primary">10K+</p>
-            <p class="text-sm text-soft mt-2">Packages tracked</p>
-          </div>
-          <div class="text-center">
-            <p class="text-4xl font-black text-primary">50+</p>
-            <p class="text-sm text-soft mt-2">Warehouse hubs</p>
-          </div>
-          <div class="text-center">
-            <p class="text-4xl font-black text-primary">200+</p>
-            <p class="text-sm text-soft mt-2">Connected partners</p>
-          </div>
-          <div class="text-center">
-            <p class="text-4xl font-black text-primary">99.9%</p>
-            <p class="text-sm text-soft mt-2">Platform uptime</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="py-20">
-        <div class="max-w-7xl mx-auto px-6">
-          <div class="max-w-2xl mb-12">
-            <p
-              class="text-primary text-xs font-black uppercase tracking-[0.2em] mb-3"
-            >
-              Core Features
-            </p>
-            <h3 class="text-4xl font-black tracking-tight">
-              Built for modern logistics teams
-            </h3>
-          </div>
-
-          <div class="grid md:grid-cols-3 gap-6">
-            <article
-              class="bg-panel border border-wire rounded-2xl p-7 hover:border-primary/40 transition-colors"
-            >
-              <div
-                class="size-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-5"
-              >
-                <span class="material-symbols-outlined">location_on</span>
-              </div>
-              <h4 class="text-xl font-black mb-3">Real-time tracking</h4>
-              <p class="text-sm text-soft leading-relaxed">
-                Monitor route updates from dispatch to delivery with detailed
-                timeline logs.
-              </p>
-            </article>
-
-            <article
-              class="bg-panel border border-wire rounded-2xl p-7 hover:border-primary/40 transition-colors"
-            >
-              <div
-                class="size-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-5"
-              >
-                <span class="material-symbols-outlined">inventory_2</span>
-              </div>
-              <h4 class="text-xl font-black mb-3">Package command center</h4>
-              <p class="text-sm text-soft leading-relaxed">
-                Filter, prioritize, and resolve shipment exceptions with
-                contextual activity history.
-              </p>
-            </article>
-
-            <article
-              class="bg-panel border border-wire rounded-2xl p-7 hover:border-primary/40 transition-colors"
-            >
-              <div
-                class="size-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-5"
-              >
-                <span class="material-symbols-outlined">warehouse</span>
-              </div>
-              <h4 class="text-xl font-black mb-3">Warehouse visibility</h4>
-              <p class="text-sm text-soft leading-relaxed">
-                Track capacity utilization and maintenance status across all
-                regional hubs.
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="py-20 bg-panel border-y border-wire">
-        <div class="max-w-5xl mx-auto px-6">
-          <div
-            class="rounded-3xl border border-primary/25 bg-canvas p-10 lg:p-14 text-center space-y-6"
-          >
-            <h3 class="text-4xl lg:text-5xl font-black tracking-tight">
-              Ready to optimize your logistics flow?
-            </h3>
-            <p class="text-soft text-lg max-w-3xl mx-auto">
-              Join teams already using PackTrack to coordinate packages and
-              warehouses with one operational view.
-            </p>
-            <div class="flex flex-wrap justify-center gap-4">
-              <RouterLink
-                :to="primaryActionPath"
-                class="px-8 py-3 rounded-xl bg-primary text-base font-black hover:bg-primary-dark transition-colors"
-              >
-                {{ primaryActionLabel }}
-              </RouterLink>
-              <RouterLink
-                to="/login"
-                class="px-8 py-3 rounded-xl border border-wire text-body font-black hover:border-primary/50 hover:text-primary transition-colors"
-              >
-                Sign In
               </RouterLink>
             </div>
           </div>

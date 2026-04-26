@@ -1,31 +1,38 @@
-<!-- @author David Hdez, Juan Andrés Young  -->
+<!-- @author David Hdez, Juan Andrés Young -->
 <script setup lang="ts">
-// external imports
-import { ref } from "vue";
-import { RouterLink, useRoute, useRouter } from "vue-router";
+// External imports
+import axios from 'axios';
+import { ref } from 'vue';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 
-// internal imports
-import { AuthService } from "@/services/AuthService";
+// Internal imports
+import { useAuthStore } from '@/stores/authstore';
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 
-const email = ref<string>("");
-const password = ref<string>("");
-const error = ref<string>("");
+const email = ref<string>('');
+const password = ref<string>('');
+const error = ref<string>('');
 const submitting = ref<boolean>(false);
 
-function handleSubmit(): void {
+async function handleSubmit(): Promise<void> {
   submitting.value = true;
-  error.value = "";
+  error.value = '';
 
   try {
-    AuthService.login(email.value, password.value);
-    const redirect = (route.query.redirect as string) || "/dashboard";
-    router.push(redirect);
-  } catch (err) {
-    error.value =
-      err instanceof Error ? err.message : "Invalid email or password.";
+    await authStore.login(email.value, password.value);
+    const redirect = (route.query.redirect as string) || '/dashboard';
+    await router.push(redirect);
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err) && err.response?.status === 401) {
+      error.value = 'Invalid email or password.';
+    } else if (err instanceof Error) {
+      error.value = err.message;
+    } else {
+      error.value = 'Unable to sign in. Please try again.';
+    }
   } finally {
     submitting.value = false;
   }
@@ -69,42 +76,13 @@ function handleSubmit(): void {
           >
             Welcome back
           </span>
-
           <h2 class="text-5xl font-black tracking-tight leading-tight">
             Sign in and operate your logistics dashboard in real time
           </h2>
-
           <p class="text-lg text-soft leading-relaxed">
             Track package flow, monitor warehouse capacity, and coordinate your
             team from a single secure workspace.
           </p>
-
-          <div class="space-y-4">
-            <div class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary mt-0.5"
-                >check_circle</span
-              >
-              <p class="text-sm text-soft">
-                Operational dashboard with live status indicators.
-              </p>
-            </div>
-            <div class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary mt-0.5"
-                >check_circle</span
-              >
-              <p class="text-sm text-soft">
-                Role-based access and shared activity timeline.
-              </p>
-            </div>
-            <div class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary mt-0.5"
-                >check_circle</span
-              >
-              <p class="text-sm text-soft">
-                Global notifications and maintenance controls.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -121,11 +99,7 @@ function handleSubmit(): void {
 
           <form class="space-y-4" @submit.prevent="handleSubmit">
             <div class="space-y-2">
-              <label
-                for="email"
-                class="text-sm font-semibold text-soft"
-                >Email</label
-              >
+              <label for="email" class="text-sm font-semibold text-soft">Email</label>
               <input
                 v-model="email"
                 type="email"
@@ -137,11 +111,7 @@ function handleSubmit(): void {
             </div>
 
             <div class="space-y-2">
-              <label
-                for="password"
-                class="text-sm font-semibold text-soft"
-                >Password</label
-              >
+              <label for="password" class="text-sm font-semibold text-soft">Password</label>
               <input
                 v-model="password"
                 type="password"
@@ -156,9 +126,7 @@ function handleSubmit(): void {
               v-if="error"
               class="flex items-center gap-2 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl"
             >
-              <span class="material-symbols-outlined text-rose-400 text-lg"
-                >error</span
-              >
+              <span class="material-symbols-outlined text-rose-400 text-lg">error</span>
               <p class="text-sm text-rose-300">{{ error }}</p>
             </div>
 
@@ -167,23 +135,9 @@ function handleSubmit(): void {
               :disabled="submitting"
               class="w-full bg-primary text-base font-black py-3 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50"
             >
-              {{ submitting ? "Signing in..." : "Sign In" }}
+              {{ submitting ? 'Signing in...' : 'Sign In' }}
             </button>
           </form>
-
-          <div class="border-t border-wire-subtle pt-4 space-y-3">
-            <p class="text-xs text-faded text-center">Demo credentials</p>
-            <p class="text-xs text-soft text-center">
-              <span class="text-primary font-mono">alex@packtrack.io</span> /
-              <span class="font-mono">admin123</span>
-              <span class="text-faded ml-1">(Admin)</span>
-            </p>
-            <p class="text-xs text-soft text-center">
-              <span class="text-primary font-mono">maria@packtrack.io</span> /
-              <span class="font-mono">maria123</span>
-              <span class="text-faded ml-1">(User)</span>
-            </p>
-          </div>
 
           <p class="text-sm text-faded text-center">
             Need an account?
