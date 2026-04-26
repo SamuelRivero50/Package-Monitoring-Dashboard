@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Post,
   Request,
   UseGuards,
@@ -14,16 +13,17 @@ import {
 // Internal imports
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
+import { RegisterDto } from './dto/register.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { User } from '../users/entities/user.entity';
-import type { UserRequestInterface } from '../interfaces/auth/UserRequestInterface';
 import { UsersService } from '../users/users.service';
+import type { UserRequestInterface } from '../interfaces/auth/UserRequestInterface';
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    private authService: AuthService,
-    private usersService: UsersService,
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
   ) {}
 
   @HttpCode(HttpStatus.OK)
@@ -34,15 +34,16 @@ export class AuthController {
     return await this.authService.signIn(signInDto.email, signInDto.password);
   }
 
+  @Post('register')
+  async register(
+    @Body() registerDto: RegisterDto,
+  ): Promise<{ access_token: string }> {
+    return await this.authService.register(registerDto);
+  }
+
   @UseGuards(AuthGuard)
   @Get('profile')
   async getProfile(@Request() req: UserRequestInterface): Promise<User> {
-    const user = await this.usersService.findById(req.user.sub);
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    return user;
+    return await this.usersService.findById(req.user.sub);
   }
 }
