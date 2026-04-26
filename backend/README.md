@@ -124,6 +124,26 @@ rm backend/database.sqlite
 npm run start:dev
 ```
 
+## Docker
+
+Build and run just the backend container:
+
+```bash
+docker build -t packtrack-backend .
+docker run -p 3000:3000 -v packtrack-data:/data \
+  -e SQLITE_PATH=/data/database.sqlite \
+  packtrack-backend
+```
+
+Or run the full stack (backend + frontend) from the project root:
+
+```bash
+cd ..
+docker compose up -d
+```
+
+See the root README for the full Docker workflow.
+
 ## High-level architecture
 
 ```mermaid

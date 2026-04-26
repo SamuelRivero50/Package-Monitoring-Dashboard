@@ -85,6 +85,34 @@ npm run dev
 | `/warehouses` | Warehouse list with capacity chart and admin CRUD | Auth (Admin for mutations) |
 | `/users` | User management | Admin only |
 
+## Docker
+
+To run the whole stack (backend + frontend + persistent SQLite volume) in containers:
+
+```bash
+docker compose up -d
+```
+
+This builds and starts both services:
+
+- **Backend** — http://localhost:3000/api
+- **Frontend** — http://localhost:5173
+
+The SQLite file lives in a Docker volume named `backend-data`, so your users and packages survive container restarts.
+
+```bash
+# Stop everything (keeps the database)
+docker compose down
+
+# Stop and wipe the database too
+docker compose down -v
+
+# Tail logs
+docker compose logs -f
+```
+
+> Since we use SQLite (a single file), there is no separate database container — the file is just persisted in a Docker volume mounted into the backend.
+
 ## Other commands
 
 ```bash
