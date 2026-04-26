@@ -1,35 +1,28 @@
-<!-- @author David Hdez, Juan Andrés Young  -->
+<!-- @author David Hdez, Juan Andrés Young -->
 <script setup lang="ts">
-// external imports
-import { computed } from "vue";
-import { RouterLink, RouterView, useRoute, useRouter } from "vue-router";
+// External imports
+import { computed, onMounted } from 'vue';
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router';
 
-// internal imports
-import { AuthService } from "@/services/AuthService";
-import { SettingsService } from "@/services/SettingsService";
+// Internal imports
+import { useAuthStore } from '@/stores/authstore';
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 
-const isAuthenticated = computed(() => AuthService.isAuthenticated());
 const showAuthenticatedLayout = computed(
-  () => Boolean(route.meta.requiresAuth) && isAuthenticated.value,
+  () => Boolean(route.meta.requiresAuth) && authStore.isAuthenticated,
 );
-const currentUser = computed(() => AuthService.getCurrentUser());
-const userNotificationMessage = computed(() =>
-  SettingsService.getUserNotificationMessage(),
-);
-const showUserNotification = computed(
-  () =>
-    currentUser.value?.role === "User" &&
-    SettingsService.isUserNotificationEnabled() &&
-    userNotificationMessage.value.length > 0,
-);
+
+onMounted(async () => {
+  await authStore.loadCurrentUser();
+});
 
 function isRouteGroupActive(groupName: string): boolean {
   const currentRouteName = route.name;
 
-  if (typeof currentRouteName !== "string") {
+  if (typeof currentRouteName !== 'string') {
     return false;
   }
 
@@ -39,9 +32,9 @@ function isRouteGroupActive(groupName: string): boolean {
   );
 }
 
-function handleLogout(): void {
-  AuthService.logout();
-  router.push({ name: "login" });
+async function handleLogout(): Promise<void> {
+  authStore.clearSession();
+  await router.push({ name: 'login' });
 }
 </script>
 
@@ -58,17 +51,11 @@ function handleLogout(): void {
             <div
               class="bg-primary/15 border border-primary/25 size-10 rounded-lg text-primary flex items-center justify-center"
             >
-              <span class="material-symbols-outlined text-2xl leading-6 block"
-                >package_2</span
-              >
+              <span class="material-symbols-outlined text-2xl leading-6 block">package_2</span>
             </div>
             <div class="flex flex-col leading-none">
-              <h1 class="text-lg font-black tracking-tight text-body">
-                PackTrack
-              </h1>
-              <p class="text-faded text-[11px] font-medium mt-1">
-                Logistics v1.0.0
-              </p>
+              <h1 class="text-lg font-black tracking-tight text-body">PackTrack</h1>
+              <p class="text-faded text-[11px] font-medium mt-1">Logistics v1.0.0</p>
             </div>
           </RouterLink>
         </div>
@@ -114,7 +101,7 @@ function handleLogout(): void {
           </RouterLink>
 
           <RouterLink
-            v-if="AuthService.isAdmin()"
+            v-if="authStore.isAdmin"
             to="/users"
             class="flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors"
             :class="
@@ -125,20 +112,6 @@ function handleLogout(): void {
           >
             <span class="material-symbols-outlined">group</span>
             <span class="text-sm font-medium">Users</span>
-          </RouterLink>
-
-          <RouterLink
-            v-if="AuthService.isAdmin()"
-            to="/settings"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors"
-            :class="
-              isRouteGroupActive('settings')
-                ? 'bg-primary/15 text-primary border-primary/30'
-                : 'text-soft border-transparent hover:bg-primary/10 hover:text-primary'
-            "
-          >
-            <span class="material-symbols-outlined">settings</span>
-            <span class="text-sm font-medium">Settings</span>
           </RouterLink>
         </nav>
 
@@ -151,10 +124,10 @@ function handleLogout(): void {
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-bold truncate text-body">
-                {{ AuthService.getCurrentUser()?.name }}
+                {{ authStore.currentUser?.name }}
               </p>
               <p class="text-[10px] text-faded truncate">
-                {{ AuthService.getCurrentUser()?.email }}
+                {{ authStore.currentUser?.email }}
               </p>
             </div>
           </div>
@@ -181,17 +154,6 @@ function handleLogout(): void {
             </button>
           </div>
         </header>
-
-        <div
-          v-if="showUserNotification"
-          class="mx-8 mt-4 px-4 py-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 flex items-start gap-2"
-        >
-          <span class="material-symbols-outlined text-sm mt-0.5">campaign</span>
-          <div>
-            <p class="text-xs font-bold uppercase tracking-wide">Notice</p>
-            <p class="text-sm leading-relaxed">{{ userNotificationMessage }}</p>
-          </div>
-        </div>
 
         <!-- main content -->
         <main class="flex-1 overflow-y-auto p-8">

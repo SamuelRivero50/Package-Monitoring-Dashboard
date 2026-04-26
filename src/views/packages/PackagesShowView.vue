@@ -1,67 +1,103 @@
-<!-- @author David Hdez -->
+<!-- @author David Hdez, Juan Andrés Young -->
 <script setup lang="ts">
-// external imports
-import { ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+// External imports
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-// internal imports
-import PackageEvents from "@/components/packages/PackageEvents.vue";
-import StatusBadge from "@/components/shared/StatusBadge.vue";
-import { PackageService } from "@/services/PackageService";
-import { UserService } from "@/services/UserService";
-import { WarehouseService } from "@/services/WarehouseService";
+// Internal imports
+import PackageEvents from '@/components/packages/PackageEvents.vue';
+import StatusBadge from '@/components/shared/StatusBadge.vue';
+import type {
+  PackageInterface,
+  PackageStatus,
+} from '@/interfaces/PackageInterface';
+import { PackageService } from '@/services/PackageService';
+import type { WarehouseInterface } from '@/interfaces/WarehouseInterface';
+import { WarehouseService } from '@/services/WarehouseService';
 
 const route = useRoute();
 const router = useRouter();
-// Normalize route param once to keep strongly typed service calls.
-const packageId = Number(route.params.id);
+const packageId = String(route.params.id);
 
-const pkg = PackageService.getPackageById(packageId);
-const warehouse = pkg ? WarehouseService.getWarehouseById(pkg.warehouseId) : undefined;
-const owner = pkg ? UserService.getUserById(pkg.userId) : undefined;
-const warehouses = WarehouseService.getWarehouses();
+const pkg = ref<PackageInterface | null>(null);
+const warehouses = ref<WarehouseInterface[]>([]);
+const isLoading = ref<boolean>(true);
+const editMode = ref<boolean>(false);
+const editStatus = ref<PackageStatus>('Pending');
+const editDescription = ref<string>('');
+const editWarehouseId = ref<string>('');
+const errorMessage = ref<string>('');
 
-const editMode = ref(false);
-const editStatus = ref(pkg?.status ?? "");
-const editDescription = ref(pkg?.description ?? "");
-const editWarehouseId = ref(pkg?.warehouseId ?? 0);
+const STATUS_OPTIONS: PackageStatus[] = [
+  'Pending',
+  'In Transit',
+  'Delivered',
+  'Exception',
+  'At Warehouse',
+];
 
-// Reset edit fields from persisted package state to avoid stale form values.
+async function refreshPackage(): Promise<void> {
+  pkg.value = await PackageService.getPackageById(packageId);
+}
+
 function startEdit(): void {
-  editStatus.value = pkg?.status ?? "";
-  editDescription.value = pkg?.description ?? "";
-  editWarehouseId.value = pkg?.warehouseId ?? 0;
+  if (!pkg.value) return;
+  editStatus.value = pkg.value.status;
+  editDescription.value = pkg.value.description;
+  editWarehouseId.value = pkg.value.warehouse.id;
   editMode.value = true;
+  errorMessage.value = '';
 }
 
-// Delegate mutations to the service to keep business rules out of the view.
-function saveEdit(): void {
-  PackageService.updatePackage(packageId, {
-    status: editStatus.value,
-    description: editDescription.value,
-    warehouseId: editWarehouseId.value,
-  });
-  editMode.value = false;
+async function saveEdit(): Promise<void> {
+  errorMessage.value = '';
+  try {
+    await PackageService.updatePackage(packageId, {
+      status: editStatus.value,
+      description: editDescription.value,
+      warehouseId: editWarehouseId.value,
+    });
+    await refreshPackage();
+    editMode.value = false;
+  } catch (err) {
+    errorMessage.value =
+      err instanceof Error ? err.message : 'Unable to update package.';
+  }
 }
 
-// Navigate back to the list after deletion to avoid stale detail routes.
-function deletePackage(): void {
-  PackageService.deletePackage(packageId);
-  router.push("/packages");
+async function deletePackage(): Promise<void> {
+  await PackageService.deletePackage(packageId);
+  await router.push('/packages');
 }
+
+onMounted(async () => {
+  try {
+    const [loaded, whs] = await Promise.all([
+      PackageService.getPackageById(packageId),
+      WarehouseService.getWarehouses(),
+    ]);
+    pkg.value = loaded;
+    warehouses.value = whs;
+  } catch {
+    pkg.value = null;
+  } finally {
+    isLoading.value = false;
+  }
+});
 </script>
 
 <template>
-  <section v-if="pkg" class="space-y-8">
-    <!-- Package Header -->
+  <section v-if="isLoading" class="flex items-center justify-center py-20">
+    <p class="text-soft">Loading package...</p>
+  </section>
+
+  <section v-else-if="pkg" class="space-y-8">
     <div class="bg-panel rounded-xl border border-wire p-8">
       <div
         class="flex flex-col md:flex-row md:items-center justify-between gap-6"
       >
         <div>
-          <h2 class="text-2xl font-black text-body">
-            {{ pkg.description }}
-          </h2>
+          <h2 class="text-2xl font-black text-body">{{ pkg.description }}</h2>
         </div>
         <div class="flex items-center gap-3">
           <StatusBadge :status="pkg.status" class="text-sm px-4 py-2" />
@@ -83,8 +119,10 @@ function deletePackage(): void {
       </div>
     </div>
 
-    <!-- Edit Form -->
-    <div v-if="editMode" class="bg-panel rounded-xl border border-wire p-6 space-y-4">
+    <div
+      v-if="editMode"
+      class="bg-panel rounded-xl border border-wire p-6 space-y-4"
+    >
       <h3 class="text-lg font-bold text-body">Edit Package</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -93,11 +131,9 @@ function deletePackage(): void {
             v-model="editStatus"
             class="select-control w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
           >
-            <option>Pending</option>
-            <option>In Transit</option>
-            <option>Delivered</option>
-            <option>Exception</option>
-            <option>At Warehouse</option>
+            <option v-for="status in STATUS_OPTIONS" :key="status" :value="status">
+              {{ status }}
+            </option>
           </select>
         </div>
         <div>
@@ -111,13 +147,16 @@ function deletePackage(): void {
         <div>
           <label class="block text-sm font-semibold text-soft mb-2">Warehouse</label>
           <select
-            v-model.number="editWarehouseId"
+            v-model="editWarehouseId"
             class="select-control w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
           >
-            <option v-for="wh in warehouses" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
+            <option v-for="wh in warehouses" :key="wh.id" :value="wh.id">
+              {{ wh.name }}
+            </option>
           </select>
         </div>
       </div>
+      <p v-if="errorMessage" class="text-rose-400 text-sm">{{ errorMessage }}</p>
       <div class="flex gap-3">
         <button
           class="bg-primary font-bold py-2.5 px-6 rounded-lg text-sm hover:bg-primary-dark transition-all"
@@ -134,29 +173,20 @@ function deletePackage(): void {
       </div>
     </div>
 
-    <!-- Package Info -->
     <div class="bg-panel rounded-xl border border-wire p-6">
-      <h3 class="text-lg font-bold text-body mb-4">
-        Package Information
-      </h3>
+      <h3 class="text-lg font-bold text-body mb-4">Package Information</h3>
       <div class="space-y-3">
         <div class="flex justify-between border-b border-wire-subtle pb-3">
           <span class="text-soft">Owner</span>
-          <span class="font-medium text-body">{{
-            owner?.name ?? "Unknown User"
-          }}</span>
+          <span class="font-medium text-body">{{ pkg.user?.name ?? 'Unknown User' }}</span>
         </div>
         <div class="flex justify-between border-b border-wire-subtle pb-3">
           <span class="text-soft">Description</span>
-          <span class="font-medium text-body">{{
-            pkg.description
-          }}</span>
+          <span class="font-medium text-body">{{ pkg.description }}</span>
         </div>
         <div class="flex justify-between border-b border-wire-subtle pb-3">
           <span class="text-soft">Warehouse</span>
-          <span class="font-medium text-body">{{
-            warehouse?.name ?? "Unknown Warehouse"
-          }}</span>
+          <span class="font-medium text-body">{{ pkg.warehouse?.name ?? 'Unknown Warehouse' }}</span>
         </div>
         <div class="flex justify-between">
           <span class="text-soft">Status</span>
@@ -165,9 +195,8 @@ function deletePackage(): void {
       </div>
     </div>
 
-    <!-- Tracking Events -->
     <div class="bg-panel rounded-xl border border-wire p-6">
-      <PackageEvents :package-id="pkg.id" />
+      <PackageEvents :package-id="pkg.id" :warehouses="warehouses" />
     </div>
   </section>
 

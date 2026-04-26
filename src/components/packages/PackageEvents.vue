@@ -1,131 +1,190 @@
-<!-- @author David Hdez, Juan Andrés Young  -->
+<!-- @author David Hdez, Juan Andrés Young -->
 <script setup lang="ts">
-// external imports
-import { computed, ref } from "vue";
+// External imports
+import { computed, onMounted, ref, watch } from 'vue';
 
-// internal imports
-import type { CreatePackageLogDTO } from "@/dtos/packagelogs/CreatePackageLogDTO";
-import { formatDateTime } from "@/utils/formatters";
-import type { PackageLogInterface } from "@/interfaces/PackageLogInterface";
-import { PackageLogService } from "@/services/PackageLogService";
-import { WarehouseService } from "@/services/WarehouseService";
+// Internal imports
+import type { CreatePackageLogDTO } from '@/dtos/packagelogs/CreatePackageLogDTO';
+import { formatDateTime } from '@/utils/formatters';
+import type {
+  PackageLogInterface,
+} from '@/interfaces/PackageLogInterface';
+import type { PackageStatus } from '@/interfaces/PackageInterface';
+import type { UpdatePackageLogDTO } from '@/dtos/packagelogs/UpdatePackageLogDTO';
+import type { WarehouseInterface } from '@/interfaces/WarehouseInterface';
+import { PackageLogService } from '@/services/PackageLogService';
 
 const props = defineProps<{
-  packageId: number;
+  packageId: string;
+  warehouses: WarehouseInterface[];
 }>();
 
-const events = computed(() =>
-  PackageLogService.getPackageLogsByPackageId(props.packageId),
+const STATUS_OPTIONS: PackageStatus[] = [
+  'Pending',
+  'In Transit',
+  'Delivered',
+  'Exception',
+  'At Warehouse',
+];
+
+const events = ref<PackageLogInterface[]>([]);
+const isLoading = ref<boolean>(true);
+const errorMessage = ref<string>('');
+
+const canManageRoutes = computed<boolean>(() => props.warehouses.length >= 2);
+const defaultFromWarehouseId = computed<string>(
+  () => props.warehouses[0]?.id ?? '',
+);
+const defaultToWarehouseId = computed<string>(
+  () => props.warehouses[1]?.id ?? defaultFromWarehouseId.value,
 );
 
-const warehouses = computed(() => WarehouseService.getWarehouses());
-// Transfers require two distinct warehouses to build a valid route.
-const canManageRoutes = computed<boolean>(() => warehouses.value.length >= 2);
+const fromWarehouseId = ref<string>('');
+const toWarehouseId = ref<string>('');
+const newPreviousStatus = ref<PackageStatus | ''>('');
+const newNewStatus = ref<PackageStatus | ''>('');
+const newDescription = ref<string>('');
 
-const defaultFromWarehouseId = computed<number>(() => warehouses.value[0]?.id ?? 1);
-const defaultToWarehouseId = computed<number>(
-  () => warehouses.value[1]?.id ?? defaultFromWarehouseId.value,
-);
+const editingEventId = ref<string | null>(null);
+const editFromWarehouseId = ref<string>('');
+const editToWarehouseId = ref<string>('');
+const editPreviousStatus = ref<PackageStatus | ''>('');
+const editNewStatus = ref<PackageStatus | ''>('');
+const editDescription = ref<string>('');
 
-const fromWarehouseId = ref<number>(defaultFromWarehouseId.value);
-const toWarehouseId = ref<number>(defaultToWarehouseId.value);
-const newPreviousStatus = ref<string>("");
-const newNewStatus = ref<string>("");
-const newDescription = ref<string>("");
-const editingEventId = ref<number | null>(null);
-const editFromWarehouseId = ref<number>(defaultFromWarehouseId.value);
-const editToWarehouseId = ref<number>(defaultToWarehouseId.value);
-const editPreviousStatus = ref<string>("");
-const editNewStatus = ref<string>("");
-const editDescription = ref<string>("");
-const errorMessage = ref<string>("");
-
-// Keep create/edit actions disabled when route constraints are not met.
 const isCreateActionDisabled = computed<boolean>(
-  () => !canManageRoutes.value || fromWarehouseId.value === toWarehouseId.value,
+  () =>
+    !canManageRoutes.value || fromWarehouseId.value === toWarehouseId.value,
 );
 const isEditActionDisabled = computed<boolean>(
-  () => !canManageRoutes.value || editFromWarehouseId.value === editToWarehouseId.value,
+  () =>
+    !canManageRoutes.value ||
+    editFromWarehouseId.value === editToWarehouseId.value,
 );
 
-function getWarehouseName(warehouseId: number): string {
-  return WarehouseService.getWarehouseById(warehouseId)?.name ?? "Unknown Warehouse";
+watch(
+  () => props.warehouses,
+  () => {
+    if (!fromWarehouseId.value) fromWarehouseId.value = defaultFromWarehouseId.value;
+    if (!toWarehouseId.value) toWarehouseId.value = defaultToWarehouseId.value;
+  },
+  { immediate: true, deep: true },
+);
+
+watch(
+  () => props.packageId,
+  () => {
+    void refreshEvents();
+  },
+);
+
+async function refreshEvents(): Promise<void> {
+  if (!props.packageId) return;
+  events.value = await PackageLogService.getPackageLogsByPackageId(
+    props.packageId,
+  );
 }
 
 function getRouteLabel(event: PackageLogInterface): string {
-  return `${getWarehouseName(event.fromWarehouseId)} -> ${getWarehouseName(event.toWarehouseId)}`;
+  const from = event.fromWarehouse?.name ?? 'Unknown Warehouse';
+  const to = event.toWarehouse?.name ?? 'Unknown Warehouse';
+  return `${from} -> ${to}`;
 }
 
 function resetCreateForm(): void {
   fromWarehouseId.value = defaultFromWarehouseId.value;
   toWarehouseId.value = defaultToWarehouseId.value;
-  newPreviousStatus.value = "";
-  newNewStatus.value = "";
-  newDescription.value = "";
+  newPreviousStatus.value = '';
+  newNewStatus.value = '';
+  newDescription.value = '';
 }
 
-function addTrackingEvent(): void {
+async function addTrackingEvent(): Promise<void> {
+  errorMessage.value = '';
   if (!canManageRoutes.value) {
-    errorMessage.value = "At least two warehouses are required to create a route log.";
+    errorMessage.value =
+      'At least two warehouses are required to create a route log.';
     return;
   }
 
-  const eventPayload: CreatePackageLogDTO = {
+  const payload: CreatePackageLogDTO = {
     packageId: props.packageId,
     fromWarehouseId: fromWarehouseId.value,
     toWarehouseId: toWarehouseId.value,
-    previousStatus: newPreviousStatus.value,
-    newStatus: newNewStatus.value,
-    description: newDescription.value,
   };
-
-  errorMessage.value = "";
+  if (newPreviousStatus.value) payload.previousStatus = newPreviousStatus.value;
+  if (newNewStatus.value) payload.newStatus = newNewStatus.value;
+  if (newDescription.value) payload.description = newDescription.value;
 
   try {
-    PackageLogService.createPackageLog(eventPayload);
+    await PackageLogService.createPackageLog(payload);
     resetCreateForm();
-  } catch (error: unknown) {
+    await refreshEvents();
+  } catch (err: unknown) {
     errorMessage.value =
-      error instanceof Error ? error.message : "Unable to create tracking event.";
+      err instanceof Error ? err.message : 'Unable to create tracking event.';
   }
 }
 
 function startEdit(event: PackageLogInterface): void {
   editingEventId.value = event.id;
-  editFromWarehouseId.value = event.fromWarehouseId;
-  editToWarehouseId.value = event.toWarehouseId;
-  editPreviousStatus.value = event.previousStatus ?? "";
-  editNewStatus.value = event.newStatus ?? "";
-  editDescription.value = event.description ?? "";
-  errorMessage.value = "";
+  editFromWarehouseId.value = event.fromWarehouse?.id ?? '';
+  editToWarehouseId.value = event.toWarehouse?.id ?? '';
+  editPreviousStatus.value = event.previousStatus ?? '';
+  editNewStatus.value = event.newStatus ?? '';
+  editDescription.value = event.description ?? '';
+  errorMessage.value = '';
 }
 
 function cancelEdit(): void {
   editingEventId.value = null;
 }
 
-function saveEdit(eventId: number): void {
-  errorMessage.value = "";
-
+async function saveEdit(eventId: string): Promise<void> {
+  errorMessage.value = '';
   if (!canManageRoutes.value) {
-    errorMessage.value = "At least two warehouses are required to edit a route log.";
+    errorMessage.value =
+      'At least two warehouses are required to edit a route log.';
     return;
   }
 
+  const payload: UpdatePackageLogDTO = {
+    fromWarehouseId: editFromWarehouseId.value,
+    toWarehouseId: editToWarehouseId.value,
+  };
+  if (editPreviousStatus.value) payload.previousStatus = editPreviousStatus.value;
+  if (editNewStatus.value) payload.newStatus = editNewStatus.value;
+  if (editDescription.value) payload.description = editDescription.value;
+
   try {
-    PackageLogService.updatePackageLog(eventId, {
-      fromWarehouseId: editFromWarehouseId.value,
-      toWarehouseId: editToWarehouseId.value,
-      previousStatus: editPreviousStatus.value,
-      newStatus: editNewStatus.value,
-      description: editDescription.value,
-    });
+    await PackageLogService.updatePackageLog(eventId, payload);
     editingEventId.value = null;
-  } catch (error: unknown) {
+    await refreshEvents();
+  } catch (err: unknown) {
     errorMessage.value =
-      error instanceof Error ? error.message : "Unable to update tracking event.";
+      err instanceof Error ? err.message : 'Unable to update tracking event.';
   }
 }
+
+async function deleteEvent(eventId: string): Promise<void> {
+  errorMessage.value = '';
+  try {
+    await PackageLogService.deletePackageLog(eventId);
+    if (editingEventId.value === eventId) editingEventId.value = null;
+    await refreshEvents();
+  } catch (err: unknown) {
+    errorMessage.value =
+      err instanceof Error ? err.message : 'Unable to delete tracking event.';
+  }
+}
+
+onMounted(async () => {
+  try {
+    await refreshEvents();
+  } finally {
+    isLoading.value = false;
+  }
+});
 </script>
 
 <template>
@@ -139,10 +198,14 @@ function saveEdit(eventId: number): void {
         <div>
           <label class="block text-xs font-semibold text-soft mb-2">From Warehouse</label>
           <select
-            v-model.number="fromWarehouseId"
+            v-model="fromWarehouseId"
             class="select-control w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
           >
-            <option v-for="warehouse in warehouses" :key="warehouse.id" :value="warehouse.id">
+            <option
+              v-for="warehouse in warehouses"
+              :key="warehouse.id"
+              :value="warehouse.id"
+            >
               {{ warehouse.name }}
             </option>
           </select>
@@ -151,10 +214,14 @@ function saveEdit(eventId: number): void {
         <div>
           <label class="block text-xs font-semibold text-soft mb-2">To Warehouse</label>
           <select
-            v-model.number="toWarehouseId"
+            v-model="toWarehouseId"
             class="select-control w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
           >
-            <option v-for="warehouse in warehouses" :key="warehouse.id" :value="warehouse.id">
+            <option
+              v-for="warehouse in warehouses"
+              :key="warehouse.id"
+              :value="warehouse.id"
+            >
               {{ warehouse.name }}
             </option>
           </select>
@@ -164,21 +231,27 @@ function saveEdit(eventId: number): void {
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
           <label class="block text-xs font-semibold text-soft mb-2">Previous Status</label>
-          <input
+          <select
             v-model="newPreviousStatus"
-            type="text"
-            class="w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="e.g. Pending"
-          />
+            class="select-control w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="">—</option>
+            <option v-for="status in STATUS_OPTIONS" :key="status" :value="status">
+              {{ status }}
+            </option>
+          </select>
         </div>
         <div>
           <label class="block text-xs font-semibold text-soft mb-2">New Status</label>
-          <input
+          <select
             v-model="newNewStatus"
-            type="text"
-            class="w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="e.g. In Transit"
-          />
+            class="select-control w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="">—</option>
+            <option v-for="status in STATUS_OPTIONS" :key="status" :value="status">
+              {{ status }}
+            </option>
+          </select>
         </div>
       </div>
 
@@ -217,16 +290,15 @@ function saveEdit(eventId: number): void {
       {{ errorMessage }}
     </p>
 
-    <!-- Event timeline -->
-    <div class="relative pl-6 space-y-6">
+    <p v-if="isLoading" class="text-soft text-sm">Loading events...</p>
+
+    <div v-else class="relative pl-6 space-y-6">
       <div class="absolute left-2 top-2 bottom-2 w-0.5 bg-primary/20"></div>
       <div v-for="event in events" :key="event.id" class="relative">
         <div
           class="absolute -left-4 top-1 size-3 rounded-full bg-primary shadow-[0_0_8px_rgba(45,212,191,0.4)]"
         ></div>
-        <div
-          class="bg-sheet rounded-lg border border-wire-subtle p-4 ml-2"
-        >
+        <div class="bg-sheet rounded-lg border border-wire-subtle p-4 ml-2">
           <div class="flex items-center justify-between gap-2 mb-2">
             <span class="font-medium text-body text-sm">{{ getRouteLabel(event) }}</span>
             <div class="flex items-center gap-2">
@@ -238,6 +310,14 @@ function saveEdit(eventId: number): void {
                 <span class="material-symbols-outlined text-sm">edit</span>
                 Edit
               </button>
+              <button
+                type="button"
+                class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all"
+                @click="deleteEvent(event.id)"
+              >
+                <span class="material-symbols-outlined text-sm">delete</span>
+                Delete
+              </button>
             </div>
           </div>
 
@@ -246,10 +326,14 @@ function saveEdit(eventId: number): void {
               <div>
                 <label class="block text-xs font-semibold text-soft mb-2">From Warehouse</label>
                 <select
-                  v-model.number="editFromWarehouseId"
+                  v-model="editFromWarehouseId"
                   class="select-control w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
                 >
-                  <option v-for="warehouse in warehouses" :key="warehouse.id" :value="warehouse.id">
+                  <option
+                    v-for="warehouse in warehouses"
+                    :key="warehouse.id"
+                    :value="warehouse.id"
+                  >
                     {{ warehouse.name }}
                   </option>
                 </select>
@@ -258,10 +342,14 @@ function saveEdit(eventId: number): void {
               <div>
                 <label class="block text-xs font-semibold text-soft mb-2">To Warehouse</label>
                 <select
-                  v-model.number="editToWarehouseId"
+                  v-model="editToWarehouseId"
                   class="select-control w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
                 >
-                  <option v-for="warehouse in warehouses" :key="warehouse.id" :value="warehouse.id">
+                  <option
+                    v-for="warehouse in warehouses"
+                    :key="warehouse.id"
+                    :value="warehouse.id"
+                  >
                     {{ warehouse.name }}
                   </option>
                 </select>
@@ -269,22 +357,28 @@ function saveEdit(eventId: number): void {
 
               <div>
                 <label class="block text-xs font-semibold text-soft mb-2">Previous Status</label>
-                <input
+                <select
                   v-model="editPreviousStatus"
-                  type="text"
-                  class="w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
-                  placeholder="e.g. Pending"
-                />
+                  class="select-control w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="">—</option>
+                  <option v-for="status in STATUS_OPTIONS" :key="status" :value="status">
+                    {{ status }}
+                  </option>
+                </select>
               </div>
 
               <div>
                 <label class="block text-xs font-semibold text-soft mb-2">New Status</label>
-                <input
+                <select
                   v-model="editNewStatus"
-                  type="text"
-                  class="w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
-                  placeholder="e.g. In Transit"
-                />
+                  class="select-control w-full bg-panel border border-wire rounded-lg p-2.5 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="">—</option>
+                  <option v-for="status in STATUS_OPTIONS" :key="status" :value="status">
+                    {{ status }}
+                  </option>
+                </select>
               </div>
             </div>
 
@@ -318,13 +412,22 @@ function saveEdit(eventId: number): void {
           </div>
 
           <div class="space-y-1.5 mt-1">
-            <div v-if="event.previousStatus || event.newStatus" class="flex items-center gap-2 text-xs">
+            <div
+              v-if="event.previousStatus || event.newStatus"
+              class="flex items-center gap-2 text-xs"
+            >
               <span class="text-faded">Status:</span>
               <span v-if="event.previousStatus" class="text-soft">{{ event.previousStatus }}</span>
-              <span v-if="event.previousStatus && event.newStatus" class="material-symbols-outlined text-xs text-faded">arrow_forward</span>
+              <span
+                v-if="event.previousStatus && event.newStatus"
+                class="material-symbols-outlined text-xs text-faded"
+                >arrow_forward</span
+              >
               <span v-if="event.newStatus" class="text-primary font-semibold">{{ event.newStatus }}</span>
             </div>
-            <p v-if="event.description" class="text-xs text-soft">{{ event.description }}</p>
+            <p v-if="event.description" class="text-xs text-soft">
+              {{ event.description }}
+            </p>
             <div class="flex items-center gap-4 text-xs text-faded">
               <span class="flex items-center gap-1">
                 <span class="material-symbols-outlined text-xs">swap_horiz</span>
