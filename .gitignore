@@ -7,15 +7,22 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
-.DS_Store
+
+# Build output
 dist
 dist-ssr
-coverage
 *.local
 
+# Test artifacts
+coverage
+__screenshots__/
 /cypress/videos/
 /cypress/screenshots/
+
+# OS
+.DS_Store
 
 # Editor directories and files
 .vscode/*
@@ -26,3 +33,20 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+
+# TypeScript / lint caches
+*.tsbuildinfo
+.eslintcache
+
+# Vite temp files
+*.timestamp-*-*.mjs
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# SQLite
+*.sqlite
+*.sqlite-journal
+*.sqlite3
