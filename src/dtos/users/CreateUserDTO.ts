@@ -1,5 +1,11 @@
-/** @author David Hdez */
-// internal imports
-import type { UserInterface } from "@/interfaces/UserInterface";
+/** @author David Hdez, Juan Andrés Young */
+// Internal imports
+import type { Role } from '@/interfaces/UserInterface';
 
-export type CreateUserDTO = Omit<UserInterface, "id">;
+export interface CreateUserDTO {
+  name: string;
+  email: string;
+  password: string;
+  role?: Role;
+  avatarUrl?: string;
+}

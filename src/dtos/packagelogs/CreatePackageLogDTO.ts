@@ -1,5 +1,12 @@
-/** @author David Hdez */
-// internal imports
-import type { PackageLogInterface } from "@/interfaces/PackageLogInterface";
+/** @author David Hdez, Juan Andrés Young */
+// Internal imports
+import type { PackageStatus } from '@/interfaces/PackageInterface';
 
-export type CreatePackageLogDTO = Omit<PackageLogInterface, "id" | "timestamp">;
+export interface CreatePackageLogDTO {
+  packageId: string;
+  fromWarehouseId: string;
+  toWarehouseId: string;
+  previousStatus?: PackageStatus;
+  newStatus?: PackageStatus;
+  description?: string;
+}

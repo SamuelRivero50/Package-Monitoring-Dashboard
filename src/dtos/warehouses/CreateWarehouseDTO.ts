@@ -1,5 +1,9 @@
-/** @author David Hdez */
-// internal imports
-import type { WarehouseInterface } from "@/interfaces/WarehouseInterface";
-
-export type CreateWarehouseDTO = Omit<WarehouseInterface, "id">;
+/** @author David Hdez, Juan Andrés Young */
+export interface CreateWarehouseDTO {
+  name: string;
+  location: string;
+  capacity: number;
+  currentLoad?: number;
+  managerName: string;
+  imageUrl?: string;
+}
