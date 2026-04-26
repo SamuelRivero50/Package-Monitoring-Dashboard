@@ -62,13 +62,67 @@ The API listens on `http://localhost:3000` with global prefix `/api`.
 
 All optional — sane defaults are baked in.
 
-| Variable | Default | Purpose |
+| Variable | Default | What it does |
 |---|---|---|
-| `PORT` | `3000` | HTTP port |
-| `CORS_ORIGIN` | `http://localhost:5173, http://localhost, http://127.0.0.1` | Comma-separated list of allowed origins |
-| `SQLITE_PATH` | `database.sqlite` | Path to the SQLite file (relative to backend/) |
+| `PORT` | `3000` | HTTP port the API listens on |
+| `CORS_ORIGIN` | `http://localhost:5173,http://localhost,http://127.0.0.1` | Comma-separated origins allowed by CORS |
+| `SQLITE_PATH` | `database.sqlite` | Path to the SQLite DB file (relative to `backend/`) |
 
-The JWT signing secret currently lives in `src/auth/constants.ts` and is **not** read from env (intentional simplification — see `docs/authentication.md`).
+To override, copy the template and edit:
+
+```bash
+cp .env.example .env
+# edit values, then start the dev server normally
+npm run start:dev
+```
+
+`.env` is gitignored; `.env.example` is committed. The JWT signing secret lives in `src/auth/constants.ts` (not in env).
+
+## Database (SQLite)
+
+The connection lives in `src/app.module.ts`:
+
+```ts
+TypeOrmModule.forRoot({
+  type: 'sqlite',
+  database: process.env.SQLITE_PATH ?? 'database.sqlite',
+  autoLoadEntities: true,
+  synchronize: true,
+}),
+```
+
+What that means:
+
+- **`type: 'sqlite'`** — uses a single file, no server to install.
+- **`database`** — the SQLite file. Created automatically on first boot at `backend/database.sqlite`.
+- **`autoLoadEntities: true`** — TypeORM picks up every entity registered with `TypeOrmModule.forFeature([Entity])` in any imported module. No manual list to maintain.
+- **`synchronize: true`** — schema is rebuilt from the entity classes on every start. Great for dev; lose your data if you rename a property.
+
+### Adding a new entity
+
+1. Create `src/<feature>/entities/<feature>.entity.ts` decorated with `@Entity()` + column decorators.
+2. Register it in the feature module: `imports: [TypeOrmModule.forFeature([Feature])]`.
+3. Import the feature module from `AppModule`.
+4. Restart `npm run start:dev`. The table is created automatically.
+
+### Inspecting the database
+
+```bash
+# CLI
+sqlite3 backend/database.sqlite
+> .tables
+> SELECT * FROM "user";
+```
+
+GUI: open `backend/database.sqlite` in **DBeaver** (New Connection → SQLite → set Path) or **DB Browser for SQLite** (`sqlitebrowser backend/database.sqlite`). Stop the backend before writing from a GUI to avoid locks; reads are safe while it runs.
+
+### Resetting the database
+
+```bash
+# Stop the backend, delete the file, restart — schema is rebuilt automatically
+rm backend/database.sqlite
+npm run start:dev
+```
 
 ## High-level architecture
 
