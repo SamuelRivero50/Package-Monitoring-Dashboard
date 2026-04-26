@@ -1,13 +1,18 @@
-/** @author David Hdez */
-export interface PackageLogInterface {
-  id: number;
-  timestamp: Date;
-  previousStatus?: string;
-  newStatus?: string;
-  description?: string;
+/** @author David Hdez, Juan Andrés Young */
+// Internal imports
+import type {
+  PackageInterface,
+  PackageStatus,
+} from '@/interfaces/PackageInterface';
+import type { WarehouseInterface } from '@/interfaces/WarehouseInterface';
 
-  // relations
-  packageId: number;
-  fromWarehouseId: number;
-  toWarehouseId: number;
+export interface PackageLogInterface {
+  id: string;
+  timestamp: string;
+  previousStatus: PackageStatus | null;
+  newStatus: PackageStatus | null;
+  description: string | null;
+  package: PackageInterface;
+  fromWarehouse: WarehouseInterface;
+  toWarehouse: WarehouseInterface;
 }

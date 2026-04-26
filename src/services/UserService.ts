@@ -1,32 +1,32 @@
-/** @author David Hdez */
-// internal imports
-import type { CreateUserDTO } from "@/dtos/users/CreateUserDTO";
-import type { UserInterface } from "@/interfaces/UserInterface";
-import { useUserStore } from "@/stores/userstore";
+/** @author David Hdez, Juan Andrés Young */
+// Internal imports
+import type { UpdateUserDTO } from '@/dtos/users/UpdateUserDTO';
+import type { UserInterface } from '@/interfaces/UserInterface';
+import { httpClient } from '@/services/httpClient';
 
 export class UserService {
-  static getUsers(): UserInterface[] {
-    return useUserStore().users;
+  static async getUsers(): Promise<UserInterface[]> {
+    const { data } = await httpClient.get<UserInterface[]>('users');
+    return data;
   }
 
-  static getUserById(id: number): UserInterface | undefined {
-    return useUserStore().users.find((u) => u.id === id);
+  static async getUserById(id: string): Promise<UserInterface> {
+    const { data } = await httpClient.get<UserInterface>(`users/${id}`);
+    return data;
   }
 
-  static createUser(user: CreateUserDTO): void {
-    const id = useUserStore().users.length + 1;
-    useUserStore().users.push({ id, ...user });
+  static async updateUser(
+    id: string,
+    payload: UpdateUserDTO,
+  ): Promise<UserInterface> {
+    const { data } = await httpClient.patch<UserInterface>(
+      `users/${id}`,
+      payload,
+    );
+    return data;
   }
 
-  static updateUser(id: number, data: Partial<CreateUserDTO>): void {
-    const user = useUserStore().users.find((u) => u.id === id);
-    if (user) Object.assign(user, data);
+  static async deleteUser(id: string): Promise<void> {
+    await httpClient.delete(`users/${id}`);
   }
-
-  static deleteUser(id: number): void {
-    const store = useUserStore();
-    const index = store.users.findIndex((u) => u.id === id);
-    if (index !== -1) store.users.splice(index, 1);
-  }
-
 }
