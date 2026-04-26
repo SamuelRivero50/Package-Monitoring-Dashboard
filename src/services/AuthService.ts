@@ -1,62 +1,43 @@
-/** @author David Hdez */
-// internal imports
-import type { UserInterface } from "@/interfaces/UserInterface";
-import { useAuthStore } from "@/stores/authstore";
-import { useUserStore } from "@/stores/userstore";
+/** @author David Hdez, Juan Andrés Young */
+// Internal imports
+import { ACCESS_TOKEN_KEY, httpClient } from '@/services/httpClient';
+import type { RegisterDTO } from '@/dtos/users/RegisterDTO';
+import type { UserInterface } from '@/interfaces/UserInterface';
+
+interface AccessTokenResponse {
+  access_token: string;
+}
 
 export class AuthService {
-  static getCurrentUser(): UserInterface | null {
-    return useAuthStore().currentUser;
+  static async login(email: string, password: string): Promise<void> {
+    const { data } = await httpClient.post<AccessTokenResponse>('auth/login', {
+      email,
+      password,
+    });
+    localStorage.setItem(ACCESS_TOKEN_KEY, data.access_token);
   }
 
-  static isAuthenticated(): boolean {
-    return useAuthStore().isAuthenticated;
-  }
-
-  static isAdmin(): boolean {
-    return useAuthStore().currentUser?.role === "Admin";
-  }
-
-  static login(email: string, password: string): void {
-    const normalizedEmail = email.trim().toLowerCase();
-    const user = useUserStore().users.find(
-      (u) =>
-        u.email.toLowerCase() === normalizedEmail && u.password === password,
+  static async register(payload: RegisterDTO): Promise<void> {
+    const { data } = await httpClient.post<AccessTokenResponse>(
+      'auth/register',
+      payload,
     );
-    if (!user) throw new Error("Invalid email or password.");
-    useAuthStore().currentUser = user;
+    localStorage.setItem(ACCESS_TOKEN_KEY, data.access_token);
   }
 
-  static register(name: string, email: string, password: string): void {
-    const trimmedName = name.trim();
-    const normalizedEmail = email.trim().toLowerCase();
-    const trimmedPassword = password.trim();
+  static async getCurrentUser(): Promise<UserInterface | null> {
+    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+    if (!token) return null;
 
-    if (!trimmedName || !normalizedEmail || !trimmedPassword) {
-      throw new Error("All fields are required.");
+    try {
+      const { data } = await httpClient.get<UserInterface>('auth/profile');
+      return data;
+    } catch {
+      return null;
     }
-
-    const existingUser = useUserStore().users.find(
-      (u) => u.email.toLowerCase() === normalizedEmail,
-    );
-    if (existingUser) {
-      throw new Error("Email already registered.");
-    }
-
-    const newUser: UserInterface = {
-      id: useUserStore().users.length + 1,
-      name: trimmedName,
-      email: normalizedEmail,
-      password: trimmedPassword,
-      role: "User",
-      avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(trimmedName)}&background=6366f1&color=fff&size=150`,
-    };
-
-    useUserStore().users.push(newUser);
-    useAuthStore().currentUser = newUser;
   }
 
   static logout(): void {
-    useAuthStore().currentUser = null;
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
   }
 }
