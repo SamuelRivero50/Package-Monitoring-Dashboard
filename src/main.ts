@@ -1,16 +1,16 @@
-/** @author David Hdez */
-// external imports
-import { createApp } from "vue";
+/** @author David Hdez, Juan Andrés Young */
+// External imports
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 
-// internal imports
-import App from "./App.vue";
-import "./assets/css/input.css";
-import PiniaConfig from "./PiniaConfig";
-import router from "./router";
+// Internal imports
+import App from './App.vue';
+import './assets/css/input.css';
+import router from './router';
 
 const app = createApp(App);
 
-app.use(PiniaConfig.init());
+app.use(createPinia());
 app.use(router);
 
-app.mount("#app");
+app.mount('#app');
