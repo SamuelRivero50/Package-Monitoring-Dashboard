@@ -1,9 +1,12 @@
-/** @author David Hdez */
+/** @author David Hdez, Juan Andrés Young */
+export type Role = 'Admin' | 'User';
+
 export interface UserInterface {
-  id: number;
+  id: string;
   name: string;
   email: string;
-  password: string;
-  role: string;
-  avatarUrl: string;
+  role: Role;
+  avatarUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

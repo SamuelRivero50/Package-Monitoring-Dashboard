@@ -1,10 +1,12 @@
-/** @author David Hdez */
+/** @author David Hdez, Juan Andrés Young */
 export interface WarehouseInterface {
-  id: number;
+  id: string;
   name: string;
   location: string;
   capacity: number;
   currentLoad: number;
   managerName: string;
-  imageUrl: string;
+  imageUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
