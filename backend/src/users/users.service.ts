@@ -1,26 +1,39 @@
 // External imports
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 // Internal imports
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 
+const BCRYPT_ROUNDS = 10;
+
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>,
   ) {}
 
   async findAll(): Promise<User[]> {
     return await this.usersRepository.find();
   }
 
-  async findById(id: string): Promise<User | null> {
-    return await this.usersRepository.findOneBy({ id });
+  async findById(id: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException(`User ${id} not found`);
+    }
+
+    return user;
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -34,31 +47,42 @@ export class UsersService {
       throw new BadRequestException('The email address is already in use');
     }
 
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      BCRYPT_ROUNDS,
+    );
+
     const user = this.usersRepository.create({
       ...createUserDto,
+      password: hashedPassword,
       role: createUserDto.role ?? 'User',
     });
 
     return await this.usersRepository.save(user);
   }
 
-  async createAdmin(): Promise<User> {
-    const admin = this.usersRepository.create({
-      name: 'Admin',
-      email: 'admin@packtrack.com',
-      password: '123',
-      role: 'Admin',
-    });
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    await this.findById(id);
 
-    return await this.usersRepository.save(admin);
-  }
+    const patch: Partial<User> = { ...updateUserDto };
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
-    await this.usersRepository.update(id, updateUserDto);
+    if (updateUserDto.password) {
+      patch.password = await bcrypt.hash(updateUserDto.password, BCRYPT_ROUNDS);
+    }
+
+    if (updateUserDto.email) {
+      const existingUser = await this.findByEmail(updateUserDto.email);
+      if (existingUser && existingUser.id !== id) {
+        throw new BadRequestException('The email address is already in use');
+      }
+    }
+
+    await this.usersRepository.update(id, patch);
     return await this.findById(id);
   }
 
   async remove(id: string): Promise<void> {
+    await this.findById(id);
     await this.usersRepository.delete(id);
   }
 }

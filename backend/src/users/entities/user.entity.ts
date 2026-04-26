@@ -3,10 +3,15 @@ import {
   Entity,
   Column,
   CreateDateColumn,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
+
+// Internal imports
+import type { Package } from '../../packages/entities/package.entity';
+import type { Role } from '../../types/UsersTypes';
 
 @Entity()
 export class User {
@@ -24,7 +29,7 @@ export class User {
   password: string;
 
   @Column({ type: 'varchar', length: 10 })
-  role: string;
+  role: Role;
 
   @Column({ type: 'varchar', nullable: true })
   avatarUrl: string;
@@ -34,4 +39,7 @@ export class User {
 
   @UpdateDateColumn({ type: 'datetime' })
   updatedAt: Date;
+
+  @OneToMany('Package', 'user')
+  packages: Package[];
 }
