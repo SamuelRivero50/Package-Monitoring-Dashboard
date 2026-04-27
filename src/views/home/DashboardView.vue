@@ -2,7 +2,7 @@
 <script setup lang="ts">
 // External imports
 import type { Chart } from 'chart.js';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 
 // Internal imports
@@ -60,9 +60,10 @@ onMounted(async () => {
     ]);
     packages.value = packagesData;
     warehouses.value = warehousesData;
-    renderChart();
   } finally {
     isLoading.value = false;
+    await nextTick();
+    renderChart();
   }
 });
 
@@ -129,7 +130,7 @@ onUnmounted(() => {
         <h2 class="font-bold text-lg text-body mb-1">Package Status</h2>
         <p class="text-xs text-faded mb-4">Distribution by current status</p>
         <div class="h-64">
-          <canvas ref="canvasRef" />
+            <canvas ref="canvasRef"></canvas>
         </div>
       </div>
 

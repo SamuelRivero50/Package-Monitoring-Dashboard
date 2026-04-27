@@ -3,7 +3,7 @@
 // External imports
 import axios from 'axios';
 import type { Chart } from 'chart.js';
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
 // Internal imports
 import { buildBarChart } from '@/utils/chartUtils';
@@ -105,7 +105,10 @@ function renderChart(): void {
   chartInstance = buildBarChart(canvasRef.value, labels, data, colors);
 }
 
-watch(warehouses, () => renderChart());
+watch(warehouses, async () => {
+  await nextTick();
+  renderChart();
+});
 
 function extractErrorMessage(err: unknown, fallback: string): string {
   if (axios.isAxiosError(err) && err.response) {
@@ -211,9 +214,10 @@ async function deleteWarehouse(warehouseId: string): Promise<void> {
 onMounted(async () => {
   try {
     await refreshWarehouses();
-    renderChart();
   } finally {
     isLoading.value = false;
+    await nextTick();
+    renderChart();
   }
 });
 
@@ -354,8 +358,8 @@ onUnmounted(() => {
       <p class="text-xs text-faded mb-4">
         Current load as % of capacity per warehouse
       </p>
-      <div class="h-52">
-        <canvas ref="canvasRef" />
+        <div class="h-52">
+        <canvas ref="canvasRef"></canvas>
       </div>
     </div>
 

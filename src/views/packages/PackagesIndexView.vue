@@ -2,7 +2,7 @@
 <script setup lang="ts">
 // External imports
 import type { Chart } from 'chart.js';
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 
 // Internal imports
@@ -91,7 +91,10 @@ function renderChart(): void {
   chartInstance = buildBarChart(canvasRef.value, labels, data, colors);
 }
 
-watch(visiblePackages, () => renderChart());
+watch(visiblePackages, async () => {
+  await nextTick();
+  renderChart();
+});
 
 onMounted(async () => {
   try {
@@ -101,9 +104,10 @@ onMounted(async () => {
     ]);
     allPackages.value = packagesData;
     warehouses.value = warehousesData;
-    renderChart();
   } finally {
     isLoading.value = false;
+    await nextTick();
+    renderChart();
   }
 });
 
@@ -180,7 +184,7 @@ onUnmounted(() => {
       <h2 class="font-bold text-lg text-body mb-1">Packages by Status</h2>
       <p class="text-xs text-faded mb-4">Count of packages per status</p>
       <div class="h-52">
-        <canvas ref="canvasRef" />
+        <canvas ref="canvasRef"></canvas>
       </div>
     </div>
 
@@ -233,6 +237,13 @@ onUnmounted(() => {
                   >
                     <span class="material-symbols-outlined text-sm">history</span>
                   </button>
+                  <RouterLink
+                    :to="{ name: 'packages.show', params: { id: packageItem.id }, query: { edit: '1' } }"
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-packages/10 text-packages border border-packages/20 hover:bg-packages/20"
+                    title="Edit package"
+                  >
+                    <span class="material-symbols-outlined text-sm">edit</span>
+                  </RouterLink>
                   <button
                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
                     title="Delete package"

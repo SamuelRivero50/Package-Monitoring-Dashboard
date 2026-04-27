@@ -59,10 +59,21 @@ async function saveEdit(): Promise<void> {
     });
     await refreshPackage();
     editMode.value = false;
+    // remove edit query param from URL after saving
+    const newQuery = { ...route.query } as Record<string, any>;
+    delete newQuery.edit;
+    await router.replace({ name: 'packages.show', params: { id: packageId }, query: newQuery });
   } catch (err) {
     errorMessage.value =
       err instanceof Error ? err.message : 'Unable to update package.';
   }
+}
+
+function closeEdit(): void {
+  editMode.value = false;
+  const newQuery = { ...route.query } as Record<string, any>;
+  delete newQuery.edit;
+  void router.replace({ name: 'packages.show', params: { id: packageId }, query: newQuery });
 }
 
 async function deletePackage(): Promise<void> {
@@ -78,6 +89,8 @@ onMounted(async () => {
     ]);
     packageItem.value = loaded;
     warehouses.value = whs;
+    // If URL has ?edit (from index/admin lists), open edit mode automatically
+    if (route.query.edit) startEdit();
   } catch {
     packageItem.value = null;
   } finally {
@@ -123,7 +136,16 @@ onMounted(async () => {
       v-if="editMode"
       class="bg-panel rounded-xl border border-wire p-6 space-y-4"
     >
-      <h3 class="text-lg font-bold text-body">Edit Package</h3>
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-body">Edit Package</h3>
+        <button
+          @click="closeEdit"
+          class="inline-flex items-center gap-1 p-2 rounded hover:bg-sheet"
+          title="Close edit"
+        >
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-semibold text-soft mb-2">Status</label>
