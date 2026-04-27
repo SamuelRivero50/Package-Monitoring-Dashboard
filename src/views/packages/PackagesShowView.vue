@@ -19,7 +19,7 @@ const route = useRoute();
 const router = useRouter();
 const packageId = String(route.params.id);
 
-const pkg = ref<PackageInterface | null>(null);
+const packageItem = ref<PackageInterface | null>(null);
 const warehouses = ref<WarehouseInterface[]>([]);
 const isLoading = ref<boolean>(true);
 const editMode = ref<boolean>(false);
@@ -37,14 +37,14 @@ const STATUS_OPTIONS: PackageStatus[] = [
 ];
 
 async function refreshPackage(): Promise<void> {
-  pkg.value = await PackageService.getPackageById(packageId);
+  packageItem.value = await PackageService.getPackageById(packageId);
 }
 
 function startEdit(): void {
-  if (!pkg.value) return;
-  editStatus.value = pkg.value.status;
-  editDescription.value = pkg.value.description;
-  editWarehouseId.value = pkg.value.warehouse.id;
+  if (!packageItem.value) return;
+  editStatus.value = packageItem.value.status;
+  editDescription.value = packageItem.value.description;
+  editWarehouseId.value = packageItem.value.warehouse.id;
   editMode.value = true;
   errorMessage.value = '';
 }
@@ -76,10 +76,10 @@ onMounted(async () => {
       PackageService.getPackageById(packageId),
       WarehouseService.getWarehouses(),
     ]);
-    pkg.value = loaded;
+    packageItem.value = loaded;
     warehouses.value = whs;
   } catch {
-    pkg.value = null;
+    packageItem.value = null;
   } finally {
     isLoading.value = false;
   }
@@ -91,16 +91,16 @@ onMounted(async () => {
     <p class="text-soft">Loading package...</p>
   </section>
 
-  <section v-else-if="pkg" class="space-y-8">
+  <section v-else-if="packageItem" class="space-y-8">
     <div class="bg-panel rounded-xl border border-wire p-8">
       <div
         class="flex flex-col md:flex-row md:items-center justify-between gap-6"
       >
         <div>
-          <h2 class="text-2xl font-black text-body">{{ pkg.description }}</h2>
+          <h2 class="text-2xl font-black text-body">{{ packageItem.description }}</h2>
         </div>
         <div class="flex items-center gap-3">
-          <StatusBadge :status="pkg.status" class="text-sm px-4 py-2" />
+          <StatusBadge :status="packageItem.status" class="text-sm px-4 py-2" />
           <button
             class="inline-flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-bold bg-panel border border-wire text-soft hover:bg-sheet transition-all"
             @click="startEdit"
@@ -178,25 +178,25 @@ onMounted(async () => {
       <div class="space-y-3">
         <div class="flex justify-between border-b border-wire-subtle pb-3">
           <span class="text-soft">Owner</span>
-          <span class="font-medium text-body">{{ pkg.user?.name ?? 'Unknown User' }}</span>
+          <span class="font-medium text-body">{{ packageItem.user?.name ?? 'Unknown User' }}</span>
         </div>
         <div class="flex justify-between border-b border-wire-subtle pb-3">
           <span class="text-soft">Description</span>
-          <span class="font-medium text-body">{{ pkg.description }}</span>
+          <span class="font-medium text-body">{{ packageItem.description }}</span>
         </div>
         <div class="flex justify-between border-b border-wire-subtle pb-3">
           <span class="text-soft">Warehouse</span>
-          <span class="font-medium text-body">{{ pkg.warehouse?.name ?? 'Unknown Warehouse' }}</span>
+          <span class="font-medium text-body">{{ packageItem.warehouse?.name ?? 'Unknown Warehouse' }}</span>
         </div>
         <div class="flex justify-between">
           <span class="text-soft">Status</span>
-          <span class="font-medium text-body">{{ pkg.status }}</span>
+          <span class="font-medium text-body">{{ packageItem.status }}</span>
         </div>
       </div>
     </div>
 
     <div class="bg-panel rounded-xl border border-wire p-6">
-      <PackageEvents :package-id="pkg.id" :warehouses="warehouses" />
+      <PackageEvents :package-id="packageItem.id" :warehouses="warehouses" />
     </div>
   </section>
 

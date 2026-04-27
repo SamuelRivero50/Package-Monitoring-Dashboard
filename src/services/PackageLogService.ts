@@ -32,10 +32,6 @@ export class PackageLogService {
   static async createPackageLog(
     payload: CreatePackageLogDTO,
   ): Promise<PackageLogInterface> {
-    if (payload.fromWarehouseId === payload.toWarehouseId) {
-      throw new Error('Origin and destination warehouses must be different.');
-    }
-
     const { data } = await httpClient.post<PackageLogInterface>(
       'package-logs',
       payload,

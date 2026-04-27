@@ -33,14 +33,14 @@ export class PackageLogsService {
       );
     }
 
-    const pkg = await this.packagesService.findById(packageId);
+    const packageEntity = await this.packagesService.findById(packageId);
     const fromWarehouse =
       await this.warehousesService.findById(fromWarehouseId);
     const toWarehouse = await this.warehousesService.findById(toWarehouseId);
 
     const log = this.packageLogsRepository.create({
       ...logData,
-      package: pkg,
+      package: packageEntity,
       fromWarehouse,
       toWarehouse,
     });

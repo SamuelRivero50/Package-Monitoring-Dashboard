@@ -9,6 +9,9 @@ import LoginView from '@/views/auth/LoginView.vue';
 import PackagesCreateView from '@/views/packages/PackagesCreateView.vue';
 import PackagesIndexView from '@/views/packages/PackagesIndexView.vue';
 import PackagesShowView from '@/views/packages/PackagesShowView.vue';
+import AdminPackagesView from '@/views/admin/packages/PackagesAdminView.vue';
+import AdminWarehousesView from '@/views/admin/warehouses/WarehousesAdminView.vue';
+import AdminUsersView from '@/views/admin/users/UsersAdminView.vue';
 import SignUpView from '@/views/auth/SignupView.vue';
 import UsersIndexView from '@/views/users/UsersIndexView.vue';
 import WarehousesIndexView from '@/views/warehouses/WarehousesIndexView.vue';
@@ -69,6 +72,24 @@ const router = createRouter({
       name: 'users',
       component: UsersIndexView,
       meta: { title: 'Users', requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      path: '/admin/packages',
+      name: 'admin.packages',
+      component: AdminPackagesView,
+      meta: { title: 'Admin Packages', requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      path: '/admin/warehouses',
+      name: 'admin.warehouses',
+      component: AdminWarehousesView,
+      meta: { title: 'Admin Warehouses', requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      path: '/admin/users',
+      name: 'admin.users',
+      component: AdminUsersView,
+      meta: { title: 'Admin Users', requiresAuth: true, requiresAdmin: true },
     },
   ],
 });

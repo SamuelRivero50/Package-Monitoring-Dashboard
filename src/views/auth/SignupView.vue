@@ -26,11 +26,6 @@ async function handleSubmit(): Promise<void> {
     return;
   }
 
-  if (password.value.length < 8) {
-    error.value = 'Password must be at least 8 characters.';
-    return;
-  }
-
   submitting.value = true;
 
   try {
@@ -41,12 +36,18 @@ async function handleSubmit(): Promise<void> {
     });
     await router.push('/dashboard');
   } catch (err: unknown) {
-    if (axios.isAxiosError(err) && err.response) {
-      const data = err.response.data as { message?: string | string[] };
-      const message = Array.isArray(data.message)
-        ? data.message.join(' ')
-        : data.message;
-      error.value = message ?? 'Unable to create account.';
+    if (axios.isAxiosError(err)) {
+      if (err.response) {
+        const data = err.response.data as { message?: string | string[] };
+        const message = Array.isArray(data.message)
+          ? data.message.join(' ')
+          : data.message;
+        error.value =
+          message ?? err.response.statusText ?? 'Unable to create account.';
+      } else {
+        error.value =
+          'Unable to connect to the API. Verify that backend is running on http://localhost:3000.';
+      }
     } else if (err instanceof Error) {
       error.value = err.message;
     } else {

@@ -25,13 +25,13 @@ export class PackagesService {
     const user = await this.usersService.findById(userId);
     const warehouse = await this.warehousesService.findById(warehouseId);
 
-    const pkg = this.packagesRepository.create({
+    const packageEntity = this.packagesRepository.create({
       ...packageData,
       user,
       warehouse,
     });
 
-    return await this.packagesRepository.save(pkg);
+    return await this.packagesRepository.save(packageEntity);
   }
 
   async findAll(): Promise<Package[]> {
@@ -39,13 +39,13 @@ export class PackagesService {
   }
 
   async findById(id: string): Promise<Package> {
-    const pkg = await this.packagesRepository.findOneBy({ id });
+    const packageEntity = await this.packagesRepository.findOneBy({ id });
 
-    if (!pkg) {
+    if (!packageEntity) {
       throw new NotFoundException(`Package ${id} not found`);
     }
 
-    return pkg;
+    return packageEntity;
   }
 
   async update(
@@ -54,24 +54,24 @@ export class PackagesService {
   ): Promise<Package> {
     const { userId, warehouseId, ...packageData } = updatePackageDto;
 
-    const pkg = await this.packagesRepository.preload({
+    const packageEntity = await this.packagesRepository.preload({
       id,
       ...packageData,
     });
 
-    if (!pkg) {
+    if (!packageEntity) {
       throw new NotFoundException(`Package ${id} not found`);
     }
 
     if (userId) {
-      pkg.user = await this.usersService.findById(userId);
+      packageEntity.user = await this.usersService.findById(userId);
     }
 
     if (warehouseId) {
-      pkg.warehouse = await this.warehousesService.findById(warehouseId);
+      packageEntity.warehouse = await this.warehousesService.findById(warehouseId);
     }
 
-    return await this.packagesRepository.save(pkg);
+    return await this.packagesRepository.save(packageEntity);
   }
 
   async remove(id: string): Promise<void> {

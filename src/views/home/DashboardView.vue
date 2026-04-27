@@ -43,8 +43,8 @@ function renderChart(): void {
   if (!canvasRef.value) return;
   chartInstance?.destroy();
   const counts: Record<string, number> = {};
-  for (const pkg of packages.value) {
-    counts[pkg.status] = (counts[pkg.status] ?? 0) + 1;
+  for (const packageItem of packages.value) {
+    counts[packageItem.status] = (counts[packageItem.status] ?? 0) + 1;
   }
   const labels = Object.keys(counts);
   const data = Object.values(counts);
@@ -54,12 +54,12 @@ function renderChart(): void {
 
 onMounted(async () => {
   try {
-    const [pkgs, whs] = await Promise.all([
+    const [packagesData, warehousesData] = await Promise.all([
       PackageService.getPackages(),
       WarehouseService.getWarehouses(),
     ]);
-    packages.value = pkgs;
-    warehouses.value = whs;
+    packages.value = packagesData;
+    warehouses.value = warehousesData;
     renderChart();
   } finally {
     isLoading.value = false;
@@ -93,13 +93,13 @@ onUnmounted(() => {
           {
             icon: 'check_circle',
             label: 'Delivered',
-            val: packages.filter((pkg) => pkg.status === 'Delivered').length,
+            val: packages.filter((packageItem) => packageItem.status === 'Delivered').length,
             color: 'primary',
           },
           {
             icon: 'local_shipping',
             label: 'In Transit',
-            val: packages.filter((pkg) => pkg.status === 'In Transit').length,
+            val: packages.filter((packageItem) => packageItem.status === 'In Transit').length,
             color: 'warehouses',
           },
         ]"
@@ -160,18 +160,18 @@ onUnmounted(() => {
           </thead>
           <tbody class="divide-y divide-wire-subtle">
             <tr
-              v-for="pkg in recentPackages"
-              :key="pkg.id"
+              v-for="packageItem in recentPackages"
+              :key="packageItem.id"
               class="hover:bg-sheet/50 transition-colors"
             >
               <td class="px-6 py-4 font-mono text-packages">
-                #{{ pkg.id.slice(0, 8) }}
+                #{{ packageItem.id.slice(0, 8) }}
               </td>
               <td class="px-6 py-4">
-                <StatusBadge :status="pkg.status" />
+                <StatusBadge :status="packageItem.status" />
               </td>
               <td class="px-6 py-4 text-soft">
-                {{ pkg.warehouse?.name ?? 'Unknown Warehouse' }}
+                {{ packageItem.warehouse?.name ?? 'Unknown Warehouse' }}
               </td>
             </tr>
             <tr v-if="recentPackages.length === 0">

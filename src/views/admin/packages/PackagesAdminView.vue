@@ -118,13 +118,15 @@ onUnmounted(() => {
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
       <div>
         <h1 class="text-3xl font-black tracking-tight text-body">
-          Package Tracking
+          Admin Package Management
         </h1>
-        <p class="text-soft mt-1">Monitor and manage all your shipments.</p>
+        <p class="text-soft mt-1">
+          Monitor, edit, and remove shipments across the platform.
+        </p>
       </div>
       <RouterLink
         :to="{ name: 'packages.create', query: { from: route.fullPath } }"
-        class="h-10 px-5 bg-primary text-base font-bold text-sm rounded-lg flex items-center gap-2 hover:bg-primary-dark transition-all w-fit"
+        class="h-10 px-5 bg-primary font-bold text-sm rounded-lg flex items-center gap-2 hover:bg-primary-dark transition-all w-fit"
       >
         <span class="material-symbols-outlined text-sm">add</span>
         New Package
@@ -138,7 +140,7 @@ onUnmounted(() => {
           class="px-4 py-2.5 rounded-xl font-medium text-sm transition-colors"
           :class="
             selectedStatus === ''
-              ? 'bg-primary text-base'
+              ? 'bg-primary'
               : 'bg-panel border border-wire text-soft'
           "
           @click="selectedStatus = ''"
@@ -151,7 +153,7 @@ onUnmounted(() => {
           class="px-4 py-2.5 rounded-xl font-medium text-sm transition-colors whitespace-nowrap"
           :class="
             selectedStatus === status
-              ? 'bg-primary text-base'
+              ? 'bg-primary'
               : 'bg-panel border border-wire text-soft'
           "
           @click="selectedStatus = status"
@@ -225,7 +227,7 @@ onUnmounted(() => {
                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all"
                     :class="
                       expandedPackageId === packageItem.id
-                        ? 'bg-primary text-base'
+                        ? 'bg-primary'
                         : 'bg-packages/10 text-packages border border-packages/20 hover:bg-packages/20'
                     "
                     title="View history"

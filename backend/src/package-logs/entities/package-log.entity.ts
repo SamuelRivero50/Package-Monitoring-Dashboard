@@ -30,7 +30,7 @@ export class PackageLog {
   @CreateDateColumn({ type: 'datetime' })
   timestamp: Date;
 
-  @ManyToOne(() => Package, (pkg) => pkg.logs, {
+  @ManyToOne(() => Package, (packageEntity) => packageEntity.logs, {
     eager: true,
     onDelete: 'CASCADE',
   })
