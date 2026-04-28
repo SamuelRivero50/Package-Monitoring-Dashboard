@@ -1,13 +1,15 @@
 <!-- @author David Hdez, Juan Andrés Young, Samuel Rivero -->
 <script setup lang="ts">
 // External imports
+import axios from 'axios';
 import type { Chart } from 'chart.js';
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import { RouterLink, useRoute } from 'vue-router';
+import { RouterLink } from 'vue-router';
 
 // Internal imports
 import PackageEvents from '@/components/packages/PackageEvents.vue';
 import StatusBadge from '@/components/shared/StatusBadge.vue';
+import type { CreatePackageDTO } from '@/dtos/packages/CreatePackageDTO';
 import type {
   PackageInterface,
   PackageStatus,
@@ -18,12 +20,30 @@ import { WarehouseService } from '@/services/WarehouseService';
 import { buildBarChart } from '@/utils/chartUtils';
 import { useAuthStore } from '@/stores/authstore';
 
-const route = useRoute();
 const authStore = useAuthStore();
+
+const STATUS_OPTIONS: PackageStatus[] = [
+  'Pending',
+  'In Transit',
+  'At Warehouse',
+  'Delivered',
+  'Exception',
+];
 
 const allPackages = ref<PackageInterface[]>([]);
 const warehouses = ref<WarehouseInterface[]>([]);
 const isLoading = ref<boolean>(true);
+
+const successMessage = ref<string>('');
+const errorMessage = ref<string>('');
+
+// Inline create form state
+const showCreateForm = ref<boolean>(false);
+const newDescription = ref<string>('');
+const newStatus = ref<PackageStatus>('Pending');
+const newPrice = ref<number>(0);
+const newWarehouseId = ref<string>('');
+const submitting = ref<boolean>(false);
 
 const visiblePackages = computed<PackageInterface[]>(() => {
   if (authStore.isAdmin) return allPackages.value;
@@ -52,13 +72,73 @@ const filteredPackages = computed<PackageInterface[]>(() =>
   }),
 );
 
+function extractErrorMessage(err: unknown, fallback: string): string {
+  if (axios.isAxiosError(err) && err.response) {
+    const data = err.response.data as { message?: string | string[] };
+    if (Array.isArray(data.message)) return data.message.join(' ');
+    if (data.message) return data.message;
+  }
+  if (err instanceof Error) return err.message;
+  return fallback;
+}
+
 async function refreshPackages(): Promise<void> {
   allPackages.value = await PackageService.getPackages();
 }
 
+function resetCreateForm(): void {
+  newDescription.value = '';
+  newStatus.value = 'Pending';
+  newPrice.value = 0;
+  newWarehouseId.value = warehouses.value[0]?.id ?? '';
+}
+
+async function submitCreate(): Promise<void> {
+  errorMessage.value = '';
+  successMessage.value = '';
+
+  const userId = authStore.currentUser?.id;
+  if (!userId) {
+    errorMessage.value = 'You must be signed in to create a package.';
+    return;
+  }
+  if (!newWarehouseId.value) {
+    errorMessage.value = 'Please select a warehouse.';
+    return;
+  }
+
+  const payload: CreatePackageDTO = {
+    description: newDescription.value,
+    status: newStatus.value,
+    price: newPrice.value,
+    userId,
+    warehouseId: newWarehouseId.value,
+  };
+
+  submitting.value = true;
+  try {
+    await PackageService.createPackage(payload);
+    await refreshPackages();
+    successMessage.value = 'Package created successfully.';
+    resetCreateForm();
+    showCreateForm.value = false;
+  } catch (err: unknown) {
+    errorMessage.value = extractErrorMessage(err, 'Unable to create package.');
+  } finally {
+    submitting.value = false;
+  }
+}
+
 async function deletePackage(id: string): Promise<void> {
-  await PackageService.deletePackage(id);
-  await refreshPackages();
+  errorMessage.value = '';
+  successMessage.value = '';
+  try {
+    await PackageService.deletePackage(id);
+    await refreshPackages();
+    successMessage.value = 'Package deleted successfully.';
+  } catch (err: unknown) {
+    errorMessage.value = extractErrorMessage(err, 'Unable to delete package.');
+  }
 }
 
 function toggleHistory(packageId: string): void {
@@ -104,6 +184,7 @@ onMounted(async () => {
     ]);
     allPackages.value = packagesData;
     warehouses.value = warehousesData;
+    newWarehouseId.value = warehouses.value[0]?.id ?? '';
   } finally {
     isLoading.value = false;
     await nextTick();
@@ -126,14 +207,106 @@ onUnmounted(() => {
         </h1>
         <p class="text-soft mt-1">Monitor and manage all your shipments.</p>
       </div>
-      <RouterLink
-        :to="{ name: 'packages.create', query: { from: route.fullPath } }"
+      <button
         class="h-10 px-5 bg-primary text-base font-bold text-sm rounded-lg flex items-center gap-2 hover:bg-primary-dark transition-all w-fit"
+        @click="showCreateForm = !showCreateForm"
       >
-        <span class="material-symbols-outlined text-sm">add</span>
-        New Package
-      </RouterLink>
+        <span class="material-symbols-outlined text-sm">{{
+          showCreateForm ? 'close' : 'add'
+        }}</span>
+        {{ showCreateForm ? 'Cancel' : 'New Package' }}
+      </button>
     </div>
+
+    <p v-if="successMessage" class="text-emerald-400 text-sm font-medium">
+      {{ successMessage }}
+    </p>
+    <p v-if="errorMessage" class="text-rose-400 text-sm font-medium">
+      {{ errorMessage }}
+    </p>
+
+    <!-- Inline create form -->
+    <form
+      v-if="showCreateForm"
+      class="bg-panel border border-wire rounded-xl p-6 space-y-4"
+      @submit.prevent="submitCreate"
+    >
+      <h3 class="text-lg font-bold text-body">New Package</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-semibold text-soft mb-2" for="newDescription">
+            Description
+          </label>
+          <input
+            id="newDescription"
+            v-model="newDescription"
+            type="text"
+            required
+            class="w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="Package contents"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-soft mb-2" for="newWarehouseId">
+            Warehouse
+          </label>
+          <select
+            id="newWarehouseId"
+            v-model="newWarehouseId"
+            required
+            class="select-control w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option
+              v-for="warehouse in warehouses"
+              :key="warehouse.id"
+              :value="warehouse.id"
+            >
+              {{ warehouse.name }}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-soft mb-2" for="newStatus">
+            Status
+          </label>
+          <select
+            id="newStatus"
+            v-model="newStatus"
+            required
+            class="select-control w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option v-for="opt in STATUS_OPTIONS" :key="opt" :value="opt">
+              {{ opt }}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-soft mb-2" for="newPrice">
+            Price (USD)
+          </label>
+          <input
+            id="newPrice"
+            v-model.number="newPrice"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+            class="w-full bg-sheet border border-wire rounded-lg p-3 text-sm text-body placeholder:text-faded focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="0.00"
+          />
+        </div>
+      </div>
+      <button
+        type="submit"
+        :disabled="submitting"
+        class="bg-primary text-base font-bold py-2.5 px-6 rounded-lg text-sm hover:bg-primary-dark transition-all disabled:opacity-60"
+      >
+        {{ submitting ? 'Creating...' : 'Create Package' }}
+      </button>
+    </form>
 
     <!-- Filters -->
     <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">

@@ -6,8 +6,8 @@ Authorization is **role-based** with two roles:
 
 | Role | Granted to | Access |
 |---|---|---|
-| `User` | Public sign-up | Read everything; create/edit/delete own packages and logs |
-| `Admin` | Manually promoted via DB (`UPDATE user SET role='Admin' WHERE email=...`) | Full access to user/warehouse mutations |
+| `User` | Public sign-up via `POST /auth/register` | Read everything; create/edit/delete own packages and logs |
+| `Admin` | Auto-seeded on first boot (default account) or promoted via `PATCH /api/users/:id` by an existing admin | Full access to user/warehouse mutations |
 
 Roles are enforced by combining two guards:
 
@@ -159,18 +159,56 @@ sequenceDiagram
 | `/api/package-logs/:id` | PATCH | No | Yes | Yes | Re-validates the warehouse pair |
 | `/api/package-logs/:id` | DELETE | No | Yes | Yes | |
 
-## Promoting a user to Admin
+## Default admin account
 
-There is **no public endpoint** to create or upgrade an Admin — by design. The first admin is created manually:
+There is **no public endpoint** to create or upgrade an Admin — by design (the public `POST /auth/register` always assigns `role: 'User'`, regardless of payload). Instead, the backend ships with a **default admin seeder** that runs on every boot.
+
+### How the seeder works
+
+`src/main.ts` calls `seedDefaultAdmin(app)` right before `app.listen(...)`. The seeder:
+
+1. Reads `SEED_ADMIN_EMAIL` (default `admin@packtrack.local`) and looks it up via `UsersService.findByEmail`.
+2. If a user with that email already exists, the seeder exits silently — no overwrite, no surprise.
+3. If not, it calls `UsersService.create({ name, email, password, role: 'Admin' })`, which hashes the password with bcrypt and inserts the row.
+4. It logs `Seeded default admin account: <email>` via the Nest `Logger` so you can see it on first boot.
+
+### Default credentials
+
+| Field | Value |
+|---|---|
+| Email | `admin@packtrack.local` |
+| Password | `Admin12345!` |
+| Name | `Admin User` |
+
+A new contributor that clones the repo and runs `npm run start:dev` (or `docker compose up -d`) can log in immediately with these credentials. **Change them through env vars before any non-local deployment.**
+
+### Customizing the seeder via env vars
+
+| Variable | Default | What it controls |
+|---|---|---|
+| `SEED_ADMIN_ENABLED` | `true` | Set to `false` to skip seeding entirely |
+| `SEED_ADMIN_NAME` | `Admin User` | Display name |
+| `SEED_ADMIN_EMAIL` | `admin@packtrack.local` | Email (lowercased before lookup) |
+| `SEED_ADMIN_PASSWORD` | `Admin12345!` | Plain password (bcrypt-hashed by the service) |
+
+### Promoting other users to Admin
+
+Once the default admin exists, additional admins are promoted through the API:
 
 ```bash
-sqlite3 backend/database.sqlite \
-  "UPDATE user SET role='Admin' WHERE email='you@example.com';"
+# Login as the default admin to get a token
+ADMIN_TOKEN=$(curl -s -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@packtrack.local","password":"Admin12345!"}' | jq -r .access_token)
+
+# Promote another user (you need their UUID)
+curl -X PATCH http://localhost:3000/api/users/$TARGET_USER_ID \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"role":"Admin"}'
 ```
 
-After promotion, the user must **log out and log in again** so the new JWT carries `role: 'Admin'`. Until then, the old token still says `role: 'User'` and the `RolesGuard` will return 403 on admin-only endpoints.
-
-> Once at least one Admin exists, they can promote others through `PATCH /api/users/:id` with `{ "role": "Admin" }`.
+The promoted user must **log out and log in again** so their new JWT carries `role: 'Admin'`. Until then, the old token still says `role: 'User'` and the `RolesGuard` will return 403 on admin-only endpoints.
 
 ## JWT shape
 
@@ -210,3 +248,4 @@ The signing secret lives in `src/auth/constants.ts` as `jwtConstants.secret`. Fo
 | Reject unknown payload fields | Done — `forbidNonWhitelisted: true` | `main.ts` ValidationPipe |
 | Strict CORS | Done — explicit origin list | `main.ts` |
 | Public registration cannot escalate | Done — `RegisterDto` has no `role` field; `authService.register` overrides to `'User'` | `auth.service.ts` |
+| Admin bootstrap is reproducible | Done — idempotent seeder runs on every boot; never overwrites an existing admin | `main.ts` (`seedDefaultAdmin`) |

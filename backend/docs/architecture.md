@@ -99,8 +99,8 @@ classDiagram
         +Package[] packages
         +PackageLog[] fromWarehouseLogs
         +PackageLog[] toWarehouseLogs
-        +findAll()
-        +findById()
+        +getWarehouses()
+        +getWarehouseById()
     }
 
     class Package {
@@ -113,8 +113,8 @@ classDiagram
         +User user
         +Warehouse warehouse
         +PackageLog[] logs
-        +create()
-        +findAll()
+        +createPackage()
+        +getPackages()
     }
 
     class PackageLog {
@@ -126,8 +126,8 @@ classDiagram
         +Package package
         +Warehouse fromWarehouse
         +Warehouse toWarehouse
-        +create()
-        +findByPackageId()
+        +createPackageLog()
+        +getPackageLogsByPackageId()
     }
 
     class Role {
@@ -139,10 +139,10 @@ classDiagram
     class PackageStatus {
         <<enumeration>>
         Pending
-        InTransit
+        In_Transit
         Delivered
         Exception
-        AtWarehouse
+        At_Warehouse
     }
 
     User "1" --> "0..*" Package : owns
@@ -168,6 +168,8 @@ classDiagram
 `eager: true` means TypeORM auto-joins the parent on every query, so a `GET /api/packages` already returns nested `user` and `warehouse` objects without a custom `.find({ relations: [...] })`.
 
 `onDelete: 'CASCADE'` on the `PackageLog → Package` relation means deleting a package wipes its logs automatically (the timeline becomes invalid without the parent).
+
+> **Note on PackageStatus values:** the enum is rendered with underscores in the diagram (`In_Transit`, `At_Warehouse`) because Mermaid does not allow spaces in enumeration members. The actual string values stored in the database and accepted by the API contain spaces: `'Pending'`, `'In Transit'`, `'Delivered'`, `'Exception'`, `'At Warehouse'`. See `src/types/PackageTypes.ts`.
 
 ## Entity-relationship diagram (database)
 
@@ -247,12 +249,13 @@ erDiagram
 - `autoLoadEntities: true` discovers entities through `@Module({ imports: [TypeOrmModule.forFeature([Entity])] })`. No `entities: [...]` array is needed at the root level.
 - The DB file lives at the project root (`backend/database.sqlite`) by default. Override with `SQLITE_PATH=...` when launching.
 - WAL/journal files (`*.sqlite-journal`, `*.sqlite-wal`, `*.sqlite-shm`) are gitignored.
+- **Default admin seeder**: on every boot, `seedDefaultAdmin()` in `src/main.ts` checks whether an admin account exists; if not, it creates one with credentials read from `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` (defaults: `admin@packtrack.local` / `Admin12345!`). Set `SEED_ADMIN_ENABLED=false` to disable.
 
 ## Where to read the code
 
 | Concern | Entry point |
 |---|---|
-| Bootstrap, CORS, global pipe + interceptor | `src/main.ts` |
+| Bootstrap, CORS, global pipe + interceptor, default admin seeder | `src/main.ts` |
 | Database connection + module list | `src/app.module.ts` |
 | JWT signing config | `src/auth/auth.module.ts` (uses `src/auth/constants.ts`) |
 | AuthGuard (token verification) | `src/auth/auth.guard.ts` |

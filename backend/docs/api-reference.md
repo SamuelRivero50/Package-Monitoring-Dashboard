@@ -312,23 +312,15 @@ Auth required.
 
 ## End-to-end example: create a complete delivery chain
 
+The default admin seeder creates `admin@packtrack.local` / `Admin12345!` on first boot, so we can log in directly without manual SQL promotion.
+
 ```bash
-# 1. Register a user → get token
-REG=$(curl -s -X POST http://localhost:3000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Demo","email":"demo@example.com","password":"password123"}')
-TOKEN=$(echo "$REG" | jq -r .access_token)
-
-# 2. Promote to admin (manual DB step)
-sqlite3 backend/database.sqlite \
-  "UPDATE user SET role='Admin' WHERE email='demo@example.com';"
-
-# 3. Re-login to get a token with role: 'Admin'
+# 1. Login as the default admin
 ADMIN_TOKEN=$(curl -s -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"demo@example.com","password":"password123"}' | jq -r .access_token)
+  -d '{"email":"admin@packtrack.local","password":"Admin12345!"}' | jq -r .access_token)
 
-# 4. Create two warehouses
+# 2. Create two warehouses
 W1=$(curl -s -X POST http://localhost:3000/api/warehouses \
   -H "Authorization: Bearer $ADMIN_TOKEN" -H "Content-Type: application/json" \
   -d '{"name":"Origin","location":"Bogota","capacity":1000,"managerName":"Alex"}' | jq -r .id)
@@ -336,25 +328,27 @@ W2=$(curl -s -X POST http://localhost:3000/api/warehouses \
   -H "Authorization: Bearer $ADMIN_TOKEN" -H "Content-Type: application/json" \
   -d '{"name":"Destination","location":"Medellin","capacity":500,"managerName":"Maria"}' | jq -r .id)
 
-# 5. Get the user's UUID
+# 3. Get the admin's own UUID (used as the package owner)
 USER_ID=$(curl -s http://localhost:3000/api/auth/profile \
   -H "Authorization: Bearer $ADMIN_TOKEN" | jq -r .id)
 
-# 6. Create a package starting at the origin warehouse
+# 4. Create a package starting at the origin warehouse
 PKG=$(curl -s -X POST http://localhost:3000/api/packages \
   -H "Authorization: Bearer $ADMIN_TOKEN" -H "Content-Type: application/json" \
   -d "{\"description\":\"Demo box\",\"status\":\"Pending\",\"price\":42,\"userId\":\"$USER_ID\",\"warehouseId\":\"$W1\"}" \
   | jq -r .id)
 
-# 7. Log the move from origin to destination
+# 5. Log the move from origin to destination
 curl -s -X POST http://localhost:3000/api/package-logs \
   -H "Authorization: Bearer $ADMIN_TOKEN" -H "Content-Type: application/json" \
   -d "{\"packageId\":\"$PKG\",\"fromWarehouseId\":\"$W1\",\"toWarehouseId\":\"$W2\",\"previousStatus\":\"Pending\",\"newStatus\":\"In Transit\",\"description\":\"Outbound\"}"
 
-# 8. Inspect the package timeline
+# 6. Inspect the package timeline
 curl -s "http://localhost:3000/api/package-logs/by-package/$PKG" \
   -H "Authorization: Bearer $ADMIN_TOKEN" | jq '.[] | {from: .fromWarehouse.name, to: .toWarehouse.name, status: .newStatus}'
 ```
+
+> Need a fresh User-role token instead? Register a new account via `POST /api/auth/register` and use the returned `access_token` directly — no admin promotion needed for User-level endpoints.
 
 ## Common error responses
 
