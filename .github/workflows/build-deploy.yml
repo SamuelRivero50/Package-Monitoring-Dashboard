@@ -12,8 +12,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/packtrack-backend
-  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/packtrack-frontend
+  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner | lower }}/packtrack-backend
+  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner | lower }}/packtrack-frontend
 
 jobs:
   build-and-push:
@@ -82,7 +82,8 @@ jobs:
       - name: Copy production compose file to VM
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p ~/packtrack"
-          sed "s/OWNER/${{ github.repository_owner }}/g" docker-compose.prod.yml > /tmp/docker-compose.yml
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]') && \
+          sed "s/OWNER/$OWNER/g" docker-compose.prod.yml > /tmp/docker-compose.yml
           scp /tmp/docker-compose.yml \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/packtrack/docker-compose.yml
 
