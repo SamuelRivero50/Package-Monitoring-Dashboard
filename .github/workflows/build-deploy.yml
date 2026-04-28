@@ -98,7 +98,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "echo '${GH_TOKEN}' | docker login ghcr.io -u '${GH_ACTOR}' --password-stdin && \
-             cd ~/packtrack && \
-             docker compose pull && \
-             CORS_ORIGIN='${CORS_ORIGIN}' docker compose up -d --remove-orphans"
+            "sg docker -c \"echo '${GH_TOKEN}' | docker login ghcr.io -u '${GH_ACTOR}' --password-stdin && \
+              cd ~/packtrack && \
+              CORS_ORIGIN='${CORS_ORIGIN}' docker compose pull && \
+              CORS_ORIGIN='${CORS_ORIGIN}' docker compose up -d --remove-orphans\""
