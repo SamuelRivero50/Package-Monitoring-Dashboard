@@ -11,6 +11,11 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
   },
 
+  // - /warehouses/** rendered server-side on each request (SSR)
+  routeRules: {
+    '/warehouses/**': { ssr: true },
+  },
+
   app: {
     head: {
       title: 'PackTrack Hybrid',
