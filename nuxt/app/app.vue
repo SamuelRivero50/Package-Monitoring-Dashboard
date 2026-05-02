@@ -23,15 +23,6 @@
             </li>
             <li>
               <NuxtLink
-                to="/blog"
-                class="px-3 py-1.5 rounded-lg text-sm font-medium text-soft hover:text-primary hover:bg-primary/10 transition-colors"
-                active-class="!text-primary !bg-primary/15"
-              >
-                Blog
-              </NuxtLink>
-            </li>
-            <li>
-              <NuxtLink
                 to="/warehouses"
                 class="px-3 py-1.5 rounded-lg text-sm font-medium text-soft hover:text-primary hover:bg-primary/10 transition-colors"
                 active-class="!text-primary !bg-primary/15"
