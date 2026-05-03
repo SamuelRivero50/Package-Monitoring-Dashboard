@@ -5,7 +5,9 @@
     <header class="border-b border-wire bg-panel/60 backdrop-blur-md sticky top-0 z-10">
       <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
         <NuxtLink to="/" class="flex items-center gap-2">
-          <div class="size-9 rounded-lg bg-primary/15 border border-primary/30 text-primary flex items-center justify-center">
+          <div
+            class="size-9 rounded-lg bg-primary/15 border border-primary/30 text-primary flex items-center justify-center"
+          >
             <span class="material-symbols-outlined text-xl">package_2</span>
           </div>
           <span class="font-black tracking-tight text-body">PackTrack Hybrid</span>

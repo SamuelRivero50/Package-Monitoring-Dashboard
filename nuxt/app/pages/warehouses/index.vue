@@ -3,9 +3,7 @@ import type { Warehouse } from '~~/server/api/warehouses.get';
 
 useHead({ title: 'Warehouses — PackTrack Hybrid' });
 
-const { data: warehouses, error } = await useFetch<Warehouse[]>(
-  '/api/warehouses',
-);
+const { data: warehouses, error } = await useFetch<Warehouse[]>('/api/warehouses');
 
 function utilization(w: Warehouse): number {
   return Math.round((w.currentLoad / w.capacity) * 100);
@@ -21,7 +19,9 @@ function barColor(percent: number): string {
 <template>
   <section>
     <div class="mb-8">
-      <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 mb-3">
+      <span
+        class="inline-block px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 mb-3"
+      >
         SSR
       </span>
       <h1 class="text-3xl font-black tracking-tight text-body">Warehouses</h1>
@@ -39,10 +39,7 @@ function barColor(percent: number): string {
       Could not load warehouses.
     </div>
 
-    <div
-      v-else-if="warehouses"
-      class="bg-panel border border-wire rounded-2xl overflow-hidden"
-    >
+    <div v-else-if="warehouses" class="bg-panel border border-wire rounded-2xl overflow-hidden">
       <table class="w-full text-left">
         <thead class="bg-sheet border-b border-wire">
           <tr class="text-xs font-bold uppercase tracking-wider text-faded">

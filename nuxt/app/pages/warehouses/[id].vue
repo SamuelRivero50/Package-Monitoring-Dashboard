@@ -4,21 +4,15 @@ import type { Warehouse } from '~~/server/api/warehouses.get';
 const route = useRoute();
 const id = computed(() => String(route.params.id));
 
-const { data: warehouse, error } = await useFetch<Warehouse>(
-  () => `/api/warehouses/${id.value}`,
-);
+const { data: warehouse, error } = await useFetch<Warehouse>(() => `/api/warehouses/${id.value}`);
 
 useHead(() => ({
-  title: warehouse.value
-    ? `${warehouse.value.name} — Warehouses`
-    : 'Warehouse not found',
+  title: warehouse.value ? `${warehouse.value.name} — Warehouses` : 'Warehouse not found',
 }));
 
 const utilization = computed(() => {
   if (!warehouse.value) return 0;
-  return Math.round(
-    (warehouse.value.currentLoad / warehouse.value.capacity) * 100,
-  );
+  return Math.round((warehouse.value.currentLoad / warehouse.value.capacity) * 100);
 });
 
 const barColor = computed(() => {
@@ -39,16 +33,17 @@ const barColor = computed(() => {
       class="mt-4 bg-rose-500/10 border border-rose-500/30 text-rose-300 rounded-xl p-5"
     >
       <h2 class="font-black mb-1">Warehouse not found</h2>
-      <p class="text-sm">No warehouse exists with id <code>{{ id }}</code>.</p>
+      <p class="text-sm">
+        No warehouse exists with id <code>{{ id }}</code
+        >.
+      </p>
     </div>
 
     <article v-else-if="warehouse" class="mt-3">
       <h1 class="text-3xl font-black tracking-tight text-body">
         {{ warehouse.name }}
       </h1>
-      <p class="mt-2 text-soft">
-        {{ warehouse.location }} · Manager: {{ warehouse.managerName }}
-      </p>
+      <p class="mt-2 text-soft">{{ warehouse.location }} · Manager: {{ warehouse.managerName }}</p>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         <div class="bg-panel border border-wire rounded-xl p-5">
@@ -71,9 +66,7 @@ const barColor = computed(() => {
 
       <div class="mt-6 bg-panel border border-wire rounded-xl p-5">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-bold uppercase tracking-wider text-faded">
-            Utilization
-          </span>
+          <span class="text-xs font-bold uppercase tracking-wider text-faded"> Utilization </span>
           <span class="text-xs font-bold text-primary">{{ utilization }}%</span>
         </div>
         <div class="h-3 bg-canvas rounded-full overflow-hidden">
