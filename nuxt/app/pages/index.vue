@@ -6,7 +6,26 @@ useHead({ title: 'PackTrack Hybrid — Home' });
   <section class="space-y-8">
     <h1 class="text-4xl font-black tracking-tight text-body">PackTrack Hybrid</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <article
+        class="bg-panel border border-wire rounded-xl p-6 hover:border-primary/40 transition-colors"
+      >
+        <span
+          class="inline-block px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-primary/15 text-primary border border-primary/30 mb-3"
+        >
+          SSG
+        </span>
+        <h2 class="text-lg font-black mb-2">Blog</h2>
+        <p class="text-sm text-soft leading-relaxed mb-4">
+          Three articles pre-rendered at build time. Each post is a static
+          <code class="text-primary text-xs">.html</code> file under
+          <code class="text-primary text-xs">/blog/&lt;slug&gt;</code>.
+        </p>
+        <NuxtLink to="/blog" class="text-sm font-bold text-primary hover:text-primary-dark">
+          Read posts →
+        </NuxtLink>
+      </article>
+
       <article
         class="bg-panel border border-wire rounded-xl p-6 hover:border-primary/40 transition-colors"
       >
