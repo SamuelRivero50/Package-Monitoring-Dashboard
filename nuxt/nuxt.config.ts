@@ -10,9 +10,12 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
   },
 
+  // Hybrid rendering rules:
   // - /warehouses/** rendered server-side on each request (SSR)
+  // - /tools/**      rendered only on the client (CSR)
   routeRules: {
     '/warehouses/**': { ssr: true },
+    '/tools/**': { ssr: false },
   },
 
   app: {
