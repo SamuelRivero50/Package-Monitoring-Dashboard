@@ -5,11 +5,7 @@ useHead({ title: 'Tools — PackTrack Hybrid' });
 <template>
   <section>
     <div class="mb-8">
-      <span
-        class="inline-block px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-500/15 text-amber-400 border border-amber-500/30 mb-3"
-      >
-        CSR
-      </span>
+      <RenderModeBadge mode="CSR" class="mb-3" />
       <h1 class="text-3xl font-black tracking-tight text-body">Tools</h1>
       <p class="mt-2 text-soft">
         Rendered only in the browser. The initial HTML is just an empty shell; everything below

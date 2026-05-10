@@ -9,17 +9,6 @@ const { data: warehouse, error } = await useFetch<Warehouse>(() => `/api/warehou
 useHead(() => ({
   title: warehouse.value ? `${warehouse.value.name} — Warehouses` : 'Warehouse not found',
 }));
-
-const utilization = computed(() => {
-  if (!warehouse.value) return 0;
-  return Math.round((warehouse.value.currentLoad / warehouse.value.capacity) * 100);
-});
-
-const barColor = computed(() => {
-  if (utilization.value > 90) return 'bg-rose-500';
-  if (utilization.value > 70) return 'bg-amber-500';
-  return 'bg-primary';
-});
 </script>
 
 <template>
@@ -60,22 +49,19 @@ const barColor = computed(() => {
         </div>
         <div class="bg-panel border border-wire rounded-xl p-5">
           <p class="text-xs font-bold uppercase tracking-wider text-faded mb-1">Utilization</p>
-          <p class="text-2xl font-black text-primary">{{ utilization }}%</p>
+          <p class="text-2xl font-black text-primary">
+            {{ utilization(warehouse.currentLoad, warehouse.capacity) }}%
+          </p>
         </div>
       </div>
 
       <div class="mt-6 bg-panel border border-wire rounded-xl p-5">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-bold uppercase tracking-wider text-faded"> Utilization </span>
-          <span class="text-xs font-bold text-primary">{{ utilization }}%</span>
-        </div>
-        <div class="h-3 bg-canvas rounded-full overflow-hidden">
-          <div
-            class="h-full rounded-full transition-all"
-            :class="barColor"
-            :style="{ width: utilization + '%' }"
-          ></div>
-        </div>
+        <UtilizationBar
+          :current-load="warehouse.currentLoad"
+          :capacity="warehouse.capacity"
+          show-label
+          size="md"
+        />
       </div>
     </article>
   </section>

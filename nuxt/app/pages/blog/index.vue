@@ -7,11 +7,7 @@ useHead({ title: 'Blog — PackTrack Hybrid' });
 <template>
   <section>
     <div class="mb-8">
-      <span
-        class="inline-block px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-primary/15 text-primary border border-primary/30 mb-3"
-      >
-        SSG
-      </span>
+      <RenderModeBadge mode="SSG" class="mb-3" />
       <h1 class="text-3xl font-black tracking-tight text-body">Blog</h1>
       <p class="mt-2 text-soft">Articles, statically generated at build time.</p>
     </div>

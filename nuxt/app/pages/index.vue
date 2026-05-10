@@ -10,11 +10,7 @@ useHead({ title: 'PackTrack Hybrid — Home' });
       <article
         class="bg-panel border border-wire rounded-xl p-6 hover:border-primary/40 transition-colors"
       >
-        <span
-          class="inline-block px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-primary/15 text-primary border border-primary/30 mb-3"
-        >
-          SSG
-        </span>
+        <RenderModeBadge mode="SSG" class="mb-3" />
         <h2 class="text-lg font-black mb-2">Blog</h2>
         <p class="text-sm text-soft leading-relaxed mb-4">
           Three articles pre-rendered at build time. Each post is a static
@@ -29,11 +25,7 @@ useHead({ title: 'PackTrack Hybrid — Home' });
       <article
         class="bg-panel border border-wire rounded-xl p-6 hover:border-primary/40 transition-colors"
       >
-        <span
-          class="inline-block px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 mb-3"
-        >
-          SSR
-        </span>
+        <RenderModeBadge mode="SSR" class="mb-3" />
         <h2 class="text-lg font-black mb-2">Warehouses</h2>
         <p class="text-sm text-soft leading-relaxed mb-4">
           List rendered on each request. Data fetched from Nuxt's
@@ -48,11 +40,7 @@ useHead({ title: 'PackTrack Hybrid — Home' });
       <article
         class="bg-panel border border-wire rounded-xl p-6 hover:border-primary/40 transition-colors"
       >
-        <span
-          class="inline-block px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-500/15 text-amber-400 border border-amber-500/30 mb-3"
-        >
-          CSR
-        </span>
+        <RenderModeBadge mode="CSR" class="mb-3" />
         <h2 class="text-lg font-black mb-2">Tools</h2>
         <p class="text-sm text-soft leading-relaxed mb-4">
           Rendered only in the browser. Includes a capacity calculator and an FAQ accordion.

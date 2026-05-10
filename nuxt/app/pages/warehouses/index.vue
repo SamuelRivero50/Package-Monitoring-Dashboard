@@ -4,26 +4,12 @@ import type { Warehouse } from '~~/server/api/warehouses.get';
 useHead({ title: 'Warehouses — PackTrack Hybrid' });
 
 const { data: warehouses, error } = await useFetch<Warehouse[]>('/api/warehouses');
-
-function utilization(w: Warehouse): number {
-  return Math.round((w.currentLoad / w.capacity) * 100);
-}
-
-function barColor(percent: number): string {
-  if (percent > 90) return 'bg-rose-500';
-  if (percent > 70) return 'bg-amber-500';
-  return 'bg-primary';
-}
 </script>
 
 <template>
   <section>
     <div class="mb-8">
-      <span
-        class="inline-block px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 mb-3"
-      >
-        SSR
-      </span>
+      <RenderModeBadge mode="SSR" class="mb-3" />
       <h1 class="text-3xl font-black tracking-tight text-body">Warehouses</h1>
       <p class="mt-2 text-soft">
         Rendered server-side on each request. Data fetched from
@@ -73,15 +59,13 @@ function barColor(percent: number): string {
             </td>
             <td class="px-6 py-4 min-w-[180px]">
               <div class="flex items-center gap-3">
-                <div class="flex-1 h-2 bg-canvas rounded-full overflow-hidden">
-                  <div
-                    class="h-full rounded-full transition-all"
-                    :class="barColor(utilization(warehouse))"
-                    :style="{ width: utilization(warehouse) + '%' }"
-                  ></div>
-                </div>
+                <UtilizationBar
+                  class="flex-1"
+                  :current-load="warehouse.currentLoad"
+                  :capacity="warehouse.capacity"
+                />
                 <span class="text-xs font-bold text-primary w-10 text-right">
-                  {{ utilization(warehouse) }}%
+                  {{ utilization(warehouse.currentLoad, warehouse.capacity) }}%
                 </span>
               </div>
             </td>

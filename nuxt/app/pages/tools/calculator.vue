@@ -4,21 +4,12 @@ useHead({ title: 'Capacity calculator — Tools' });
 const currentLoad = ref<number>(0);
 const capacity = ref<number>(1000);
 
-const utilization = computed(() => {
-  if (capacity.value <= 0) return 0;
-  return Math.round((currentLoad.value / capacity.value) * 100);
-});
-
-const barColor = computed(() => {
-  if (utilization.value > 90) return 'bg-rose-500';
-  if (utilization.value > 70) return 'bg-amber-500';
-  return 'bg-primary';
-});
+const percent = computed(() => utilization(currentLoad.value, capacity.value));
 
 const advice = computed(() => {
-  if (utilization.value === 0) return 'Enter values to compute utilization.';
-  if (utilization.value > 90) return 'Critical: redirect inbound shipments to alternate hubs.';
-  if (utilization.value > 70) return 'Healthy: monitor closely for capacity spikes.';
+  if (percent.value === 0) return 'Enter values to compute utilization.';
+  if (percent.value > 90) return 'Critical: redirect inbound shipments to alternate hubs.';
+  if (percent.value > 70) return 'Healthy: monitor closely for capacity spikes.';
   return 'Under-utilized: consider consolidating with another hub.';
 });
 </script>
@@ -64,17 +55,7 @@ const advice = computed(() => {
       </div>
 
       <div>
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-bold uppercase tracking-wider text-faded">Utilization</span>
-          <span class="text-sm font-black text-primary">{{ utilization }}%</span>
-        </div>
-        <div class="h-3 bg-canvas rounded-full overflow-hidden">
-          <div
-            class="h-full rounded-full transition-all"
-            :class="barColor"
-            :style="{ width: utilization + '%' }"
-          ></div>
-        </div>
+        <UtilizationBar :current-load="currentLoad" :capacity="capacity" show-label size="md" />
         <p class="mt-3 text-sm text-soft">{{ advice }}</p>
       </div>
     </div>
