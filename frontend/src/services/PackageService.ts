@@ -6,17 +6,17 @@ import type { UpdatePackageDTO } from '@/dtos/packages/UpdatePackageDTO';
 import { httpClient } from '@/services/httpClient';
 
 export class PackageService {
-  static async getPackages(): Promise<PackageInterface[]> {
+  static async getAll(): Promise<PackageInterface[]> {
     const { data } = await httpClient.get<PackageInterface[]>('packages');
     return data;
   }
 
-  static async getPackageById(id: string): Promise<PackageInterface> {
+  static async getById(id: string): Promise<PackageInterface> {
     const { data } = await httpClient.get<PackageInterface>(`packages/${id}`);
     return data;
   }
 
-  static async createPackage(
+  static async create(
     payload: CreatePackageDTO,
   ): Promise<PackageInterface> {
     const { data } = await httpClient.post<PackageInterface>(
@@ -26,7 +26,7 @@ export class PackageService {
     return data;
   }
 
-  static async updatePackage(
+  static async update(
     id: string,
     payload: UpdatePackageDTO,
   ): Promise<PackageInterface> {
@@ -37,7 +37,7 @@ export class PackageService {
     return data;
   }
 
-  static async deletePackage(id: string): Promise<void> {
+  static async delete(id: string): Promise<void> {
     await httpClient.delete(`packages/${id}`);
   }
 }

@@ -6,21 +6,21 @@ import type { UpdatePackageLogDTO } from '@/dtos/packagelogs/UpdatePackageLogDTO
 import { httpClient } from '@/services/httpClient';
 
 export class PackageLogService {
-  static async getPackageLogs(): Promise<PackageLogInterface[]> {
+  static async getAll(): Promise<PackageLogInterface[]> {
     const { data } = await httpClient.get<PackageLogInterface[]>(
       'package-logs',
     );
     return data;
   }
 
-  static async getPackageLogById(id: string): Promise<PackageLogInterface> {
+  static async getById(id: string): Promise<PackageLogInterface> {
     const { data } = await httpClient.get<PackageLogInterface>(
       `package-logs/${id}`,
     );
     return data;
   }
 
-  static async getPackageLogsByPackageId(
+  static async getByPackageId(
     packageId: string,
   ): Promise<PackageLogInterface[]> {
     const { data } = await httpClient.get<PackageLogInterface[]>(
@@ -29,7 +29,7 @@ export class PackageLogService {
     return data;
   }
 
-  static async createPackageLog(
+  static async create(
     payload: CreatePackageLogDTO,
   ): Promise<PackageLogInterface> {
     const { data } = await httpClient.post<PackageLogInterface>(
@@ -39,7 +39,7 @@ export class PackageLogService {
     return data;
   }
 
-  static async updatePackageLog(
+  static async update(
     id: string,
     payload: UpdatePackageLogDTO,
   ): Promise<PackageLogInterface> {
@@ -50,7 +50,7 @@ export class PackageLogService {
     return data;
   }
 
-  static async deletePackageLog(id: string): Promise<void> {
+  static async delete(id: string): Promise<void> {
     await httpClient.delete(`package-logs/${id}`);
   }
 }
