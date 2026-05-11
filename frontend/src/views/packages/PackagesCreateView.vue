@@ -75,7 +75,7 @@ async function submitForm(): Promise<void> {
 
   submitting.value = true;
   try {
-    await PackageService.createPackage(payload);
+    await PackageService.create(payload);
     successMessage.value = 'Package created successfully!';
     description.value = '';
     status.value = 'Pending';
@@ -99,7 +99,7 @@ async function submitForm(): Promise<void> {
 }
 
 onMounted(async () => {
-  warehouses.value = await WarehouseService.getWarehouses();
+  warehouses.value = await WarehouseService.getAll();
   warehouseId.value = warehouses.value[0]?.id ?? '';
 });
 </script>

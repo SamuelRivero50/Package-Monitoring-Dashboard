@@ -121,7 +121,7 @@ function extractErrorMessage(err: unknown, fallback: string): string {
 }
 
 async function refreshWarehouses(): Promise<void> {
-  warehouses.value = await WarehouseService.getWarehouses();
+  warehouses.value = await WarehouseService.getAll();
 }
 
 function resetCreateForm(): void {
@@ -148,7 +148,7 @@ async function submitCreate(): Promise<void> {
 
   submitting.value = true;
   try {
-    await WarehouseService.createWarehouse(payload);
+    await WarehouseService.create(payload);
     await refreshWarehouses();
     successMessage.value = 'Warehouse created successfully.';
     resetCreateForm();
@@ -190,7 +190,7 @@ async function saveEdit(warehouseId: string): Promise<void> {
   if (editImageUrl.value) payload.imageUrl = editImageUrl.value;
 
   try {
-    await WarehouseService.updateWarehouse(warehouseId, payload);
+    await WarehouseService.update(warehouseId, payload);
     await refreshWarehouses();
     successMessage.value = 'Warehouse updated successfully.';
     editingWarehouseId.value = null;
@@ -203,7 +203,7 @@ async function deleteWarehouse(warehouseId: string): Promise<void> {
   errorMessage.value = '';
   successMessage.value = '';
   try {
-    await WarehouseService.deleteWarehouse(warehouseId);
+    await WarehouseService.delete(warehouseId);
     await refreshWarehouses();
     successMessage.value = 'Warehouse deleted successfully.';
   } catch (err: unknown) {

@@ -20,7 +20,7 @@ const editRole = ref<Role>('User');
 const editAvatarUrl = ref<string>('');
 
 async function refreshUsers(): Promise<void> {
-  users.value = await UserService.getUsers();
+  users.value = await UserService.getAll();
 }
 
 function startEdit(user: UserInterface): void {
@@ -42,7 +42,7 @@ async function saveEdit(userId: string): Promise<void> {
   if (editAvatarUrl.value) payload.avatarUrl = editAvatarUrl.value;
 
   try {
-    await UserService.updateUser(userId, payload);
+    await UserService.update(userId, payload);
     await refreshUsers();
     editingUserId.value = null;
   } catch (err: unknown) {
@@ -58,7 +58,7 @@ async function saveEdit(userId: string): Promise<void> {
 }
 
 async function deleteUser(userId: string): Promise<void> {
-  await UserService.deleteUser(userId);
+  await UserService.delete(userId);
   await refreshUsers();
 }
 
