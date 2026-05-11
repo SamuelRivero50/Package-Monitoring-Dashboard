@@ -6,7 +6,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import DashboardView from '@/views/home/DashboardView.vue';
 import HomeView from '@/views/home/HomeView.vue';
 import LoginView from '@/views/auth/LoginView.vue';
-import PackagesCreateView from '@/views/packages/PackagesCreateView.vue';
 import PackagesIndexView from '@/views/packages/PackagesIndexView.vue';
 import PackagesShowView from '@/views/packages/PackagesShowView.vue';
 import AdminPackagesView from '@/views/admin/packages/PackagesAdminView.vue';
@@ -47,12 +46,6 @@ const router = createRouter({
       name: 'packages',
       component: PackagesIndexView,
       meta: { title: 'Packages', requiresAuth: true },
-    },
-    {
-      path: '/packages/create',
-      name: 'packages.create',
-      component: PackagesCreateView,
-      meta: { title: 'Create Package', requiresAuth: true },
     },
     {
       path: '/packages/:id',

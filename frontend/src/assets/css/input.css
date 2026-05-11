@@ -34,12 +34,16 @@
 
 /* === Admin theme overrides ===
    When `.admin-mode` is applied to a root element, every Tailwind utility
-   that resolves through --color-primary / --color-primary-dark switches
-   from teal to amber. All bg-primary / text-primary / border-primary
-   instances throughout the app inherit this without per-component edits. */
+   that resolves through these CSS variables switches from its default to
+   amber. All bg-primary / bg-packages / bg-warehouses / bg-users-icon
+   (and their text-/border-/hover:bg- variants) inherit this without
+   per-component edits. */
 .admin-mode {
-  --color-primary: #f59e0b;       /* amber-500 */
-  --color-primary-dark: #d97706;  /* amber-600 */
+  --color-primary: #f59e0b;        /* amber-500 */
+  --color-primary-dark: #d97706;   /* amber-600 */
+  --color-packages: #f59e0b;       /* was teal-darker (#0d9488) */
+  --color-warehouses: #f59e0b;     /* was blue (#2563eb) */
+  --color-users-icon: #f59e0b;     /* was green (#16a34a) */
 }
 
 @layer base {
