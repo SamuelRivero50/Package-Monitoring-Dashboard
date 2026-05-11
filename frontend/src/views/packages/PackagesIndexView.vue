@@ -54,7 +54,7 @@ const visiblePackages = computed<PackageInterface[]>(() => {
 
 const selectorStatuses = computed<PackageStatus[]>(() => {
   const set = new Set<PackageStatus>();
-  for (const packageItem of visiblePackages.value) set.add(packageItem.status);
+  for (const package of visiblePackages.value) set.add(package.status);
   return Array.from(set);
 });
 
@@ -63,11 +63,11 @@ const selectedWarehouseId = ref<string | ''>('');
 const expandedPackageId = ref<string | null>(null);
 
 const filteredPackages = computed<PackageInterface[]>(() =>
-  visiblePackages.value.filter((packageItem) => {
+  visiblePackages.value.filter((package) => {
     const matchStatus =
-      !selectedStatus.value || packageItem.status === selectedStatus.value;
+      !selectedStatus.value || package.status === selectedStatus.value;
     const matchWarehouse =
-      !selectedWarehouseId.value || packageItem.warehouse.id === selectedWarehouseId.value;
+      !selectedWarehouseId.value || package.warehouse.id === selectedWarehouseId.value;
     return matchStatus && matchWarehouse;
   }),
 );
@@ -375,43 +375,43 @@ onUnmounted(() => {
           </tr>
         </thead>
         <tbody class="divide-y divide-wire-subtle">
-          <template v-for="packageItem in filteredPackages" :key="packageItem.id">
+          <template v-for="package in filteredPackages" :key="package.id">
             <tr class="hover:bg-sheet/50 transition-colors">
               <td class="px-6 py-4 font-mono text-sm text-packages">
                 <RouterLink
-                  :to="`/packages/${packageItem.id}`"
+                  :to="`/packages/${package.id}`"
                   class="hover:underline"
-                  >#{{ packageItem.id.slice(0, 8) }}</RouterLink
+                  >#{{ package.id.slice(0, 8) }}</RouterLink
                 >
               </td>
               <td class="px-6 py-4 text-sm font-medium text-body">
-                {{ packageItem.description }}
+                {{ package.description }}
               </td>
               <td class="px-6 py-4 text-sm text-soft">
-                {{ packageItem.user?.name ?? 'Unknown User' }}
+                {{ package.user?.name ?? 'Unknown User' }}
               </td>
               <td class="px-6 py-4 text-sm text-soft">
-                {{ packageItem.warehouse?.name ?? 'Unknown Warehouse' }}
+                {{ package.warehouse?.name ?? 'Unknown Warehouse' }}
               </td>
               <td class="px-6 py-4">
-                <StatusBadge :status="packageItem.status" />
+                <StatusBadge :status="package.status" />
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
                   <button
                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all"
                     :class="
-                      expandedPackageId === packageItem.id
+                      expandedPackageId === package.id
                         ? 'bg-primary text-base'
                         : 'bg-packages/10 text-packages border border-packages/20 hover:bg-packages/20'
                     "
                     title="View history"
-                    @click="toggleHistory(packageItem.id)"
+                    @click="toggleHistory(package.id)"
                   >
                     <span class="material-symbols-outlined text-sm">history</span>
                   </button>
                   <RouterLink
-                    :to="{ name: 'packages.show', params: { id: packageItem.id }, query: { edit: '1' } }"
+                    :to="{ name: 'packages.show', params: { id: package.id }, query: { edit: '1' } }"
                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-packages/10 text-packages border border-packages/20 hover:bg-packages/20"
                     title="Edit package"
                   >
@@ -420,7 +420,7 @@ onUnmounted(() => {
                   <button
                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
                     title="Delete package"
-                    @click="deletePackage(packageItem.id)"
+                    @click="deletePackage(package.id)"
                   >
                     <span class="material-symbols-outlined text-sm">delete</span>
                   </button>
@@ -428,10 +428,10 @@ onUnmounted(() => {
               </td>
             </tr>
 
-            <tr v-if="expandedPackageId === packageItem.id">
+            <tr v-if="expandedPackageId === package.id">
               <td colspan="6" class="px-6 py-0">
                 <div class="py-4 border-t border-primary/20">
-                  <PackageEvents :package-id="packageItem.id" :warehouses="warehouses" />
+                  <PackageEvents :package-id="package.id" :warehouses="warehouses" />
                 </div>
               </td>
             </tr>

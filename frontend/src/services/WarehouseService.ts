@@ -3,16 +3,16 @@
 import type { CreateWarehouseDTO } from '@/dtos/warehouses/CreateWarehouseDTO';
 import type { UpdateWarehouseDTO } from '@/dtos/warehouses/UpdateWarehouseDTO';
 import type { WarehouseInterface } from '@/interfaces/WarehouseInterface';
-import { httpClient } from '@/services/httpClient';
+import { axiosInstance } from '@/services/httpClient';
 
 export class WarehouseService {
   static async getAll(): Promise<WarehouseInterface[]> {
-    const { data } = await httpClient.get<WarehouseInterface[]>('warehouses');
+    const { data } = await axiosInstance.get<WarehouseInterface[]>('warehouses');
     return data;
   }
 
   static async getById(id: string): Promise<WarehouseInterface> {
-    const { data } = await httpClient.get<WarehouseInterface>(
+    const { data } = await axiosInstance.get<WarehouseInterface>(
       `warehouses/${id}`,
     );
     return data;
@@ -21,7 +21,7 @@ export class WarehouseService {
   static async create(
     payload: CreateWarehouseDTO,
   ): Promise<WarehouseInterface> {
-    const { data } = await httpClient.post<WarehouseInterface>(
+    const { data } = await axiosInstance.post<WarehouseInterface>(
       'warehouses',
       payload,
     );
@@ -32,7 +32,7 @@ export class WarehouseService {
     id: string,
     payload: UpdateWarehouseDTO,
   ): Promise<WarehouseInterface> {
-    const { data } = await httpClient.patch<WarehouseInterface>(
+    const { data } = await axiosInstance.patch<WarehouseInterface>(
       `warehouses/${id}`,
       payload,
     );
@@ -40,6 +40,6 @@ export class WarehouseService {
   }
 
   static async delete(id: string): Promise<void> {
-    await httpClient.delete(`warehouses/${id}`);
+    await axiosInstance.delete(`warehouses/${id}`);
   }
 }
