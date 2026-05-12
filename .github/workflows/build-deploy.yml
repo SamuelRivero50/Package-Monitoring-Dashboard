@@ -101,6 +101,11 @@ jobs:
           scp /tmp/docker-compose.yml \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/packtrack/docker-compose.yml
 
+      - name: Clean up Docker on VM
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "docker system prune -af --volumes || true"
+
       - name: Pull images and restart stack
         env:
           CORS_ORIGIN: ${{ secrets.CORS_ORIGIN }}
