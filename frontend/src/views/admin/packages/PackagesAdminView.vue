@@ -53,11 +53,11 @@ const filteredPackages = computed<PackageInterface[]>(() =>
 );
 
 async function refreshPackages(): Promise<void> {
-  allPackages.value = await PackageService.getPackages();
+  allPackages.value = await PackageService.getAll();
 }
 
 async function deletePackage(id: string): Promise<void> {
-  await PackageService.deletePackage(id);
+  await PackageService.delete(id);
   await refreshPackages();
 }
 
@@ -99,8 +99,8 @@ watch(visiblePackages, async () => {
 onMounted(async () => {
   try {
     const [packagesData, warehousesData] = await Promise.all([
-      PackageService.getPackages(),
-      WarehouseService.getWarehouses(),
+      PackageService.getAll(),
+      WarehouseService.getAll(),
     ]);
     allPackages.value = packagesData;
     warehouses.value = warehousesData;

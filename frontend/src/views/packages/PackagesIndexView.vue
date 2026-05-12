@@ -83,7 +83,7 @@ function extractErrorMessage(err: unknown, fallback: string): string {
 }
 
 async function refreshPackages(): Promise<void> {
-  allPackages.value = await PackageService.getPackages();
+  allPackages.value = await PackageService.getAll();
 }
 
 function resetCreateForm(): void {
@@ -117,7 +117,7 @@ async function submitCreate(): Promise<void> {
 
   submitting.value = true;
   try {
-    await PackageService.createPackage(payload);
+    await PackageService.create(payload);
     await refreshPackages();
     successMessage.value = 'Package created successfully.';
     resetCreateForm();
@@ -133,7 +133,7 @@ async function deletePackage(id: string): Promise<void> {
   errorMessage.value = '';
   successMessage.value = '';
   try {
-    await PackageService.deletePackage(id);
+    await PackageService.delete(id);
     await refreshPackages();
     successMessage.value = 'Package deleted successfully.';
   } catch (err: unknown) {
@@ -179,8 +179,8 @@ watch(visiblePackages, async () => {
 onMounted(async () => {
   try {
     const [packagesData, warehousesData] = await Promise.all([
-      PackageService.getPackages(),
-      WarehouseService.getWarehouses(),
+      PackageService.getAll(),
+      WarehouseService.getAll(),
     ]);
     allPackages.value = packagesData;
     warehouses.value = warehousesData;

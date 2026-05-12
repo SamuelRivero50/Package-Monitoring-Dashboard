@@ -80,7 +80,7 @@ watch(
 
 async function refreshEvents(): Promise<void> {
   if (!props.packageId) return;
-  events.value = await PackageLogService.getPackageLogsByPackageId(
+  events.value = await PackageLogService.getByPackageId(
     props.packageId,
   );
 }
@@ -117,7 +117,7 @@ async function addTrackingEvent(): Promise<void> {
   if (newDescription.value) payload.description = newDescription.value;
 
   try {
-    await PackageLogService.createPackageLog(payload);
+    await PackageLogService.create(payload);
     resetCreateForm();
     await refreshEvents();
   } catch (err: unknown) {
@@ -157,7 +157,7 @@ async function saveEdit(eventId: string): Promise<void> {
   if (editDescription.value) payload.description = editDescription.value;
 
   try {
-    await PackageLogService.updatePackageLog(eventId, payload);
+    await PackageLogService.update(eventId, payload);
     editingEventId.value = null;
     await refreshEvents();
   } catch (err: unknown) {
@@ -169,7 +169,7 @@ async function saveEdit(eventId: string): Promise<void> {
 async function deleteEvent(eventId: string): Promise<void> {
   errorMessage.value = '';
   try {
-    await PackageLogService.deletePackageLog(eventId);
+    await PackageLogService.delete(eventId);
     if (editingEventId.value === eventId) editingEventId.value = null;
     await refreshEvents();
   } catch (err: unknown) {

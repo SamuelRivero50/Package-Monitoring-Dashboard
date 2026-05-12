@@ -11,7 +11,7 @@ definePageMeta({
 const route = useRoute();
 const post = computed(() => {
   const slug = String(route.params.slug);
-  return posts.find((p) => p.slug === slug);
+  return posts.find((post) => post.slug === slug);
 });
 
 useHead(() => ({

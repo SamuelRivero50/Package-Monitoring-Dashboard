@@ -6,19 +6,19 @@ import type { WarehouseInterface } from '@/interfaces/WarehouseInterface';
 import { httpClient } from '@/services/httpClient';
 
 export class WarehouseService {
-  static async getWarehouses(): Promise<WarehouseInterface[]> {
+  static async getAll(): Promise<WarehouseInterface[]> {
     const { data } = await httpClient.get<WarehouseInterface[]>('warehouses');
     return data;
   }
 
-  static async getWarehouseById(id: string): Promise<WarehouseInterface> {
+  static async getById(id: string): Promise<WarehouseInterface> {
     const { data } = await httpClient.get<WarehouseInterface>(
       `warehouses/${id}`,
     );
     return data;
   }
 
-  static async createWarehouse(
+  static async create(
     payload: CreateWarehouseDTO,
   ): Promise<WarehouseInterface> {
     const { data } = await httpClient.post<WarehouseInterface>(
@@ -28,7 +28,7 @@ export class WarehouseService {
     return data;
   }
 
-  static async updateWarehouse(
+  static async update(
     id: string,
     payload: UpdateWarehouseDTO,
   ): Promise<WarehouseInterface> {
@@ -39,7 +39,7 @@ export class WarehouseService {
     return data;
   }
 
-  static async deleteWarehouse(id: string): Promise<void> {
+  static async delete(id: string): Promise<void> {
     await httpClient.delete(`warehouses/${id}`);
   }
 }

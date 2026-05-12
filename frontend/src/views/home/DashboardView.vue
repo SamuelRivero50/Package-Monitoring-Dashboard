@@ -55,8 +55,8 @@ function renderChart(): void {
 onMounted(async () => {
   try {
     const [packagesData, warehousesData] = await Promise.all([
-      PackageService.getPackages(),
-      WarehouseService.getWarehouses(),
+      PackageService.getAll(),
+      WarehouseService.getAll(),
     ]);
     packages.value = packagesData;
     warehouses.value = warehousesData;

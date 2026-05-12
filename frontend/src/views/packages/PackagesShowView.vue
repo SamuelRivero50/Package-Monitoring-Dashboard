@@ -37,7 +37,7 @@ const STATUS_OPTIONS: PackageStatus[] = [
 ];
 
 async function refreshPackage(): Promise<void> {
-  packageItem.value = await PackageService.getPackageById(packageId);
+  packageItem.value = await PackageService.getById(packageId);
 }
 
 function startEdit(): void {
@@ -52,7 +52,7 @@ function startEdit(): void {
 async function saveEdit(): Promise<void> {
   errorMessage.value = '';
   try {
-    await PackageService.updatePackage(packageId, {
+    await PackageService.update(packageId, {
       status: editStatus.value,
       description: editDescription.value,
       warehouseId: editWarehouseId.value,
@@ -77,15 +77,15 @@ function closeEdit(): void {
 }
 
 async function deletePackage(): Promise<void> {
-  await PackageService.deletePackage(packageId);
+  await PackageService.delete(packageId);
   await router.push('/packages');
 }
 
 onMounted(async () => {
   try {
     const [loaded, whs] = await Promise.all([
-      PackageService.getPackageById(packageId),
-      WarehouseService.getWarehouses(),
+      PackageService.getById(packageId),
+      WarehouseService.getAll(),
     ]);
     packageItem.value = loaded;
     warehouses.value = whs;

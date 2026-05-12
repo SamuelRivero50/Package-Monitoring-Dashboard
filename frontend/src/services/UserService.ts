@@ -5,17 +5,17 @@ import type { UserInterface } from '@/interfaces/UserInterface';
 import { httpClient } from '@/services/httpClient';
 
 export class UserService {
-  static async getUsers(): Promise<UserInterface[]> {
+  static async getAll(): Promise<UserInterface[]> {
     const { data } = await httpClient.get<UserInterface[]>('users');
     return data;
   }
 
-  static async getUserById(id: string): Promise<UserInterface> {
+  static async getById(id: string): Promise<UserInterface> {
     const { data } = await httpClient.get<UserInterface>(`users/${id}`);
     return data;
   }
 
-  static async updateUser(
+  static async update(
     id: string,
     payload: UpdateUserDTO,
   ): Promise<UserInterface> {
@@ -26,7 +26,7 @@ export class UserService {
     return data;
   }
 
-  static async deleteUser(id: string): Promise<void> {
+  static async delete(id: string): Promise<void> {
     await httpClient.delete(`users/${id}`);
   }
 }
