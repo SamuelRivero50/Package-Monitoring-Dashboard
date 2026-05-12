@@ -3,7 +3,7 @@
 import type { CreateWarehouseDTO } from '@/dtos/warehouses/CreateWarehouseDTO';
 import type { UpdateWarehouseDTO } from '@/dtos/warehouses/UpdateWarehouseDTO';
 import type { WarehouseInterface } from '@/interfaces/WarehouseInterface';
-import { axiosInstance } from '@/services/httpClient';
+import { axiosInstance } from '@/utils/axiosInstance';
 
 export class WarehouseService {
   static async getAll(): Promise<WarehouseInterface[]> {

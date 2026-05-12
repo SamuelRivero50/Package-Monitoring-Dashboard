@@ -43,8 +43,8 @@ function renderChart(): void {
   if (!canvasRef.value) return;
   chartInstance?.destroy();
   const counts: Record<string, number> = {};
-  for (const packageItem of packages.value) {
-    counts[packageItem.status] = (counts[packageItem.status] ?? 0) + 1;
+  for (const currentPackage of packages.value) {
+    counts[currentPackage.status] = (counts[currentPackage.status] ?? 0) + 1;
   }
   const labels = Object.keys(counts);
   const data = Object.values(counts);
@@ -94,13 +94,13 @@ onUnmounted(() => {
           {
             icon: 'check_circle',
             label: 'Delivered',
-            val: packages.filter((packageItem) => packageItem.status === 'Delivered').length,
+            val: packages.filter((currentPackage) => currentPackage.status === 'Delivered').length,
             color: 'primary',
           },
           {
             icon: 'local_shipping',
             label: 'In Transit',
-            val: packages.filter((packageItem) => packageItem.status === 'In Transit').length,
+            val: packages.filter((currentPackage) => currentPackage.status === 'In Transit').length,
             color: 'warehouses',
           },
         ]"
@@ -161,18 +161,18 @@ onUnmounted(() => {
           </thead>
           <tbody class="divide-y divide-wire-subtle">
             <tr
-              v-for="packageItem in recentPackages"
-              :key="packageItem.id"
+              v-for="currentPackage in recentPackages"
+              :key="currentPackage.id"
               class="hover:bg-sheet/50 transition-colors"
             >
               <td class="px-6 py-4 font-mono text-packages">
-                #{{ packageItem.id.slice(0, 8) }}
+                #{{ currentPackage.id.slice(0, 8) }}
               </td>
               <td class="px-6 py-4">
-                <StatusBadge :status="packageItem.status" />
+                <StatusBadge :status="currentPackage.status" />
               </td>
               <td class="px-6 py-4 text-soft">
-                {{ packageItem.warehouse?.name ?? 'Unknown Warehouse' }}
+                {{ currentPackage.warehouse?.name ?? 'Unknown Warehouse' }}
               </td>
             </tr>
             <tr v-if="recentPackages.length === 0">

@@ -4,7 +4,7 @@ import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 
 // Internal imports
-import { ACCESS_TOKEN_KEY } from '@/services/httpClient';
+import { ACCESS_TOKEN_KEY } from '@/utils/axiosInstance';
 import { AuthService } from '@/services/AuthService';
 import type { RegisterDTO } from '@/dtos/users/RegisterDTO';
 import type { UserInterface } from '@/interfaces/UserInterface';

@@ -1,7 +1,7 @@
 // External imports
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 
-const ACCESS_TOKEN_KEY = 'access_token';
+export const ACCESS_TOKEN_KEY = 'access_token';
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -38,4 +38,4 @@ axiosInstance.interceptors.response.use(
   },
 );
 
-export { ACCESS_TOKEN_KEY, axiosInstance };
+export { axiosInstance };

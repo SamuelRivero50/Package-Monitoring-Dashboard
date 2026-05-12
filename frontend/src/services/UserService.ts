@@ -2,7 +2,7 @@
 // Internal imports
 import type { UpdateUserDTO } from '@/dtos/users/UpdateUserDTO';
 import type { UserInterface } from '@/interfaces/UserInterface';
-import { axiosInstance } from '@/services/httpClient';
+import { axiosInstance } from '@/utils/axiosInstance';
 
 export class UserService {
   static async getAll(): Promise<UserInterface[]> {
