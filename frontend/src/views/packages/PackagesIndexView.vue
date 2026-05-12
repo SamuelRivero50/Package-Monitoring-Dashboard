@@ -1,73 +1,71 @@
 <!-- @author David Hdez, Juan Andrés Young, Samuel Rivero -->
 <script setup lang="ts">
 // External imports
-import axios from 'axios';
-import type { Chart } from 'chart.js';
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import { RouterLink } from 'vue-router';
+import axios from "axios";
+import type { Chart } from "chart.js";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { RouterLink } from "vue-router";
 
 // Internal imports
-import PackageEvents from '@/components/packages/PackageEvents.vue';
-import StatusBadge from '@/components/shared/StatusBadge.vue';
-import type { CreatePackageDTO } from '@/dtos/packages/CreatePackageDTO';
+import PackageEvents from "@/components/packages/PackageEvents.vue";
+import StatusBadge from "@/components/shared/StatusBadge.vue";
+import type { CreatePackageDTO } from "@/dtos/packages/CreatePackageDTO";
 import type {
   PackageInterface,
   PackageStatus,
-} from '@/interfaces/PackageInterface';
-import { PackageService } from '@/services/PackageService';
-import type { WarehouseInterface } from '@/interfaces/WarehouseInterface';
-import { WarehouseService } from '@/services/WarehouseService';
-import { buildBarChart } from '@/utils/chartUtils';
-import { useAuthStore } from '@/stores/authstore';
+} from "@/interfaces/PackageInterface";
+import { PackageService } from "@/services/PackageService";
+import type { WarehouseInterface } from "@/interfaces/WarehouseInterface";
+import { WarehouseService } from "@/services/WarehouseService";
+import { buildBarChart } from "@/utils/chartUtils";
+import { useAuthStore } from "@/stores/authstore";
 
 const authStore = useAuthStore();
 
 const STATUS_OPTIONS: PackageStatus[] = [
-  'Pending',
-  'In Transit',
-  'At Warehouse',
-  'Delivered',
-  'Exception',
+  "Pending",
+  "In Transit",
+  "At Warehouse",
+  "Delivered",
+  "Exception",
 ];
 
-const allPackages = ref<PackageInterface[]>([]);
+const packages = ref<PackageInterface[]>([]);
 const warehouses = ref<WarehouseInterface[]>([]);
 const isLoading = ref<boolean>(true);
 
-const successMessage = ref<string>('');
-const errorMessage = ref<string>('');
+const successMessage = ref<string>("");
+const errorMessage = ref<string>("");
 
 // Inline create form state
 const showCreateForm = ref<boolean>(false);
-const newDescription = ref<string>('');
-const newStatus = ref<PackageStatus>('Pending');
+const newDescription = ref<string>("");
+const newStatus = ref<PackageStatus>("Pending");
 const newPrice = ref<number>(0);
-const newWarehouseId = ref<string>('');
+const newWarehouseId = ref<string>("");
 const submitting = ref<boolean>(false);
 
 const visiblePackages = computed<PackageInterface[]>(() => {
-  if (authStore.isAdmin) return allPackages.value;
-  const userId = authStore.currentUser?.id;
-  if (!userId) return [];
-  return allPackages.value.filter((packageItem) => packageItem.user.id === userId);
+  return packages.value;
 });
 
 const selectorStatuses = computed<PackageStatus[]>(() => {
   const set = new Set<PackageStatus>();
-  for (const packageItem of visiblePackages.value) set.add(packageItem.status);
+  for (const currentPackage of visiblePackages.value) set.add(currentPackage.status);
   return Array.from(set);
 });
 
-const selectedStatus = ref<PackageStatus | ''>('');
-const selectedWarehouseId = ref<string | ''>('');
+const selectedStatus = ref<PackageStatus | "">("");
+const selectedWarehouseId = ref<string | "">("");
 const expandedPackageId = ref<string | null>(null);
 
 const filteredPackages = computed<PackageInterface[]>(() =>
-  visiblePackages.value.filter((packageItem) => {
+  visiblePackages.value.filter((currentPackage) => {
     const matchStatus =
-      !selectedStatus.value || packageItem.status === selectedStatus.value;
+      !selectedStatus.value || currentPackage.status === selectedStatus.value;
     const matchWarehouse =
-      !selectedWarehouseId.value || packageItem.warehouse.id === selectedWarehouseId.value;
+      !selectedWarehouseId.value ||
+      currentPackage.warehouse.id === selectedWarehouseId.value;
     return matchStatus && matchWarehouse;
   }),
 );
@@ -75,7 +73,7 @@ const filteredPackages = computed<PackageInterface[]>(() =>
 function extractErrorMessage(err: unknown, fallback: string): string {
   if (axios.isAxiosError(err) && err.response) {
     const data = err.response.data as { message?: string | string[] };
-    if (Array.isArray(data.message)) return data.message.join(' ');
+    if (Array.isArray(data.message)) return data.message.join(" ");
     if (data.message) return data.message;
   }
   if (err instanceof Error) return err.message;
@@ -83,27 +81,27 @@ function extractErrorMessage(err: unknown, fallback: string): string {
 }
 
 async function refreshPackages(): Promise<void> {
-  allPackages.value = await PackageService.getAll();
+  packages.value = await PackageService.getAll();
 }
 
 function resetCreateForm(): void {
-  newDescription.value = '';
-  newStatus.value = 'Pending';
+  newDescription.value = "";
+  newStatus.value = "Pending";
   newPrice.value = 0;
-  newWarehouseId.value = warehouses.value[0]?.id ?? '';
+  newWarehouseId.value = warehouses.value[0]?.id ?? "";
 }
 
 async function submitCreate(): Promise<void> {
-  errorMessage.value = '';
-  successMessage.value = '';
+  errorMessage.value = "";
+  successMessage.value = "";
 
-  const userId = authStore.currentUser?.id;
-  if (!userId) {
-    errorMessage.value = 'You must be signed in to create a package.';
+  const currentUserId = authStore.currentUser?.id;
+  if (!currentUserId) {
+    errorMessage.value = "You must be signed in to create a package.";
     return;
   }
   if (!newWarehouseId.value) {
-    errorMessage.value = 'Please select a warehouse.';
+    errorMessage.value = "Please select a warehouse.";
     return;
   }
 
@@ -111,7 +109,7 @@ async function submitCreate(): Promise<void> {
     description: newDescription.value,
     status: newStatus.value,
     price: newPrice.value,
-    userId,
+    userId: currentUserId,
     warehouseId: newWarehouseId.value,
   };
 
@@ -119,25 +117,25 @@ async function submitCreate(): Promise<void> {
   try {
     await PackageService.create(payload);
     await refreshPackages();
-    successMessage.value = 'Package created successfully.';
+    successMessage.value = "Package created successfully.";
     resetCreateForm();
     showCreateForm.value = false;
   } catch (err: unknown) {
-    errorMessage.value = extractErrorMessage(err, 'Unable to create package.');
+    errorMessage.value = extractErrorMessage(err, "Unable to create package.");
   } finally {
     submitting.value = false;
   }
 }
 
 async function deletePackage(id: string): Promise<void> {
-  errorMessage.value = '';
-  successMessage.value = '';
+  errorMessage.value = "";
+  successMessage.value = "";
   try {
     await PackageService.delete(id);
     await refreshPackages();
-    successMessage.value = 'Package deleted successfully.';
+    successMessage.value = "Package deleted successfully.";
   } catch (err: unknown) {
-    errorMessage.value = extractErrorMessage(err, 'Unable to delete package.');
+    errorMessage.value = extractErrorMessage(err, "Unable to delete package.");
   }
 }
 
@@ -148,11 +146,11 @@ function toggleHistory(packageId: string): void {
 
 // chart
 const statusColors: Record<string, string> = {
-  Delivered: '#10b981',
-  'In Transit': '#f59e0b',
-  'At Warehouse': '#2dd4bf',
-  Pending: '#6b7280',
-  Exception: '#f43f5e',
+  Delivered: "#10b981",
+  "In Transit": "#f59e0b",
+  "At Warehouse": "#2dd4bf",
+  Pending: "#6b7280",
+  Exception: "#f43f5e",
 };
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
@@ -162,12 +160,12 @@ function renderChart(): void {
   if (!canvasRef.value) return;
   chartInstance?.destroy();
   const counts: Record<string, number> = {};
-  for (const packageItem of visiblePackages.value) {
-    counts[packageItem.status] = (counts[packageItem.status] ?? 0) + 1;
+  for (const currentPackage of visiblePackages.value) {
+    counts[currentPackage.status] = (counts[currentPackage.status] ?? 0) + 1;
   }
   const labels = Object.keys(counts);
   const data = Object.values(counts);
-  const colors = labels.map((l) => statusColors[l] ?? '#8b949e');
+  const colors = labels.map((l) => statusColors[l] ?? "#8b949e");
   chartInstance = buildBarChart(canvasRef.value, labels, data, colors);
 }
 
@@ -182,9 +180,9 @@ onMounted(async () => {
       PackageService.getAll(),
       WarehouseService.getAll(),
     ]);
-    allPackages.value = packagesData;
+    packages.value = packagesData;
     warehouses.value = warehousesData;
-    newWarehouseId.value = warehouses.value[0]?.id ?? '';
+    newWarehouseId.value = warehouses.value[0]?.id ?? "";
   } finally {
     isLoading.value = false;
     await nextTick();
@@ -212,9 +210,9 @@ onUnmounted(() => {
         @click="showCreateForm = !showCreateForm"
       >
         <span class="material-symbols-outlined text-sm">{{
-          showCreateForm ? 'close' : 'add'
+          showCreateForm ? "close" : "add"
         }}</span>
-        {{ showCreateForm ? 'Cancel' : 'New Package' }}
+        {{ showCreateForm ? "Cancel" : "New Package" }}
       </button>
     </div>
 
@@ -234,7 +232,10 @@ onUnmounted(() => {
       <h3 class="text-lg font-bold text-body">New Package</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="md:col-span-2">
-          <label class="block text-sm font-semibold text-soft mb-2" for="newDescription">
+          <label
+            class="block text-sm font-semibold text-soft mb-2"
+            for="newDescription"
+          >
             Description
           </label>
           <input
@@ -248,7 +249,10 @@ onUnmounted(() => {
         </div>
 
         <div>
-          <label class="block text-sm font-semibold text-soft mb-2" for="newWarehouseId">
+          <label
+            class="block text-sm font-semibold text-soft mb-2"
+            for="newWarehouseId"
+          >
             Warehouse
           </label>
           <select
@@ -268,7 +272,10 @@ onUnmounted(() => {
         </div>
 
         <div>
-          <label class="block text-sm font-semibold text-soft mb-2" for="newStatus">
+          <label
+            class="block text-sm font-semibold text-soft mb-2"
+            for="newStatus"
+          >
             Status
           </label>
           <select
@@ -284,7 +291,10 @@ onUnmounted(() => {
         </div>
 
         <div>
-          <label class="block text-sm font-semibold text-soft mb-2" for="newPrice">
+          <label
+            class="block text-sm font-semibold text-soft mb-2"
+            for="newPrice"
+          >
             Price (USD)
           </label>
           <input
@@ -304,7 +314,7 @@ onUnmounted(() => {
         :disabled="submitting"
         class="bg-primary text-base font-bold py-2.5 px-6 rounded-lg text-sm hover:bg-primary-dark transition-all disabled:opacity-60"
       >
-        {{ submitting ? 'Creating...' : 'Create Package' }}
+        {{ submitting ? "Creating..." : "Create Package" }}
       </button>
     </form>
 
@@ -375,43 +385,49 @@ onUnmounted(() => {
           </tr>
         </thead>
         <tbody class="divide-y divide-wire-subtle">
-          <template v-for="packageItem in filteredPackages" :key="packageItem.id">
+          <template v-for="currentPackage in filteredPackages" :key="currentPackage.id">
             <tr class="hover:bg-sheet/50 transition-colors">
               <td class="px-6 py-4 font-mono text-sm text-packages">
                 <RouterLink
-                  :to="`/packages/${packageItem.id}`"
+                  :to="`/packages/${currentPackage.id}`"
                   class="hover:underline"
-                  >#{{ packageItem.id.slice(0, 8) }}</RouterLink
+                  >#{{ currentPackage.id.slice(0, 8) }}</RouterLink
                 >
               </td>
               <td class="px-6 py-4 text-sm font-medium text-body">
-                {{ packageItem.description }}
+                {{ currentPackage.description }}
               </td>
               <td class="px-6 py-4 text-sm text-soft">
-                {{ packageItem.user?.name ?? 'Unknown User' }}
+                {{ currentPackage.user?.name ?? "Unknown User" }}
               </td>
               <td class="px-6 py-4 text-sm text-soft">
-                {{ packageItem.warehouse?.name ?? 'Unknown Warehouse' }}
+                {{ currentPackage.warehouse?.name ?? "Unknown Warehouse" }}
               </td>
               <td class="px-6 py-4">
-                <StatusBadge :status="packageItem.status" />
+                <StatusBadge :status="currentPackage.status" />
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
                   <button
                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all"
                     :class="
-                      expandedPackageId === packageItem.id
+                      expandedPackageId === currentPackage.id
                         ? 'bg-primary text-base'
                         : 'bg-packages/10 text-packages border border-packages/20 hover:bg-packages/20'
                     "
                     title="View history"
-                    @click="toggleHistory(packageItem.id)"
+                    @click="toggleHistory(currentPackage.id)"
                   >
-                    <span class="material-symbols-outlined text-sm">history</span>
+                    <span class="material-symbols-outlined text-sm"
+                      >history</span
+                    >
                   </button>
                   <RouterLink
-                    :to="{ name: 'packages.show', params: { id: packageItem.id }, query: { edit: '1' } }"
+                    :to="{
+                      name: 'packages.show',
+                      params: { id: currentPackage.id },
+                      query: { edit: '1' },
+                    }"
                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-packages/10 text-packages border border-packages/20 hover:bg-packages/20"
                     title="Edit package"
                   >
@@ -420,18 +436,23 @@ onUnmounted(() => {
                   <button
                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
                     title="Delete package"
-                    @click="deletePackage(packageItem.id)"
+                    @click="deletePackage(currentPackage.id)"
                   >
-                    <span class="material-symbols-outlined text-sm">delete</span>
+                    <span class="material-symbols-outlined text-sm"
+                      >delete</span
+                    >
                   </button>
                 </div>
               </td>
             </tr>
 
-            <tr v-if="expandedPackageId === packageItem.id">
+            <tr v-if="expandedPackageId === currentPackage.id">
               <td colspan="6" class="px-6 py-0">
                 <div class="py-4 border-t border-primary/20">
-                  <PackageEvents :package-id="packageItem.id" :warehouses="warehouses" />
+                  <PackageEvents
+                    :package-id="currentPackage.id"
+                    :warehouses="warehouses"
+                  />
                 </div>
               </td>
             </tr>

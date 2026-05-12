@@ -3,18 +3,18 @@
 import type { CreatePackageLogDTO } from '@/dtos/packagelogs/CreatePackageLogDTO';
 import type { PackageLogInterface } from '@/interfaces/PackageLogInterface';
 import type { UpdatePackageLogDTO } from '@/dtos/packagelogs/UpdatePackageLogDTO';
-import { httpClient } from '@/services/httpClient';
+import { axiosInstance } from '@/utils/axiosInstance';
 
 export class PackageLogService {
   static async getAll(): Promise<PackageLogInterface[]> {
-    const { data } = await httpClient.get<PackageLogInterface[]>(
+    const { data } = await axiosInstance.get<PackageLogInterface[]>(
       'package-logs',
     );
     return data;
   }
 
   static async getById(id: string): Promise<PackageLogInterface> {
-    const { data } = await httpClient.get<PackageLogInterface>(
+    const { data } = await axiosInstance.get<PackageLogInterface>(
       `package-logs/${id}`,
     );
     return data;
@@ -23,7 +23,7 @@ export class PackageLogService {
   static async getByPackageId(
     packageId: string,
   ): Promise<PackageLogInterface[]> {
-    const { data } = await httpClient.get<PackageLogInterface[]>(
+    const { data } = await axiosInstance.get<PackageLogInterface[]>(
       `package-logs/by-package/${packageId}`,
     );
     return data;
@@ -32,7 +32,7 @@ export class PackageLogService {
   static async create(
     payload: CreatePackageLogDTO,
   ): Promise<PackageLogInterface> {
-    const { data } = await httpClient.post<PackageLogInterface>(
+    const { data } = await axiosInstance.post<PackageLogInterface>(
       'package-logs',
       payload,
     );
@@ -43,7 +43,7 @@ export class PackageLogService {
     id: string,
     payload: UpdatePackageLogDTO,
   ): Promise<PackageLogInterface> {
-    const { data } = await httpClient.patch<PackageLogInterface>(
+    const { data } = await axiosInstance.patch<PackageLogInterface>(
       `package-logs/${id}`,
       payload,
     );
@@ -51,6 +51,6 @@ export class PackageLogService {
   }
 
   static async delete(id: string): Promise<void> {
-    await httpClient.delete(`package-logs/${id}`);
+    await axiosInstance.delete(`package-logs/${id}`);
   }
 }

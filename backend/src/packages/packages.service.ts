@@ -9,6 +9,7 @@ import { Package } from './entities/package.entity';
 import { UpdatePackageDto } from './dto/update-package.dto';
 import { UsersService } from '../users/users.service';
 import { WarehousesService } from '../warehouses/warehouses.service';
+import type { Role } from '../types/UsersTypes';
 
 @Injectable()
 export class PackagesService {
@@ -34,8 +35,13 @@ export class PackagesService {
     return await this.packagesRepository.save(packageEntity);
   }
 
-  async findAll(): Promise<Package[]> {
-    return await this.packagesRepository.find();
+  async findAll(requestingUserId: string, requestingUserRole: Role): Promise<Package[]> {
+    if (requestingUserRole === 'Admin') {
+      return await this.packagesRepository.find();
+    }
+    return await this.packagesRepository.find({
+      where: { user: { id: requestingUserId } },
+    });
   }
 
   async findById(id: string): Promise<Package> {

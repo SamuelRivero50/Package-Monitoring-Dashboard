@@ -21,20 +21,17 @@ import { useAuthStore } from '@/stores/authstore';
 const route = useRoute();
 const authStore = useAuthStore();
 
-const allPackages = ref<PackageInterface[]>([]);
+const packages = ref<PackageInterface[]>([]);
 const warehouses = ref<WarehouseInterface[]>([]);
 const isLoading = ref<boolean>(true);
 
 const visiblePackages = computed<PackageInterface[]>(() => {
-  if (authStore.isAdmin) return allPackages.value;
-  const userId = authStore.currentUser?.id;
-  if (!userId) return [];
-  return allPackages.value.filter((packageItem) => packageItem.user.id === userId);
+  return packages.value;
 });
 
 const selectorStatuses = computed<PackageStatus[]>(() => {
   const set = new Set<PackageStatus>();
-  for (const packageItem of visiblePackages.value) set.add(packageItem.status);
+  for (const currentPackage of visiblePackages.value) set.add(currentPackage.status);
   return Array.from(set);
 });
 
@@ -43,17 +40,17 @@ const selectedWarehouseId = ref<string | ''>('');
 const expandedPackageId = ref<string | null>(null);
 
 const filteredPackages = computed<PackageInterface[]>(() =>
-  visiblePackages.value.filter((packageItem) => {
+  visiblePackages.value.filter((currentPackage) => {
     const matchStatus =
-      !selectedStatus.value || packageItem.status === selectedStatus.value;
+      !selectedStatus.value || currentPackage.status === selectedStatus.value;
     const matchWarehouse =
-      !selectedWarehouseId.value || packageItem.warehouse.id === selectedWarehouseId.value;
+      !selectedWarehouseId.value || currentPackage.warehouse.id === selectedWarehouseId.value;
     return matchStatus && matchWarehouse;
   }),
 );
 
 async function refreshPackages(): Promise<void> {
-  allPackages.value = await PackageService.getAll();
+  packages.value = await PackageService.getAll();
 }
 
 async function deletePackage(id: string): Promise<void> {
@@ -82,8 +79,8 @@ function renderChart(): void {
   if (!canvasRef.value) return;
   chartInstance?.destroy();
   const counts: Record<string, number> = {};
-  for (const packageItem of visiblePackages.value) {
-    counts[packageItem.status] = (counts[packageItem.status] ?? 0) + 1;
+  for (const currentPackage of visiblePackages.value) {
+    counts[currentPackage.status] = (counts[currentPackage.status] ?? 0) + 1;
   }
   const labels = Object.keys(counts);
   const data = Object.values(counts);
@@ -102,7 +99,7 @@ onMounted(async () => {
       PackageService.getAll(),
       WarehouseService.getAll(),
     ]);
-    allPackages.value = packagesData;
+    packages.value = packagesData;
     warehouses.value = warehousesData;
   } finally {
     isLoading.value = false;
@@ -204,43 +201,43 @@ onUnmounted(() => {
           </tr>
         </thead>
         <tbody class="divide-y divide-wire-subtle">
-          <template v-for="packageItem in filteredPackages" :key="packageItem.id">
+          <template v-for="currentPackage in filteredPackages" :key="currentPackage.id">
             <tr class="hover:bg-sheet/50 transition-colors">
               <td class="px-6 py-4 font-mono text-sm text-packages">
                 <RouterLink
-                  :to="`/packages/${packageItem.id}`"
+                  :to="`/packages/${currentPackage.id}`"
                   class="hover:underline"
-                  >#{{ packageItem.id.slice(0, 8) }}</RouterLink
+                  >#{{ currentPackage.id.slice(0, 8) }}</RouterLink
                 >
               </td>
               <td class="px-6 py-4 text-sm font-medium text-body">
-                {{ packageItem.description }}
+                {{ currentPackage.description }}
               </td>
               <td class="px-6 py-4 text-sm text-soft">
-                {{ packageItem.user?.name ?? 'Unknown User' }}
+                {{ currentPackage.user?.name ?? 'Unknown User' }}
               </td>
               <td class="px-6 py-4 text-sm text-soft">
-                {{ packageItem.warehouse?.name ?? 'Unknown Warehouse' }}
+                {{ currentPackage.warehouse?.name ?? 'Unknown Warehouse' }}
               </td>
               <td class="px-6 py-4">
-                <StatusBadge :status="packageItem.status" />
+                <StatusBadge :status="currentPackage.status" />
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
                   <button
                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all"
                     :class="
-                      expandedPackageId === packageItem.id
+                      expandedPackageId === currentPackage.id
                         ? 'bg-primary'
                         : 'bg-packages/10 text-packages border border-packages/20 hover:bg-packages/20'
                     "
                     title="View history"
-                    @click="toggleHistory(packageItem.id)"
+                    @click="toggleHistory(currentPackage.id)"
                   >
                     <span class="material-symbols-outlined text-sm">history</span>
                   </button>
                   <RouterLink
-                    :to="{ name: 'packages.show', params: { id: packageItem.id }, query: { edit: '1' } }"
+                    :to="{ name: 'packages.show', params: { id: currentPackage.id }, query: { edit: '1' } }"
                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-packages/10 text-packages border border-packages/20 hover:bg-packages/20"
                     title="Edit package"
                   >
@@ -249,7 +246,7 @@ onUnmounted(() => {
                   <button
                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"
                     title="Delete package"
-                    @click="deletePackage(packageItem.id)"
+                    @click="deletePackage(currentPackage.id)"
                   >
                     <span class="material-symbols-outlined text-sm">delete</span>
                   </button>
@@ -257,10 +254,10 @@ onUnmounted(() => {
               </td>
             </tr>
 
-            <tr v-if="expandedPackageId === packageItem.id">
+            <tr v-if="expandedPackageId === currentPackage.id">
               <td colspan="6" class="px-6 py-0">
                 <div class="py-4 border-t border-primary/20">
-                  <PackageEvents :package-id="packageItem.id" :warehouses="warehouses" />
+                  <PackageEvents :package-id="currentPackage.id" :warehouses="warehouses" />
                 </div>
               </td>
             </tr>

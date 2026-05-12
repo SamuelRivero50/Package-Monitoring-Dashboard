@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 
@@ -16,6 +17,7 @@ import { CreatePackageDto } from './dto/create-package.dto';
 import { Package } from './entities/package.entity';
 import { PackagesService } from './packages.service';
 import { UpdatePackageDto } from './dto/update-package.dto';
+import type { UserRequestInterface } from '../interfaces/auth/UserRequestInterface';
 
 @UseGuards(AuthGuard)
 @Controller('packages')
@@ -23,8 +25,8 @@ export class PackagesController {
   constructor(private readonly packagesService: PackagesService) {}
 
   @Get()
-  async findAll(): Promise<Package[]> {
-    return await this.packagesService.findAll();
+  async findAll(@Request() req: UserRequestInterface): Promise<Package[]> {
+    return await this.packagesService.findAll(req.user.sub, req.user.role);
   }
 
   @Get(':id')

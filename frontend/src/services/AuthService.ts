@@ -1,6 +1,6 @@
 /** @author David Hdez, Juan Andrés Young */
 // Internal imports
-import { ACCESS_TOKEN_KEY, httpClient } from '@/services/httpClient';
+import { ACCESS_TOKEN_KEY, axiosInstance } from '@/utils/axiosInstance';
 import type { RegisterDTO } from '@/dtos/users/RegisterDTO';
 import type { UserInterface } from '@/interfaces/UserInterface';
 
@@ -10,7 +10,7 @@ interface AccessTokenResponse {
 
 export class AuthService {
   static async login(email: string, password: string): Promise<void> {
-    const { data } = await httpClient.post<AccessTokenResponse>('auth/login', {
+    const { data } = await axiosInstance.post<AccessTokenResponse>('auth/login', {
       email,
       password,
     });
@@ -18,7 +18,7 @@ export class AuthService {
   }
 
   static async register(payload: RegisterDTO): Promise<void> {
-    const { data } = await httpClient.post<AccessTokenResponse>(
+    const { data } = await axiosInstance.post<AccessTokenResponse>(
       'auth/register',
       payload,
     );
@@ -30,7 +30,7 @@ export class AuthService {
     if (!token) return null;
 
     try {
-      const { data } = await httpClient.get<UserInterface>('auth/profile');
+      const { data } = await axiosInstance.get<UserInterface>('auth/profile');
       return data;
     } catch {
       return null;
